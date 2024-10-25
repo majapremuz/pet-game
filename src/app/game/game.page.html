@@ -1,0 +1,61 @@
+<ion-content [fullscreen]="true">
+
+  <div class="conteiner">
+
+    <div class="top-btn-container">
+      <button class="topBtn">
+        <img src="assets/v.png" alt="v icon">
+      </button>
+      <button class="topBtn">
+        <img src="assets/bone.png" alt="bone icon">
+      </button>
+      <button class="topBtn">
+        <img src="assets/vs.png" alt="vs icon">
+      </button>
+    </div>
+
+    <div class="level-bar">
+      <p>LV: {{ level }}</p>
+      <div class="level-progress-bar" [ngStyle]="{'width': progressBarWidth + '%'}"></div>
+    </div>
+
+      <div class="stats">
+        <div class="status-bar-outer"></div>
+        <div class="status-bar" [ngStyle]="{'height': purityValue + '%', 'background-color': getStatusColor(purityValue)}"></div>
+    
+      <div class="dog">
+        <img src="/assets/dog.png" alt="dog" class="dog_img">
+      </div>
+     </div>  
+     
+    <div class="buttons-container">
+  
+      <button (click)="bath()">
+        <div class="img_container">
+        <img src="assets/bath.png" alt="bath icon" class="imgBtn">
+        </div>
+      </button>
+  
+      <button (click)="sleep()">
+        <div class="img_container">
+        <img src="assets/lighting.png" alt="sleep icon" class="imgBtn">
+        </div>
+      </button>
+  
+      <button (click)="care()">
+        <div class="img_container">
+        <img src="assets/heart.png" alt="care icon" class="imgBtn">
+        </div>
+      </button>
+  
+      <button (click)="feed()">
+        <div class="img_container">
+        <img src="assets/ham.png" alt="food icon" class="imgBtn">
+        </div>
+      </button>
+  
+    </div>
+  
+  </div>
+  
+</ion-content>
