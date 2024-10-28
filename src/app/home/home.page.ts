@@ -16,5 +16,8 @@ export class HomePage {
     this.router.navigateByUrl('/game');
   }
 
-  
+  login() {
+    this.router.navigateByUrl('/login');
+  }
+
 }
