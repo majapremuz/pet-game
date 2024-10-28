@@ -24,32 +24,32 @@
         <div class="status-bar" [ngStyle]="{'height': purityValue + '%', 'background-color': getStatusColor(purityValue)}"></div>
     
       <div class="dog">
-        <img src="/assets/dog.png" alt="dog" class="dog_img">
+        <img src="/assets/dog.png" alt="dog" class="dog_img" [class.jump]="isJumping" (click)="makeDogJump()">
       </div>
      </div>  
      
     <div class="buttons-container">
   
       <button (click)="bath()">
-        <div class="img_container">
+        <div class="img_container" [ngStyle]="{'background-color': currentColor}">
         <img src="assets/bath.png" alt="bath icon" class="imgBtn">
         </div>
       </button>
   
       <button (click)="sleep()">
-        <div class="img_container">
+        <div class="img_container" [ngStyle]="{'background-color': currentColor}">
         <img src="assets/lighting.png" alt="sleep icon" class="imgBtn">
         </div>
       </button>
   
       <button (click)="care()">
-        <div class="img_container">
+        <div class="img_container" [ngStyle]="{'background-color': currentColor}">
         <img src="assets/heart.png" alt="care icon" class="imgBtn">
         </div>
       </button>
   
       <button (click)="feed()">
-        <div class="img_container">
+        <div class="img_container" [ngStyle]="{'background-color': currentColor}">
         <img src="assets/ham.png" alt="food icon" class="imgBtn">
         </div>
       </button>

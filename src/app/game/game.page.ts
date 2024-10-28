@@ -15,30 +15,34 @@ export class GamePage {
   fatigueValue: number = 100;
   purityValue: number = 100;
   attentionValue: number = 100;
-  //statusValue: number = 100;
   decreaseInterval: any;
   points: number = 0; 
   level: number = 0; 
   pointsNeeded: number = 10; 
   maxPoints: number = 100; 
   progressBarWidth: number = 0; 
+  currentColor: string = '#d3ba77';
+  isJumping: boolean = false;
+  audio: HTMLAudioElement;
 
-  constructor(private cdRef: ChangeDetectorRef) {}
+  constructor(private cdRef: ChangeDetectorRef) {
+    this.audio = new Audio('assets/bark.wav');
+  }
 
   ngOnInit() {
     this.startStatusDecreasing();
+    this.updateColorGradually();
   }
 
   startStatusDecreasing() {
-    // Hunger decreases 2-4 times per day (adjust as needed)
-    setInterval(() => this.decreaseStat('hunger', 2), 10000); // 10 seconds for testing, adjust to hours
-    setInterval(() => this.decreaseStat('fatigue', 1), 20000); // 20 seconds for testing, adjust to hours
-    setInterval(() => this.decreaseStat('purity', 1), 30000); // 30 seconds for testing
-    setInterval(() => this.decreaseStat('attention', 3), 40000); // 40 seconds for testing
+    setInterval(() => this.decreaseStat('hunger', 10), 6 * 60 * 60 * 1000); // svaki 6 sati
+    setInterval(() => this.decreaseStat('fatigue', 15), 24 * 60 * 60 * 1000); // svaka 24 sata
+    setInterval(() => this.decreaseStat('purity', 20), 18 * 60 * 60 * 1000); // svaki 18 sati
+    setInterval(() => this.decreaseStat('attention', 5), 8 * 60 * 60 * 1000); // svaki 8 sati
   }
 
   decreaseStat(stat: string, decrement: number) {
-    switch(stat) {
+    switch (stat) {
       case 'hunger':
         this.hungerValue = Math.max(this.hungerValue - decrement, 0);
         break;
@@ -52,6 +56,7 @@ export class GamePage {
         this.attentionValue = Math.max(this.attentionValue - decrement, 0);
         break;
     }
+    this.cdRef.detectChanges();
   }
 
   getStatusColor(value: number): string {
@@ -68,6 +73,16 @@ export class GamePage {
     }
   }
 
+  updateColorGradually() {
+    setInterval(() => {
+      const currentHour = new Date().getHours();
+      // Map the hour (0-23) to a color value (from morning to night)
+      const colorValue = 255 - Math.floor((currentHour / 23) * 255); // Adjust as needed
+      this.currentColor = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
+      this.cdRef.detectChanges();
+    }, 3600000); // Update every hour
+  }
+
   bath() {
     this.increaseStat('purity', 20);
     this.addPoint();
@@ -79,12 +94,12 @@ export class GamePage {
   }
 
   care() {
-    this.increaseStat('attention', 20);
+    this.increaseStat('attention', 25);
     this.addPoint();
   }
 
   feed() {
-    this.increaseStat('hunger', 15);
+    this.increaseStat('hunger', 20);
     this.addPoint();
   }
 
@@ -124,5 +139,21 @@ export class GamePage {
     this.pointsNeeded = Math.ceil(this.pointsNeeded * 1.1); 
     this.progressBarWidth = 0;
   }
+
+  makeDogJump() {
+    this.isJumping = true;
+    setTimeout(() => {
+      this.isJumping = false;
+    }, 500);
+    this.playSound();
+  }
+
+  playSound() {
+    this.audio.currentTime = 0;
+    this.audio.play().catch(error => {
+      console.error('Audio playback failed:', error);
+    });
+  }
+
 }
 

@@ -1,9 +1,12 @@
 ion-content {
     padding: 0;
     margin: 0;
-    height: 100vh;
-    display: grid;
-    place-items: center;
+    height: 100%;
+    width: 100%;
+    --background: url("/assets/game background.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .conteiner {
@@ -11,11 +14,42 @@ ion-content {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.title-img {
+    margin-bottom: 2rem;
+    width: 100vmin;
+}
+
+.bone-img {
+    width: 50vmin;
+    margin-top: 5rem;
 }
 
 button {
     padding: 1rem;
     margin: 1rem;
-    height: 80%;
-    width: 70%;
+    height: 20vmin;
+    width: 90vmin;
+    margin: 0.4rem;
+    background-color: #d3ba77;
+    border: 8px solid #bc9763;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 900;
+    color: #ffff;
+    word-spacing: 0.5rem;
+    text-shadow: 
+    4px 4px 0 #bb9764, 
+    4px -4px 0 #bb9764, 
+    -4px 4px 0 #bb9764, 
+    -4px -4px 0 #bb9764, 
+    4px 0px 0 #bb9764, 
+    0px 4px 0 #bb9764, 
+    -4px 0px 0 #bb9764,
+     0px -4px 0 #bb9764;
 }

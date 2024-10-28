@@ -17,6 +17,17 @@ ion-content {
   .dog_img {
     height: 120vmin;
     width: 120vmin;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .dog_img.jump {
+    animation: jump 0.5s ease;
+  }
+
+  @keyframes jump {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0); }
   }
 
   .buttons-container {
