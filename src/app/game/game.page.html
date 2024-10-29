@@ -24,7 +24,8 @@
         <div class="status-bar" [ngStyle]="{'height': purityValue + '%', 'background-color': getStatusColor(purityValue)}"></div>
     
       <div class="dog">
-        <img src="/assets/dog.png" alt="dog" class="dog_img" [class.jump]="isJumping" (click)="makeDogJump()">
+        <img [src]="selectedDogImage" alt="selected dog" class="dog_img" [class.jump]="isJumping" (click)="makeDogJump()">
+        <img src="assets/dog_heart.png" alt="heart icon" class="heart_img" *ngIf="showHeart">
       </div>
      </div>  
      

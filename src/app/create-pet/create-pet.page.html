@@ -1,0 +1,63 @@
+<ion-header [translucent]="true">
+
+<ion-content [fullscreen]="true">
+
+<div class="main-container">
+  <h1>PICK A PET</h1>
+
+<!-- image 1-->
+  <div class="slide fade">
+    <div class="container">
+      <div class="pet-container">
+        <div class="pet stats">
+          <p>Smart: 10</p>
+          <p>Speed: 5</p>
+          <p>Strength: 5</p>
+        </div>
+        <img src="assets/select dog 1.png" alt="dog 1" class="dog-img">
+         </div>
+    </div>
+  </div>
+
+  <!-- image 2-->
+  <div class="slide fade">
+    <div class="container">
+      <div class="pet-container">
+        <div class="pet stats">
+          <p>Smart: 5</p>
+          <p>Speed: 10</p>
+          <p>Strength: 5</p>
+        </div>
+        <img src="assets/select dog 2.png" alt="dog 2" class="dog-img">  
+      </div>
+    </div>
+  </div>
+
+  <!-- image 3-->
+  <div class="slide fade">
+    <div class="container">
+      <div class="pet-container">
+        <div class="pet stats">
+          <p>Smart: 5</p>
+          <p>Speed: 5</p>
+          <p>Strength: 10</p>
+        </div>
+        <img src="assets/select dog 3.png" alt="dog 3" class="dog-img">  
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <button class="prev" (click)="plusSlides(-1);">
+    <div class="prev"></div>
+  </button>
+  <button href="#next" class="next" (click)="plusSlides(-1);">
+    <div class="next"></div>
+  </button>
+
+  <button class="pickBtn" (click)="game();">Pick this pet</button>
+
+</div>
+  
+  
+</ion-content>

@@ -12,8 +12,8 @@ import { Router } from '@angular/router';
 export class HomePage {
   constructor(private router: Router) {}
 
-  game() {
-    this.router.navigateByUrl('/game');
+  createPet() {
+    this.router.navigateByUrl('/create-pet');
   }
 
   login() {

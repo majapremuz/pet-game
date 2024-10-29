@@ -1,5 +1,5 @@
 ion-content {
-  --background: url("/assets/game background.png");
+  --background: url("/assets/game background.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -14,9 +14,14 @@ ion-content {
     align-items: center;
   }
 
+  .dog {
+    position: relative;
+
+  }
+
   .dog_img {
-    height: 120vmin;
-    width: 120vmin;
+    height: 70vmin;
+    width: 70vmin;
     transition: transform 0.3s ease-in-out;
   }
 
@@ -28,6 +33,26 @@ ion-content {
     0% { transform: translateY(0); }
     50% { transform: translateY(-20px); }
     100% { transform: translateY(0); }
+  }
+
+  .heart_img {
+    position: absolute;
+    left: 70%;
+    transform: translate(-50%, 50%);
+    width: 10%;
+    opacity: 0;
+    animation: heart-rise 1s forwards ease-in-out;
+  }
+
+  @keyframes heart-rise {
+    0% {
+      bottom: 95%;
+      opacity: 1;
+    }
+    100% {
+      bottom: 130%;
+      opacity: 0;
+    }
   }
 
   .buttons-container {

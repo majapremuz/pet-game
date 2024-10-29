@@ -1,0 +1,135 @@
+ion-content {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    --background: url("/assets/game background.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.main-container {
+    background-color: #c8aa6e;
+    border-radius: 50px 50px 0px 0px;
+    box-shadow: 0px -7px 0px 5px #bc9763;
+    position: absolute;
+    bottom: 0;
+    height: 60%;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    padding: 0 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 900;
+    word-spacing: 0.5rem;
+    color: white;
+    text-shadow: 
+    4px 4px 0 #bb9764, 
+    4px -4px 0 #bb9764, 
+    -4px 4px 0 #bb9764, 
+    -4px -4px 0 #bb9764, 
+    4px 0px 0 #bb9764, 
+    0px 4px 0 #bb9764, 
+    -4px 0px 0 #bb9764,
+     0px -4px 0 #bb9764;
+}
+
+.pet-container {
+    background-color: #fffaef;
+    box-shadow: -2px -5px 0px 10px #bc9763;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    margin: 1rem 2rem;
+    height: 40vmin;
+}
+
+p {
+    font-size: 1.2rem;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 900;
+    word-spacing: 0.5rem;
+    color: white;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+}
+
+.dog-img {
+    width: 60%;
+}
+
+.prev {
+    clip-path: polygon(100% 0, 0 50%, 100% 100%);
+    background-color: #bc9763;
+    height: 8vmin;
+    width: 8vmin;
+    position: absolute;
+    top: 30%;
+    left: 3.5%;
+    margin: 0 -1rem;
+}
+
+.next {
+    clip-path: polygon(100% 50%, 0 0, 0 100%);
+    background-color: #bc9763;
+    height: 8vmin;
+    width: 8vmin;
+    position: absolute;
+    top: 30%;
+    right: 0;
+}
+
+.slide {
+    display: none;
+  }
+  
+  .fade {
+    animation: fadeEffect 1s;
+  }
+  
+  @keyframes fadeEffect {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+  }
+
+.pickBtn {
+    background-color: #d3ba77;
+    color: white;
+    font-family: "Baloo 2", sans-serif;
+    font-size: 2rem;
+    font-weight: bolder;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 0;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+     width: 85%;
+     height: 10vmin;
+     margin-top: 1rem;
+     padding: 2rem 0;
+     border: 6px solid #bc9763;
+     border-radius: 5px;
+}

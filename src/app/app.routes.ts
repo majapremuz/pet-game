@@ -18,4 +18,8 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./login/login.page').then( m => m.LoginPage)
   },
+  {
+    path: 'create-pet',
+    loadComponent: () => import('./create-pet/create-pet.page').then( m => m.CreatePetPage)
+  },
 ];

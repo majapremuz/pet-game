@@ -35,3 +35,44 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+.alert-wrapper {
+    --background: #d3ba77; 
+    --backdrop-opacity: 0.8;
+    --backdrop-background: rgba(0, 0, 0, 0.884);
+    --border-radius: 15px;
+      border: 6px solid #bc9763;
+     --max-width: 100%;
+}
+
+.alert-message.sc-ion-alert-md {
+    color:#ffff;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+}
+
+.alert-button-group .sc-ion-alert-md {
+    width: 40%;
+  }
+  
+  .alert-button.sc-ion-alert-md {
+    font-family: "Baloo 2", sans-serif;
+    color: white;
+    font-size: 1.5rem;
+    text-shadow: 
+    4px 4px 0 #bb9764, 
+    4px -4px 0 #bb9764, 
+    -4px 4px 0 #bb9764, 
+    -4px -4px 0 #bb9764, 
+    4px 0px 0 #bb9764, 
+    0px 4px 0 #bb9764, 
+    -4px 0px 0 #bb9764,
+     0px -4px 0 #bb9764;
+  }

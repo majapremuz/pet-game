@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -24,9 +25,18 @@ export class GamePage {
   currentColor: string = '#d3ba77';
   isJumping: boolean = false;
   audio: HTMLAudioElement;
+  selectedDogImage: string = '';
+  showHeart: boolean = false;
 
-  constructor(private cdRef: ChangeDetectorRef) {
-    this.audio = new Audio('assets/bark.wav');
+  constructor(
+    private cdRef: ChangeDetectorRef,
+    private router: Router
+  ) {
+    const navigation = this.router.getCurrentNavigation();
+  if (navigation?.extras.state) {
+    this.selectedDogImage = navigation.extras.state['selectedDogImage'];
+  }
+  this.audio = new Audio('assets/bark.wav');
   }
 
   ngOnInit() {
@@ -142,8 +152,10 @@ export class GamePage {
 
   makeDogJump() {
     this.isJumping = true;
+    this.showHeart = true;
     setTimeout(() => {
       this.isJumping = false;
+      this.showHeart = false;
     }, 500);
     this.playSound();
   }
