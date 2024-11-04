@@ -98,15 +98,19 @@ ion-content {
   }
 
   .img_container {
-    background-color: #d3ba77;
-    clip-path: polygon(8% 0, 94% 0, 100% 15%, 100% 87%, 92% 100%, 14% 100%, 0 90%, 0 18%);
+    transition: height 0.5s ease, background-color 0.5s ease;
+    clip-path: polygon(8% 100%, 94% 100%, 100% 85%, 100% 13%, 92% 0%, 14% 0%, 0 10%, 0 82%); 
     height: 18vmin;
     width: 18vmin;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: auto;
-  }
+    margin-left: 5px;
+    margin-top: 5px;
+    position: absolute;
+    bottom: -0.6rem;
+}
+
 
   .imgBtn {
     height: 20vmin;
