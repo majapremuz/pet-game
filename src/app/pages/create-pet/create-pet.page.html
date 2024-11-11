@@ -57,6 +57,12 @@
 
   <button class="pickBtn" (click)="game();">Pick this pet</button>
 
+  <div *ngIf="showInput" class="nameInput">
+    <label for="petName">Enter Pet Name:</label>
+    <input id="petName" type="text" [(ngModel)]="petName" placeholder="Enter pet name here"/>
+    <button (click)="game()" class="nameConfirmBtn">Confirm</button>
+  </div>
+
 </div>
   
   

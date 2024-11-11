@@ -1,0 +1,19 @@
+<ion-content [fullscreen]="true">
+  <form (ngSubmit)="createProfile()">
+    <h1>CREATE PROFILE</h1>
+
+    <div>
+    <label for="username">username</label>
+    <br>
+    <input type="text" id="username" name="username" [(ngModel)]="username">
+  
+    <label for="password">password</label>
+    <br>
+    <input type="password" id="password" name="password" [(ngModel)]="password">
+    </div>
+
+    
+    
+    <button type="submit">CREATE</button>
+  </form>
+</ion-content>

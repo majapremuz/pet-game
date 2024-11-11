@@ -133,3 +133,46 @@ p {
      border: 6px solid #bc9763;
      border-radius: 5px;
 }
+
+.nameInput {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #d3ba77;
+    border: 6px solid #bc9763;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: white;
+    font-family: "Baloo 2", sans-serif;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+     position: absolute;
+}
+
+label {
+    font-size: 1.5rem;
+}
+
+input {
+    width: 80%;
+    border-radius: 5px;
+    color: black;
+    text-align: center;
+}
+
+.nameConfirmBtn {
+   background-color: #bb9764;
+   color: white;
+   margin: 1rem;
+   padding: 1rem 1.5rem;
+   font-size: 1.2rem;
+   font-family: "Baloo 2", sans-serif;
+}

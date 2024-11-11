@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: 'home',
-    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    loadComponent: () => import('./pages/home/home.page').then((m) => m.HomePage),
   },
   {
     path: '',
@@ -12,14 +12,22 @@ export const routes: Routes = [
   },
   {
     path: 'game',
-    loadComponent: () => import('./game/game.page').then( m => m.GamePage)
+    loadComponent: () => import('./pages/create-pet/game/game.page').then( m => m.GamePage)
   },
   {
     path: 'login',
-    loadComponent: () => import('./login/login.page').then( m => m.LoginPage)
+    loadComponent: () => import('./pages/login/login.page').then( m => m.LoginPage)
   },
   {
     path: 'create-pet',
-    loadComponent: () => import('./create-pet/create-pet.page').then( m => m.CreatePetPage)
+    loadComponent: () => import('./pages/create-pet/create-pet.page').then( m => m.CreatePetPage)
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile.page').then( m => m.ProfilePage)
+  },
+  {
+    path: 'create-profile',
+    loadComponent: () => import('./pages/create-profile/create-profile.page').then( m => m.CreateProfilePage)
   },
 ];

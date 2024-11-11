@@ -1,19 +1,19 @@
 <ion-content [fullscreen]="true">
     <form>
-      <h1>CREATE PROFILE</h1>
+      <h1>LOGIN</h1>
 
       <div>
       <label for="username">username</label>
       <br>
-      <input type="text" id="username">
+      <input type="text" id="username" name="username"  [(ngModel)]="username">
     
       <label for="password">password</label>
       <br>
-      <input type="password" id="password">
+      <input type="password" id="password" name="password" >
       </div>
 
       
       
-      <button>CREATE</button>
+      <button (click)="profil()">LOGIN</button>
     </form>
 </ion-content>

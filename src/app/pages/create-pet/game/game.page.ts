@@ -3,6 +3,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
+import { PetService } from 'src/app/services/pet.servise';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
@@ -42,7 +43,9 @@ export class GamePage implements StatProperties  {
   currentColor: string = '#d3ba77';
   isJumping: boolean = false;
   audio: HTMLAudioElement;
+  petName: string = '';
   selectedDogImage: string = '';
+  dogStats: any = {};
   showHeart: boolean = false;
   nextFeedTime: Date | undefined;
 
@@ -58,22 +61,34 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
 
   constructor(
     private cdRef: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private petService: PetService
   ) {
     const navigation = this.router.getCurrentNavigation();
   if (navigation?.extras.state) {
     this.selectedDogImage = navigation.extras.state['selectedDogImage'];
+    this.petName = navigation.extras.state['petName'];
   }
   this.audio = new Audio('assets/bark.wav');
   }
 
   ngOnInit() {
-    this.setInitialActionTimes();
-    this.startStatusDecreasing();
-    this.updateColorGradually();
+    this.loadGameState();
+  const selectedDog = this.petService.getSelectedDog();
+  if (selectedDog) {
+    this.selectedDogImage = selectedDog.image;
+    this.petName = selectedDog.name;
+    this.dogStats = selectedDog.stats;
+  } else {
+    console.warn("No selected dog found. Redirecting to pet selection page.");
+    this.router.navigate(['/create-pet']);
   }
 
-   // Sets initial times for each action
+  this.setInitialActionTimes();
+  this.startStatusDecreasing();
+  this.updateColorGradually();
+  }
+
    setInitialActionTimes() {
     const now = new Date();
     this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
@@ -288,9 +303,44 @@ checkAlert(stat: StatName) {
     this.nextFeedTime = new Date(now.getTime() + randomHours * 60 * 60 * 1000);
   }
 
+  loadGameState() {
+    const savedLevel = localStorage.getItem('level');
+    const savedPoints = localStorage.getItem('points');
+    const savedPointsNeeded = localStorage.getItem('pointsNeeded');
+
+    if (savedLevel) {
+      this.level = parseInt(savedLevel);
+    }
+    if (savedPoints) {
+      this.points = parseInt(savedPoints);
+    }
+    if (savedPointsNeeded) {
+      this.pointsNeeded = parseInt(savedPointsNeeded);
+    }
+  }
+
+  saveGameState() {
+    localStorage.setItem('level', this.level.toString());
+    localStorage.setItem('points', this.points.toString());
+    localStorage.setItem('pointsNeeded', this.pointsNeeded.toString());
+  }
+
+  checkLevelUp() {
+    if (this.points >= this.pointsNeeded) {
+      this.level += 1;
+      this.points = 0; // Reset points or carry over excess points if needed
+      this.pointsNeeded = Math.floor(this.pointsNeeded * 1.1); // Increase points needed for the next level by 10%
+  
+      // Navigate to profile page and pass a flag to trigger the level-up modal
+      this.router.navigate(['/profile'], { state: { levelUp: true } });
+    }
+  }
+  
+
   // Adds points based on user timing
   addPoint(points: number) {
     this.points += points;
+    this.checkLevelUp();
     this.progressBarWidth = (this.points / this.pointsNeeded) * 100;
     if (this.points >= this.pointsNeeded) {
       this.levelUp();
@@ -304,11 +354,16 @@ checkAlert(stat: StatName) {
       this.points = 0;
       this.pointsNeeded = Math.ceil(this.pointsNeeded * 1.1); 
       this.progressBarWidth = 0;
+      this.openLevelUpModal();
     } else {
       this.points = this.pointsNeeded;
       this.progressBarWidth = 100;
       console.log("Maximum level reached.");
     }
+  }
+
+  openLevelUpModal() {
+    this.router.navigate(['/profile'], { state: { levelUp: true } });
   }
 
   makeDogJump() {
@@ -326,6 +381,10 @@ checkAlert(stat: StatName) {
     this.audio.play().catch(error => {
       console.error('Audio playback failed:', error);
     });
+  }
+
+  profile() {
+    this.router.navigate(['/profile']);
   }
 
 }

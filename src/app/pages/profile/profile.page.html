@@ -1,0 +1,34 @@
+<ion-content [fullscreen]="true">
+  <div class="main">
+    <div class="profile">
+      <h1>PROFILE</h1>
+    <p>{{ username }}</p>
+      <div class="dog">
+      <h2>{{ petName || dogStats.name }}</h2>
+      <p>Smart: {{ dogStats?.smart }}</p>
+      <p>Speed: {{ dogStats?.speed }}</p>
+      <p>Strength: {{ dogStats?.strength }}</p>
+      </div>
+
+      <button (click)="returnToGame()">RETURN TO GAME</button>
+    </div>
+    
+  </div>
+
+ <!-- <ion-modal #levelUpModal>
+    
+  </ion-modal>-->
+
+</ion-content>
+
+<ion-modal #levelUpModal>
+  <ng-template>
+      <ion-button (click)="closeModal()" slot="end" class="modalCloseBtn">X</ion-button>
+      <h2 class="modalTitle">Select a stat to upgrade:</h2>
+      <ion-button (click)="upgradeStat('smart')" class="statBtn">Smart</ion-button>
+      <ion-button (click)="upgradeStat('speed')" class="statBtn">Speed</ion-button>
+      <ion-button (click)="upgradeStat('strength')" class="statBtn">Strength</ion-button>
+  </ng-template>
+</ion-modal>
+
+

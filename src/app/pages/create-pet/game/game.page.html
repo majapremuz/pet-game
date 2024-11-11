@@ -3,7 +3,7 @@
   <div class="conteiner">
 
     <div class="top-btn-container">
-      <button class="topBtn">
+      <button class="topBtn" (click)="profile()">
         <img src="assets/v.png" alt="v icon">
       </button>
       <button class="topBtn">
@@ -17,6 +17,7 @@
     <div class="level-bar">
       <p>LV: {{ level }}</p>
       <div class="level-progress-bar" [ngStyle]="{'width': progressBarWidth + '%'}"></div>
+      <h1>{{ petName }}</h1>
     </div>
 
       <div class="stats">
