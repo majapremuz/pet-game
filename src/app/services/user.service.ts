@@ -15,6 +15,22 @@ export class UserService {
     return this.username || localStorage.getItem('username') || '';
   }
 
+  getSleepTime(): string {
+    return localStorage.getItem('sleepTime') || '';
+  }
+  
+  setSleepTime(time: string) {
+    localStorage.setItem('sleepTime', time);
+  }
+  
+  getWakeTime(): string {
+    return localStorage.getItem('wakeTime') || '';
+  }
+  
+  setWakeTime(time: string) {
+    localStorage.setItem('wakeTime', time);
+  }  
+
   profileExists() {
     return this.username.length > 0;
   }

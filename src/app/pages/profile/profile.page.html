@@ -1,24 +1,34 @@
 <ion-content [fullscreen]="true">
-  <div class="main">
     <div class="profile">
       <h1>PROFILE</h1>
-    <p>{{ username }}</p>
+    <p>Username: {{ username }}</p>
       <div class="dog">
-      <h2>{{ petName || dogStats.name }}</h2>
+      <h2>Pet name: {{ petName || dogStats.name }}</h2>
       <p>Smart: {{ dogStats?.smart }}</p>
       <p>Speed: {{ dogStats?.speed }}</p>
       <p>Strength: {{ dogStats?.strength }}</p>
       </div>
 
+      <div class="sleep-time">
+        <h2 class="sleep-title">Adjust notifications</h2>
+
+        <div class="time-picker">
+          <ion-item>
+            <ion-label position="stacked">Sleep Time</ion-label>
+            <ion-datetime presentation="time" displayFormat="HH:mm" [(ngModel)]="sleepTime"></ion-datetime>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Wake Time</ion-label>
+            <ion-datetime presentation="time" displayFormat="HH:mm" [(ngModel)]="wakeTime"></ion-datetime>
+          </ion-item>
+        </div>
+        
+        <button ion-button (click)="saveSleepSchedule()">SAVE</button>
+      </div>
+      
       <button (click)="returnToGame()">RETURN TO GAME</button>
     </div>
-    
-  </div>
-
- <!-- <ion-modal #levelUpModal>
-    
-  </ion-modal>-->
-
+  
 </ion-content>
 
 <ion-modal #levelUpModal>

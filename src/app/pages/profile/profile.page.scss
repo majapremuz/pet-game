@@ -3,10 +3,7 @@ ion-content {
     margin: 0;
     height: 100%;
     width: 100%;
-    --background: url("/assets/game background.jpg");
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    --background: #c8aa6e;
     text-shadow: 
     2px 2px 0 #bb9764, 
     2px -2px 0 #bb9764, 
@@ -19,36 +16,21 @@ ion-content {
      font-family: "Baloo 2", sans-serif;
 }
 
-.main {
-    background-color: #c8aa6e;
-    border: 6px solid #bc9763;
-    border-radius: 50px 50px 0px 0px;
-    box-shadow: 0px -3px 15px 0px rgba(0,0,0,0.75);
-    position: absolute;
-    bottom: 0;
-    height: 60%;
-    width: 100%;
+.profile {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
     flex-direction: column;
 }
 
-.profile {
-    background-color: white;
-    display: flex;
-    padding: 1rem 5rem;
-    flex-direction: column;
-    border: 6px solid #bc9763;
-}
-
 .dog {
-    background-color: #d3ba77;
-    padding: 0 1rem;
+    background-color: white;
+    padding: 1rem 2rem;
 }
 
 h1, h2, p {
     color: white;
+    word-spacing: 0.5rem;
 }
 
 h1, h2 {
@@ -111,4 +93,35 @@ ion-modal {
     --background: #d3ba77;
     --box-shadow: none;
     font-family: "Baloo 2", sans-serif;
+}
+
+//sleep time
+.sleep-time {
+    background-color: #bc9763;
+    margin: 0.5rem 0;
+    color: white;
+}
+
+ion-item {
+    margin: 1rem;
+    height: 30%;
+}
+
+.time-picker {
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+ion-item > ion-label {
+    color: white;
+    font-size: 1.2rem;
+    margin: 1rem;
+    position: relative;
+    left: 0.5rem;
+}
+
+.sleep-title {
+    font-size: 1.1rem;
 }

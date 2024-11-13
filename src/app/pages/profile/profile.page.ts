@@ -19,6 +19,9 @@ export class ProfilePage implements OnInit, AfterViewInit {
   username: string = '';
   petName: string = '';
   dogStats: any;
+  sleepTime: string = '';
+  wakeTime: string = '';
+
 
   constructor(
     private router: Router,
@@ -34,8 +37,14 @@ export class ProfilePage implements OnInit, AfterViewInit {
       this.petName = selectedDog.name;
       this.dogStats = selectedDog.stats;
     }
+    const storedSleepTime = this.userService.getSleepTime();
+    const storedWakeTime = this.userService.getWakeTime();
+    if (storedSleepTime && storedWakeTime) {
+      this.sleepTime = storedSleepTime;
+      this.wakeTime = storedWakeTime;
+    }
   }
-
+  
   ngAfterViewInit() {
     console.log('LevelUpModal:', this.levelUpModal);
     if (this.levelUpModal) {
@@ -47,6 +56,13 @@ export class ProfilePage implements OnInit, AfterViewInit {
       }
     }
   }
+
+  saveSleepSchedule() {
+    this.userService.setSleepTime(this.sleepTime);
+    this.userService.setWakeTime(this.wakeTime);
+    console.log(`Sleep schedule saved: Sleep - ${this.sleepTime}, Wake - ${this.wakeTime}`);
+  }
+  
   
 
   openModal() {
