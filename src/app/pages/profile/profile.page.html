@@ -2,6 +2,19 @@
     <div class="profile">
       <h1>PROFILE</h1>
     <p>Username: {{ username }}</p>
+
+    <div class="password-field" *ngIf="isPasswordFieldVisible">
+      <ion-label>Current password</ion-label>
+      <ion-input [(ngModel)]="currentPassword" type="password" required></ion-input>
+
+      <ion-label>New password</ion-label>
+      <ion-input [(ngModel)]="newPassword" type="password" required></ion-input>
+
+      <button>Confirm</button>
+      <!--(click)="changePassword()"-->
+    </div>
+
+    <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>
       <div class="dog">
       <h2>Pet name: {{ petName || dogStats.name }}</h2>
       <p>Smart: {{ dogStats?.smart }}</p>
@@ -10,7 +23,10 @@
       </div>
 
       <div class="sleep-time">
-        <h2 class="sleep-title">Adjust notifications</h2>
+        <h2 class="sleep-title">
+          Adjust notifications
+          <p>Its important that everyone gets at least 8 hours sleep.</p>
+        </h2>
 
         <div class="time-picker">
           <ion-item>
@@ -31,7 +47,7 @@
   
 </ion-content>
 
-<ion-modal #levelUpModal>
+<ion-modal *ngIf="isModalVisible" #levelUpModal>
   <ng-template>
       <ion-button (click)="closeModal()" slot="end" class="modalCloseBtn">X</ion-button>
       <h2 class="modalTitle">Select a stat to upgrade:</h2>

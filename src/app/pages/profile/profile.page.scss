@@ -26,6 +26,7 @@ ion-content {
 .dog {
     background-color: white;
     padding: 1rem 2rem;
+    border: 5px solid #bc9763;
 }
 
 h1, h2, p {
@@ -98,8 +99,10 @@ ion-modal {
 //sleep time
 .sleep-time {
     background-color: #bc9763;
-    margin: 0.5rem 0;
+    margin: 1rem 0;
     color: white;
+    width: 90%;
+    border: 5px solid white;
 }
 
 ion-item {
@@ -124,4 +127,28 @@ ion-item > ion-label {
 
 .sleep-title {
     font-size: 1.1rem;
+}
+
+//password change
+.passwordBtn {
+    width: 60%;
+    background-color: rgb(102, 102, 246);
+    border: 3px solid white;
+    text-shadow: none;
+    margin-bottom: 1rem;
+}
+
+.password-field {
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 1rem;
+    color: white;
+}
+
+ion-input {
+    border: 1px solid black;
+    border-radius: 5px;
 }

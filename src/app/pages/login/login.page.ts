@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
-import { UserService } from '../../services/user.service';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -16,9 +16,13 @@ export class LoginPage implements OnInit {
   username: string = '';
 
   constructor(
-    private router: Router, 
-    private userService: UserService
+    private router: Router,
+    private injector: Injector
   ) { }
+
+  private get userService(): UserService {
+    return this.injector.get(UserService);
+  }
 
   ngOnInit() {
   }

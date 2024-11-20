@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
@@ -25,9 +25,16 @@ export class CreatePetPage implements OnInit {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private petService: PetService,
-    private userService: UserService
+    private injector: Injector
   ) { }
+
+  private get petService(): PetService {
+    return this.injector.get(PetService);
+  }
+  
+  private get userService(): UserService {
+    return this.injector.get(UserService);
+  }
 
   ngOnInit() {
     this.showSlide(this.currentSlideIndex);

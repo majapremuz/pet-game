@@ -4,6 +4,9 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class PetService {
+  constructor() {
+  }
+
   private selectedDog: any = null;
 
   setSelectedDog(dogData: any) {

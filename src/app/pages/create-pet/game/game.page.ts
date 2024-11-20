@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, Injector } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
@@ -62,7 +62,7 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
   constructor(
     private cdRef: ChangeDetectorRef,
     private router: Router,
-    private petService: PetService
+    private injector: Injector
   ) {
     const navigation = this.router.getCurrentNavigation();
   if (navigation?.extras.state) {
@@ -70,6 +70,10 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     this.petName = navigation.extras.state['petName'];
   }
   this.audio = new Audio('assets/bark.wav');
+  }
+
+  private get petService(): PetService {
+    return this.injector.get(PetService);
   }
 
   ngOnInit() {
