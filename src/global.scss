@@ -76,3 +76,45 @@
     -4px 0px 0 #bb9764,
      0px -4px 0 #bb9764;
   }
+
+  .playMode .alert-wrapper {
+    --background: #d3ba77; 
+    --backdrop-opacity: 0.8;
+    --backdrop-background: rgba(0, 0, 0, 0.884);
+    --border-radius: 15px;
+    border: 6px solid #bc9763;
+    --max-width: 100%;
+}
+
+.playMode .alert-message {
+    color: #ffff;
+    text-shadow: 
+        2px 2px 0 #bb9764, 
+        2px -2px 0 #bb9764, 
+        -2px 2px 0 #bb9764, 
+        -2px -2px 0 #bb9764, 
+        2px 0px 0 #bb9764, 
+        0px 2px 0 #bb9764, 
+        -2px 0px 0 #bb9764,
+        0px -2px 0 #bb9764;
+}
+
+.playMode .alert-button-group {
+    width: 110vmin;
+}
+
+.playMode .alert-button {
+    font-family: "Baloo 2", sans-serif;
+    color: white;
+    font-size: 0.9rem;
+    text-shadow: 
+        4px 4px 0 #bb9764, 
+        4px -4px 0 #bb9764, 
+        -4px 4px 0 #bb9764, 
+        -4px -4px 0 #bb9764, 
+        4px 0px 0 #bb9764, 
+        0px 4px 0 #bb9764, 
+        -4px 0px 0 #bb9764,
+        0px -4px 0 #bb9764;
+}
+

@@ -199,7 +199,7 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
         break;
     }
 
-    this.increaseStat(action, incrementValue);
+    //this.increaseStat(action, incrementValue);
 
    // Ensure nextActionTime is defined before proceeding
   if (nextActionTime) {

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
+import { App } from '@capacitor/app';
 
 @Component({
   selector: 'app-home',
@@ -20,4 +21,7 @@ export class HomePage {
     this.router.navigateByUrl('/login');
   }
 
+  quitApp() {
+    App.exitApp();
+  }
 }

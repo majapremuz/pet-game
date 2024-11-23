@@ -15,6 +15,7 @@ import { UserService } from 'src/app/services/user.service';
   imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
 })
 export class CreatePetPage implements OnInit {
+  playMode: string | null = null;
   currentSlideIndex: number = 0;
   slides: HTMLElement[] = [];
   selectedDogImage: string = '';
@@ -38,6 +39,30 @@ export class CreatePetPage implements OnInit {
 
   ngOnInit() {
     this.showSlide(this.currentSlideIndex);
+    this.promptPlayMode();
+  }
+
+  async promptPlayMode() {
+    const alert = await this.alertController.create({
+      message: 'Želite li igrati online ili offline?',
+      cssClass: 'playMode',
+      buttons: [
+        {
+          text: 'Online',
+          handler: () => {
+            this.playMode = 'online';
+          }
+        },
+        {
+          text: 'Offline',
+          handler: () => {
+            this.playMode = 'offline';
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   plusSlides(n: number) {
@@ -58,6 +83,11 @@ export class CreatePetPage implements OnInit {
   }
 
   async game() {
+    if (!this.playMode) {
+      await this.promptPlayMode();
+      return;
+    }
+
     const profileExists = this.userService.profileExists();
     if (!profileExists) {
       this.router.navigate(['/create-profile']);
