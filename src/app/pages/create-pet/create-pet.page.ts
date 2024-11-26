@@ -87,7 +87,7 @@ export class CreatePetPage implements OnInit {
       await this.promptPlayMode();
       return;
     }
-
+  
     const profileExists = this.userService.profileExists();
     if (!profileExists) {
       this.router.navigate(['/create-profile']);
@@ -100,16 +100,16 @@ export class CreatePetPage implements OnInit {
       buttons: [
         {
           text: 'No',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Yes',
-          handler: () => {
-            this.showInput = true; 
-            // Set default dog stats
+          handler: async () => {
+            this.showInput = true;
+  
+            // Default dog stats
             let dogStats = { name: this.petName, smart: 0, speed: 0, strength: 0 };
   
-            // Determine dog stats based on current slide index
             switch (this.currentSlideIndex) {
               case 0:
                 this.selectedDogImage = 'assets/dog 1.png';
@@ -125,22 +125,48 @@ export class CreatePetPage implements OnInit {
                 break;
             }
   
-            // Check if petName has been set before saving
+            // Check if petName is set
             if (this.petName.trim()) {
-              // Save dog data with petName and stats to PetService
-              this.petService.setSelectedDog({ image: this.selectedDogImage, name: this.petName, stats: dogStats });
-              this.router.navigate(['/game']); // Navigate here if required
+              if (this.playMode === 'online') {
+                const username = 'testUser'; // Replace with actual username
+                const password = 'testPassword'; // Replace with actual password
+                const pushToken = 'pushToken123'; // Replace with actual push token
+  
+                this.userService
+                  .saveOnlineData(username, password, this.petName, pushToken)
+                  .subscribe(
+                    (response) => {
+                      console.log('Online data saved:', response);
+                      this.petService.setSelectedDog({
+                        image: this.selectedDogImage,
+                        name: this.petName,
+                        stats: dogStats,
+                      });
+                      this.router.navigate(['/game']);
+                    },
+                    (error) => console.error('Error saving online data:', error)
+                  );
+              } else if (this.playMode === 'offline') {
+                const username = 'testUser'; // Replace with actual username
+                this.userService.saveOfflineData(username);
+  
+                this.petService.setSelectedDog({
+                  image: this.selectedDogImage,
+                  name: this.petName,
+                  stats: dogStats,
+                });
+                this.router.navigate(['/game']);
+              }
             } else {
-              // Handle case where petName is not set (maybe show an alert or error message)
               console.warn('Pet name is empty or not set.');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
   
     await alert.present();
-  }
+  }  
   
 
 }

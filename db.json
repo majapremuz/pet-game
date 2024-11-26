@@ -1,0 +1,35 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "John Doe"
+    },
+    {
+      "id": "2",
+      "name": "Jane Smith"
+    },
+    {
+      "id": "b93d",
+      "name": "Test User"
+    },
+    {
+      "id": "caa5",
+      "username": "fe5b6e22eb30cdad08b2d6f62c722ba8e1f6cc15",
+      "password": "82f8809f42d911d1bd5199021d69d15ea91d1fad",
+      "petName": "ddsdcsdc",
+      "pushToken": "pushToken123"
+    }
+  ],
+  "pets": [
+    {
+      "id": "1",
+      "name": "Buddy",
+      "type": "dog"
+    },
+    {
+      "id": "2",
+      "name": "Mittens",
+      "type": "cat"
+    }
+  ]
+}
