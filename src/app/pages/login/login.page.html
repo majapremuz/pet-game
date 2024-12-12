@@ -1,5 +1,5 @@
 <ion-content [fullscreen]="true">
-    <form>
+    <!--<form (ngSubmit)="onLogin()">
       <h1>LOGIN</h1>
 
       <div>
@@ -14,6 +14,23 @@
 
       
       
-      <button (click)="profil()">LOGIN</button>
-    </form>
+      <button (click)="logIn()">LOGIN</button>
+    </form>-->
+      <form (ngSubmit)="onLogin()">
+        <h1>LOGIN</h1>
+        <div>
+          <ion-item lines="none">
+            <ion-label position="floating">username</ion-label>
+            <br>
+            <ion-input [(ngModel)]="username" name="username" required></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label position="floating">password</ion-label>
+            <br>
+            <ion-input [(ngModel)]="password" name="password" type="password" required></ion-input>
+          </ion-item>
+        </div> 
+        <ion-button type="submit" expand="full">LOGIN</ion-button>
+      </form>
+    
 </ion-content>

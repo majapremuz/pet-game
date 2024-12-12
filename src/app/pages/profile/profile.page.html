@@ -1,7 +1,7 @@
 <ion-content [fullscreen]="true">
     <div class="profile">
       <h1>PROFILE</h1>
-    <p>Username: {{ username }}</p>
+    <p class="pet-name">{{ petName }}</p>
 
     <div class="password-field" *ngIf="isPasswordFieldVisible">
       <ion-label>Current password</ion-label>
@@ -15,11 +15,11 @@
     </div>
 
     <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>
-      <div class="dog">
-      <h2>Pet name: {{ petName || dogStats.name }}</h2>
-      <p>Smart: {{ dogStats?.smart }}</p>
-      <p>Speed: {{ dogStats?.speed }}</p>
-      <p>Strength: {{ dogStats?.strength }}</p>
+      <div class="stats-conteiner">
+      <h2>STATS</h2>
+      <p>Smart: {{ petSmart }}</p>
+      <p>Speed: {{ petSpeed }}</p>
+      <p>Strength: {{ petStrength }}</p>
       </div>
 
       <div class="sleep-time">
@@ -39,15 +39,17 @@
           </ion-item>
         </div>
         
-        <button ion-button (click)="saveSleepSchedule()">SAVE</button>
+        <button (click)="saveSleepSchedule()">SAVE</button>
       </div>
       
       <button (click)="returnToGame()">RETURN TO GAME</button>
+      <button (click)="logOut()">LOG OUT</button>
+      <button (click)="deleteProfile()" class="deleteBtn">DELETE PROFILE</button>
     </div>
   
 </ion-content>
 
-<ion-modal *ngIf="isModalVisible" #levelUpModal>
+<!--<ion-modal *ngIf="isModalVisible" #levelUpModal>
   <ng-template>
       <ion-button (click)="closeModal()" slot="end" class="modalCloseBtn">X</ion-button>
       <h2 class="modalTitle">Select a stat to upgrade:</h2>
@@ -55,6 +57,6 @@
       <ion-button (click)="upgradeStat('speed')" class="statBtn">Speed</ion-button>
       <ion-button (click)="upgradeStat('strength')" class="statBtn">Strength</ion-button>
   </ng-template>
-</ion-modal>
+</ion-modal>-->
 
 

@@ -23,10 +23,14 @@ ion-content {
     flex-direction: column;
 }
 
-.dog {
+.stats-conteiner {
     background-color: white;
     padding: 1rem 2rem;
     border: 5px solid #bc9763;
+}
+
+.pet-name {
+    font-size: 3rem;
 }
 
 h1, h2, p {
@@ -151,4 +155,8 @@ ion-item > ion-label {
 ion-input {
     border: 1px solid black;
     border-radius: 5px;
+}
+
+.deleteBtn {
+    background-color: rgb(244, 60, 60);
 }

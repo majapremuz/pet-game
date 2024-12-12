@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { PetService } from 'src/app/services/pet.servise';
 import { UserService } from 'src/app/services/user.service';
+import * as SHA1 from 'crypto-js/sha1';
 
 @Component({
   selector: 'app-create-pet',
@@ -107,54 +108,64 @@ export class CreatePetPage implements OnInit {
           handler: async () => {
             this.showInput = true;
   
-            // Default dog stats
-            let dogStats = { name: this.petName, smart: 0, speed: 0, strength: 0 };
+            // Default dog stats and image
+            const dogStats: any = { name: this.petName, smart: 0, speed: 0, strength: 0, image: '' };
   
             switch (this.currentSlideIndex) {
               case 0:
-                this.selectedDogImage = 'assets/dog 1.png';
-                dogStats = { name: this.petName, smart: 10, speed: 5, strength: 5 };
+                dogStats.image = 'assets/dog 1.png';
+                dogStats.smart = 10;
+                dogStats.speed = 5;
+                dogStats.strength = 5;
                 break;
               case 1:
-                this.selectedDogImage = 'assets/dog 2.png';
-                dogStats = { name: this.petName, smart: 5, speed: 10, strength: 5 };
+                dogStats.image = 'assets/dog 2.png';
+                dogStats.smart = 5;
+                dogStats.speed = 10;
+                dogStats.strength = 5;
                 break;
               case 2:
-                this.selectedDogImage = 'assets/dog 3.png';
-                dogStats = { name: this.petName, smart: 5, speed: 5, strength: 10 };
+                dogStats.image = 'assets/dog 3.png';
+                dogStats.smart = 5;
+                dogStats.speed = 5;
+                dogStats.strength = 10;
                 break;
             }
   
-            // Check if petName is set
             if (this.petName.trim()) {
+              dogStats.name = this.petName;
+  
+              const username = this.userService.getUsername();
+              const password = this.userService.getUserPassword();
+  
+              // Hash the username and password
+              const hashedUsername = SHA1(username).toString();
+              const hashedPassword = SHA1(password).toString();
+  
               if (this.playMode === 'online') {
-                const username = 'testUser'; // Replace with actual username
-                const password = 'testPassword'; // Replace with actual password
                 const pushToken = 'pushToken123'; // Replace with actual push token
   
+                const onlineData = {
+                  username: hashedUsername,
+                  password: hashedPassword,
+                  pushToken: pushToken,
+                  petStats: dogStats,
+                };
+  
                 this.userService
-                  .saveOnlineData(username, password, this.petName, pushToken)
+                  .saveOnlineData(onlineData)
                   .subscribe(
                     (response) => {
                       console.log('Online data saved:', response);
-                      this.petService.setSelectedDog({
-                        image: this.selectedDogImage,
-                        name: this.petName,
-                        stats: dogStats,
-                      });
+                      this.petService.setSelectedDog(dogStats);
                       this.router.navigate(['/game']);
                     },
                     (error) => console.error('Error saving online data:', error)
                   );
               } else if (this.playMode === 'offline') {
-                const username = 'testUser'; // Replace with actual username
-                this.userService.saveOfflineData(username);
+                this.userService.saveOfflineData(hashedUsername);
   
-                this.petService.setSelectedDog({
-                  image: this.selectedDogImage,
-                  name: this.petName,
-                  stats: dogStats,
-                });
+                this.petService.setSelectedDog(dogStats); 
                 this.router.navigate(['/game']);
               }
             } else {
@@ -166,7 +177,7 @@ export class CreatePetPage implements OnInit {
     });
   
     await alert.present();
-  }  
+  }
   
 
 }

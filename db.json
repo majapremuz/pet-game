@@ -1,35 +1,30 @@
 {
   "users": [
     {
-      "id": "1",
-      "name": "John Doe"
+      "id": "a60e",
+      "username": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
+      "password": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
+      "pushToken": "pushToken123",
+      "petStats": {
+        "name": "Bobi",
+        "smart": 10,
+        "speed": 5,
+        "strength": 5,
+        "image": "assets/dog 1.png"
+      }
     },
     {
-      "id": "2",
-      "name": "Jane Smith"
-    },
-    {
-      "id": "b93d",
-      "name": "Test User"
-    },
-    {
-      "id": "caa5",
-      "username": "fe5b6e22eb30cdad08b2d6f62c722ba8e1f6cc15",
-      "password": "82f8809f42d911d1bd5199021d69d15ea91d1fad",
-      "petName": "ddsdcsdc",
-      "pushToken": "pushToken123"
-    }
-  ],
-  "pets": [
-    {
-      "id": "1",
-      "name": "Buddy",
-      "type": "dog"
-    },
-    {
-      "id": "2",
-      "name": "Mittens",
-      "type": "cat"
+      "id": "6283",
+      "username": "c4033bff94b567a190e33faa551f411caef444f2",
+      "password": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+      "pushToken": "pushToken123",
+      "petStats": {
+        "name": "max",
+        "smart": 5,
+        "speed": 5,
+        "strength": 10,
+        "image": "assets/dog 3.png"
+      }
     }
   ]
 }

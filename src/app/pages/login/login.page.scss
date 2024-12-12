@@ -38,31 +38,43 @@ div {
     width: 80%;
 }
 
-label {
-    color: #815403;
+ion-label {
     font-size: 0.8rem;
     position: relative;
     left: 10px;
-    top: 10px;
+    top: 5px;
 }
 
-input {
-    background-color: white;
-    width: 100%;
+.item.sc-ion-label-md-h, .item .sc-ion-label-md-h {
+    --color: #815403;
+}
+
+ion-input {
+    --background: rgb(254, 251, 251);
+    width: 99%;
     height: 16vmin;
-    border-radius: 8px;
-    margin: 0.5rem 0;
+    box-shadow: 0px 0px 1px 1px rgba(0,0,0,0.75);
+    margin: 1rem auto;
     text-indent: 1rem;
+    /*--padding-bottom: 10px;
+    --padding-end: 10px;
+    --padding-start: 10px;
+    --padding-top: 10px;*/
 }
 
-button {
-    background-color: #855603;
-    color: white;
+ion-item {
+    border: none;
+}
+
+ion-button {
+    --background: #855603;
+    --color: white;
     font-size: 1.1rem;
-    width: 80%;
-    height: 15vmin;
+    width: 70%;
+    height: 16vmin;
     margin-top: 2rem;
     border-radius: 5px;
+    --box-shadow: none;
 }
 
 

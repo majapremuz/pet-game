@@ -27,6 +27,7 @@ export class CreateProfilePage implements OnInit {
   createProfile() {
     if (this.username && this.password) {
       this.userService.setUsername(this.username);
+      this.userService.setUserPassword(this.password);
       this.router.navigate(['/create-pet']);
     } else {
       alert('Please enter a username and password');

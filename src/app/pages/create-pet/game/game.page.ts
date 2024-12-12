@@ -76,7 +76,7 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     return this.injector.get(PetService);
   }
 
-  ngOnInit() {
+  /*ngOnInit() {
     this.loadGameState();
   const selectedDog = this.petService.getSelectedDog();
   if (selectedDog) {
@@ -91,6 +91,24 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
   this.setInitialActionTimes();
   this.startStatusDecreasing();
   this.updateColorGradually();
+  }*/
+
+  ngOnInit() {
+    this.loadGameState();
+    this.petService.initializePetData().subscribe(selectedDog => {
+      if (selectedDog) {
+        this.selectedDogImage = selectedDog.image;
+        this.petName = selectedDog.name;
+        this.dogStats = selectedDog.stats;
+      } else {
+        console.warn("No selected dog found. Redirecting to pet selection page.");
+        this.router.navigate(['/create-pet']);
+      }
+    });
+
+    this.setInitialActionTimes();
+    this.startStatusDecreasing();
+    this.updateColorGradually();
   }
 
    setInitialActionTimes() {
