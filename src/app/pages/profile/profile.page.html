@@ -30,12 +30,8 @@
 
         <div class="time-picker">
           <ion-item>
-            <ion-label position="stacked">Sleep Time</ion-label>
+            <ion-label position="stacked"></ion-label>
             <ion-datetime presentation="time" displayFormat="HH:mm" [(ngModel)]="sleepTime"></ion-datetime>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Wake Time</ion-label>
-            <ion-datetime presentation="time" displayFormat="HH:mm" [(ngModel)]="wakeTime"></ion-datetime>
           </ion-item>
         </div>
         
@@ -49,14 +45,15 @@
   
 </ion-content>
 
-<!--<ion-modal *ngIf="isModalVisible" #levelUpModal>
+<ion-modal #levelUpModal [isOpen]="isModalVisible" (willDismiss)="onModalDismiss()">
   <ng-template>
-      <ion-button (click)="closeModal()" slot="end" class="modalCloseBtn">X</ion-button>
-      <h2 class="modalTitle">Select a stat to upgrade:</h2>
-      <ion-button (click)="upgradeStat('smart')" class="statBtn">Smart</ion-button>
-      <ion-button (click)="upgradeStat('speed')" class="statBtn">Speed</ion-button>
-      <ion-button (click)="upgradeStat('strength')" class="statBtn">Strength</ion-button>
+    <ion-button (click)="closeModal()" slot="end" class="modalCloseBtn">X</ion-button>
+    <h2 class="modalTitle">Select a stat to upgrade:</h2>
+    <ion-button (click)="upgradeStat('smart')" class="statBtn">Smart</ion-button>
+    <ion-button (click)="upgradeStat('speed')" class="statBtn">Speed</ion-button>
+    <ion-button (click)="upgradeStat('strength')" class="statBtn">Strength</ion-button>
   </ng-template>
-</ion-modal>-->
+</ion-modal>
+
 
 

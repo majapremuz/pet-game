@@ -110,16 +110,17 @@ ion-modal {
 }
 
 ion-item {
-    margin: 1rem;
-    height: 30%;
+    margin: auto;
+    height: 10%;
+    width: 40%;
 }
 
-.time-picker {
+/*.time-picker {
     display: flex;
     justify-items: center;
     align-items: center;
     flex-direction: row;
-}
+}*/
 
 ion-item > ion-label {
     color: white;

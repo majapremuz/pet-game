@@ -10,9 +10,9 @@ ion-content {
 }
 
 form {
-    background-color: white;
+    background-color: #d3ba77;
     border-radius: 50px 50px 0px 0px;
-    box-shadow: 0px -3px 15px 0px rgba(0,0,0,0.75);
+    box-shadow: -2px -5px 0px 10px #bc9763;
     position: absolute;
     bottom: 0;
     height: 60%;
@@ -24,45 +24,79 @@ form {
 }
 
 h1 {
-    color: #815403;
-    font-weight: bolder;
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 1.2rem;
-    margin-left: 2rem;
+    font-size: 2.8rem;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 900;
+    word-spacing: 0.5rem;
+    color: white;
+    text-shadow: 
+    6px 6px 0 #bb9764, 
+    6px -6px 0 #bb9764, 
+    -6px 6px 0 #bb9764, 
+    -6px -6px 0 #bb9764, 
+    6px 0px 0 #bb9764, 
+    0px 6px 0 #bb9764, 
+    -6px 0px 0 #bb9764,
+     0px -6px 0 #bb9764;
 }
 
 div {
-    margin-top: 5rem;
     width: 80%;
 }
 
 label {
-    color: #815403;
-    font-size: 0.8rem;
     position: relative;
-    left: 10px;
     top: 10px;
+    font-size: 1.5rem;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 900;
+    word-spacing: 0.5rem;
+    color: white;
+    text-shadow: 
+    3px 3px 0 #bb9764, 
+    3px -3px 0 #bb9764, 
+    -3px 3px 0 #bb9764, 
+    -3px -3px 0 #bb9764, 
+    3px 0px 0 #bb9764, 
+    0px 3px 0 #bb9764, 
+    -3px 0px 0 #bb9764,
+     0px -3px 0 #bb9764;
 }
 
 input {
-    background-color: white;
+    background-color: #fffaef;
+    border: 7px solid #bc9763;
     width: 100%;
-    height: 16vmin;
-    border-radius: 8px;
+    height: 18vmin;
+    border-radius: 10px;
     margin: 0.5rem 0;
     text-indent: 1rem;
 }
 
 button {
-    background-color: #855603;
+    background-color: #c9ac5f;
     color: white;
-    font-size: 1.1rem;
-    width: 80%;
-    height: 15vmin;
-    margin-top: 2rem;
-    border-radius: 5px;
+    font-family: "Baloo 2", sans-serif;
+    font-size: 2rem;
+    font-weight: bolder;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 0;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+     width: 80%;
+     height: 10vmin;
+     margin-top: 1rem;
+     padding: 2rem 0;
+     border: 6px solid #fffaef;
+     border-radius: 5px;
 }
 
 

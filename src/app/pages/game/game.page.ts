@@ -3,7 +3,7 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
-import { PetService } from 'src/app/services/pet.servise';
+import { UserService } from 'src/app/services/user.service';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
@@ -57,8 +57,7 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
    fatigueNextAction: Date | undefined;
    purityNextAction: Date | undefined;
    attentionNextAction: Date | undefined;
- 
-
+   
   constructor(
     private cdRef: ChangeDetectorRef,
     private router: Router,
@@ -72,30 +71,13 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
   this.audio = new Audio('assets/bark.wav');
   }
 
-  private get petService(): PetService {
-    return this.injector.get(PetService);
+  private get userService(): UserService {
+    return this.injector.get(UserService);
   }
-
-  /*ngOnInit() {
-    this.loadGameState();
-  const selectedDog = this.petService.getSelectedDog();
-  if (selectedDog) {
-    this.selectedDogImage = selectedDog.image;
-    this.petName = selectedDog.name;
-    this.dogStats = selectedDog.stats;
-  } else {
-    console.warn("No selected dog found. Redirecting to pet selection page.");
-    this.router.navigate(['/create-pet']);
-  }
-
-  this.setInitialActionTimes();
-  this.startStatusDecreasing();
-  this.updateColorGradually();
-  }*/
 
   ngOnInit() {
     this.loadGameState();
-    this.petService.initializePetData().subscribe(selectedDog => {
+    this.userService.initializePetData().subscribe(selectedDog => {
       if (selectedDog) {
         this.selectedDogImage = selectedDog.image;
         this.petName = selectedDog.name;
@@ -111,40 +93,63 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     this.updateColorGradually();
   }
 
-   setInitialActionTimes() {
+   /*setInitialActionTimes() {
     const now = new Date();
     this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
     this.fatigueNextAction = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
     this.purityNextAction = new Date(now.getTime() + 18 * 60 * 60 * 1000); // 18 hours
     this.attentionNextAction = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hours
-  }
+  }*/
+
+    setInitialActionTimes() {
+      const now = new Date();
+      this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(1, 2)); // 1-2 minutes
+      this.fatigueNextAction = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes
+      this.purityNextAction = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes
+      this.attentionNextAction = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute
+    }
 
   // Returns a random interval within the given hour range
-  getRandomInterval(minHours: number, maxHours: number): number {
+  /*getRandomInterval(minHours: number, maxHours: number): number {
     const randomHours = Math.floor(Math.random() * (maxHours - minHours + 1) + minHours);
     return randomHours * 60 * 60 * 1000;
-  }
+  }*/
+getRandomInterval(minMinutes: number, maxMinutes: number): number {
+  const randomMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1) + minMinutes);
+  return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
+}
 
-  // Decrease stats gradually at specified intervals
-  startStatusDecreasing() {
-    setInterval(() => {
-      this.decreaseStat('hunger', 10);
-    }, 6 * 60 * 60 * 1000); 
+  /*startStatusDecreasing() {
+    const decrementIntervals: Record<StatName, number> = {
+      hunger: 6 * 60 * 60 * 1000, // 6 hours
+      fatigue: 24 * 60 * 60 * 1000, // 24 hours
+      purity: 18 * 60 * 60 * 1000, // 18 hours
+      attention: 8 * 60 * 60 * 1000, // 8 hours
+    };
   
-    setInterval(() => {
-      this.decreaseStat('fatigue', 10);
-    }, 24 * 60 * 60 * 1000);
+    Object.entries(decrementIntervals).forEach(([stat, interval]) => {
+      setInterval(() => {
+        this.decreaseStat(stat as StatName, 10);
+      }, interval);
+    });
+  }*/
+
+    startStatusDecreasing() {
+      const decrementIntervals: Record<StatName, number> = {
+        hunger: 1 * 60 * 1000, // 1 minute
+        fatigue: 3 * 60 * 1000, // 3 minutes
+        purity: 2 * 60 * 1000, // 2 minutes
+        attention: 1 * 60 * 1000, // 1 minute
+      };
+    
+      Object.entries(decrementIntervals).forEach(([stat, interval]) => {
+        setInterval(() => {
+          this.decreaseStat(stat as StatName, 10); // Decrement by 10 for testing
+        }, interval);
+      });
+    }
   
-    setInterval(() => {
-      this.decreaseStat('purity', 15);
-    }, 18 * 60 * 60 * 1000);
-  
-    setInterval(() => {
-      this.decreaseStat('attention', 5);
-    }, 8 * 60 * 60 * 1000);
-  }
-  
-  decreaseStat(stat: StatName, decrement: number) {
+  /*decreaseStat(stat: StatName, decrement: number) {
     let valueKey: keyof StatProperties;
 
     switch (stat) {
@@ -168,8 +173,14 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     this.checkAlert(stat);
     this.updateContainerHeight(stat);
     this.cdRef.markForCheck();
-}
+}*/
 
+decreaseStat(stat: StatName, decrement: number) {
+  const valueKey = `${stat}Value` as keyof StatProperties;
+  this[valueKey] = Math.max(this[valueKey] - decrement, 0);
+  this.updateStatColorsAndHeight(stat);
+  this.updateCurrentStat(stat);
+}
 
   // Update the next action time based on the stat
   private updateNextActionTime(stat: StatName) {
@@ -190,70 +201,64 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     }
   }
 
-   // Method to handle actions (e.g., feed, sleep) with timing checks and points assignment
-   handleAction(action: StatName) {
-    const now = new Date();
-    let nextActionTime : Date | undefined;
-    let incrementValue: number = 0;
-    
-    clearInterval(this.decreaseInterval);
+handleAction(action: StatName) {
+  const now = new Date();
+  let nextActionTime: Date | undefined;
+  let incrementValue: number = 0;
 
-    switch (action) {
-      case 'hunger':
-        nextActionTime = this.hungerNextAction;
-        incrementValue = 20;
-        break;
-      case 'fatigue':
-        nextActionTime = this.fatigueNextAction;
-        incrementValue = 30;
-        break;
-      case 'purity':
-        nextActionTime = this.purityNextAction;
-        incrementValue = 20;
-        break;
-      case 'attention':
-        nextActionTime = this.attentionNextAction;
-        incrementValue = 25;
-        break;
-    }
+  switch (action) {
+    case 'hunger':
+      nextActionTime = this.hungerNextAction;
+      incrementValue = 20;
+      break;
+    case 'fatigue':
+      nextActionTime = this.fatigueNextAction;
+      incrementValue = 30;
+      break;
+    case 'purity':
+      nextActionTime = this.purityNextAction;
+      incrementValue = 20;
+      break;
+    case 'attention':
+      nextActionTime = this.attentionNextAction;
+      incrementValue = 25;
+      break;
+  }
 
-    //this.increaseStat(action, incrementValue);
-
-   // Ensure nextActionTime is defined before proceeding
   if (nextActionTime) {
     const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000);
+    if (timeDifference <= 10) this.addPoint(1);
+    else if (now < nextActionTime) this.addPoint(0.5);
+    else this.addPoint(0);
 
-    if (timeDifference <= 10) {
-      this.addPoint(1);
-    } else if (now < nextActionTime) {
-      this.addPoint(0.5);
-    } else {
-      this.addPoint(0); 
-    }
-
-    // Update the next interval based on whether the action was early or late
-    const newInterval = this.getRandomInterval(6, 12);
-    nextActionTime.setTime(now.getTime() + newInterval);
-  } else {
-    console.warn(`nextActionTime is undefined for action: ${action}`);
+    nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
   }
 
   this.increaseStat(action, incrementValue);
+  this.updateStatColorsAndHeight(action);
 }
 
- // Increase stat helper method
- increaseStat(stat: StatName, increment: number) {
+increaseStat(stat: StatName, increment: number) {
   const valueKey = `${stat}Value` as keyof StatProperties;
   this[valueKey] = Math.min(this[valueKey] + increment, 100);
-  this.updateNextActionTime(stat);
-  //this.updateStatColors();
-  this.updateContainerHeight(stat);
+  this.updateStatColorsAndHeight(stat);
+  this.updateCurrentStat(stat);
+}
+
+updateStatColorsAndHeight(stat: StatName) {
+  const valueKey = `${stat}Value` as keyof StatProperties;
+  const colorKey = `${stat}Color` as StatColorName;
+
+  const currentValue = this[valueKey] as number;
+  this[colorKey] = this.getStatusColor(currentValue);
+  this.cdRef.markForCheck();
 }
 
 updateCurrentStat(stat: StatName) {
   const valueKey = `${stat}Value` as keyof StatProperties;
+  const colorKey = `${stat}Color` as StatColorName;
   this.currentStatValue = this[valueKey];
-  this.currentStatColor = this.getStatusColor(this[valueKey] as number);
+  this.currentStatColor = this[colorKey];
 }
 
 checkAlert(stat: StatName) {
@@ -278,12 +283,14 @@ checkAlert(stat: StatName) {
     }
   }
 
-  updateContainerHeight(stat: StatName) {
-    const valueKey = `${stat}Value` as keyof StatProperties;
-    const colorKey = `${stat}Color` as StatColorName; // Change here
-    this[colorKey] = this.getStatusColor(this[valueKey] as number);
-    this.cdRef.detectChanges(); 
+updateContainerHeight(stat: StatName) {
+  const valueKey = `${stat}Value` as keyof StatProperties;
+  const statElement = document.getElementById(`${stat}-container`);
+  if (statElement) {
+    statElement.style.height = this.getContainerHeight(this[valueKey] as number);
+  }
 }
+
 
   getContainerHeight(value: number): string {
     return `${value}%`; 
@@ -299,6 +306,12 @@ checkAlert(stat: StatName) {
     }, 2000); // Update every hour
   }
 
+  syncCurrentStat(stat: StatName) {
+    const valueKey = `${stat}Value` as keyof StatProperties;
+    this.currentStatValue = this[valueKey] as number;
+    this.currentStatColor = this.getStatusColor(this.currentStatValue);
+  }
+  
   bath() {
     this.handleAction('purity');
     this.updateCurrentStat('purity');
@@ -350,9 +363,9 @@ checkAlert(stat: StatName) {
   checkLevelUp() {
     if (this.points >= this.pointsNeeded) {
       this.level += 1;
-      this.points = 0; // Reset points or carry over excess points if needed
-      this.pointsNeeded = Math.floor(this.pointsNeeded * 1.1); // Increase points needed for the next level by 10%
-  
+      this.points = 0;
+      this.pointsNeeded = Math.floor(this.pointsNeeded * 1.1);
+      console.log('Navigating with levelUp:', this.level);
       // Navigate to profile page and pass a flag to trigger the level-up modal
       this.router.navigate(['/profile'], { state: { levelUp: true } });
     }

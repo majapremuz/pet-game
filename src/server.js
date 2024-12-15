@@ -15,37 +15,6 @@ server.use(cors({
 server.use(bodyParser.json());
 server.use(bodyParser.urlencoded({ extended: false }));
 
-// Custom Login Route
-server.post('/users/login', (req, res) => {
-  console.log('Custom /users/login route hit');
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.status(400).json({ success: false, message: 'Missing username or password' });
-  }
-
-  const hashedUsername = SHA1(username).toString();
-  const hashedPassword = SHA1(password).toString();
-
-  const users = router.db.get('users').value();
-  const user = users.find(
-    (u) => u.username === hashedUsername && u.password === hashedPassword
-  );
-
-  if (user) {
-    res.status(200).json({
-      success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        petStats: user.petStats,
-      },
-    });
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid username or password' });
-  }
-});
-
 // JSON Server Router
 server.use(router);
 

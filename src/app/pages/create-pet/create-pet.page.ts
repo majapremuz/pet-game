@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
-import { PetService } from 'src/app/services/pet.servise';
 import { UserService } from 'src/app/services/user.service';
 import * as SHA1 from 'crypto-js/sha1';
 
@@ -30,10 +29,6 @@ export class CreatePetPage implements OnInit {
     private injector: Injector
   ) { }
 
-  private get petService(): PetService {
-    return this.injector.get(PetService);
-  }
-  
   private get userService(): UserService {
     return this.injector.get(UserService);
   }
@@ -89,7 +84,7 @@ export class CreatePetPage implements OnInit {
       return;
     }
   
-    const profileExists = this.userService.profileExists();
+    const profileExists = !!this.userService.getUsername();
     if (!profileExists) {
       this.router.navigate(['/create-profile']);
       return;
@@ -98,6 +93,13 @@ export class CreatePetPage implements OnInit {
     const alert = await this.alertController.create({
       message: 'Are you sure you want to pick this dog?',
       cssClass: 'alert',
+      inputs: [
+        {
+          name: 'petName',
+          type: 'text',
+          placeholder: 'Enter pet name',
+        },
+      ],
       buttons: [
         {
           text: 'No',
@@ -105,12 +107,15 @@ export class CreatePetPage implements OnInit {
         },
         {
           text: 'Yes',
-          handler: async () => {
-            this.showInput = true;
+          handler: async (data) => {
+            const petName = data.petName?.trim();
+            if (!petName) {
+              console.warn('Pet name is empty.');
+              return;
+            }
   
-            // Default dog stats and image
-            const dogStats: any = { name: this.petName, smart: 0, speed: 0, strength: 0, image: '' };
-  
+            // Prepare dog stats based on the selected slide
+            const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
             switch (this.currentSlideIndex) {
               case 0:
                 dogStats.image = 'assets/dog 1.png';
@@ -132,44 +137,36 @@ export class CreatePetPage implements OnInit {
                 break;
             }
   
-            if (this.petName.trim()) {
-              dogStats.name = this.petName;
+            const hashedUsername = SHA1(this.userService.getUsername()).toString();
+            const hashedPassword = SHA1(this.userService.getUserPassword()).toString();
   
-              const username = this.userService.getUsername();
-              const password = this.userService.getUserPassword();
+            if (this.playMode === 'online') {
+              const pushToken = 'pushToken123'; // Replace with actual push token
+              const onlineData = {
+                username: hashedUsername,
+                password: hashedPassword,
+                pushToken: pushToken,
+                petStats: dogStats,
+              };
   
-              // Hash the username and password
-              const hashedUsername = SHA1(username).toString();
-              const hashedPassword = SHA1(password).toString();
-  
-              if (this.playMode === 'online') {
-                const pushToken = 'pushToken123'; // Replace with actual push token
-  
-                const onlineData = {
-                  username: hashedUsername,
-                  password: hashedPassword,
-                  pushToken: pushToken,
-                  petStats: dogStats,
-                };
-  
-                this.userService
-                  .saveOnlineData(onlineData)
-                  .subscribe(
-                    (response) => {
-                      console.log('Online data saved:', response);
-                      this.petService.setSelectedDog(dogStats);
-                      this.router.navigate(['/game']);
-                    },
-                    (error) => console.error('Error saving online data:', error)
-                  );
-              } else if (this.playMode === 'offline') {
-                this.userService.saveOfflineData(hashedUsername);
-  
-                this.petService.setSelectedDog(dogStats); 
-                this.router.navigate(['/game']);
-              }
+              this.userService.saveOnlineData(onlineData).subscribe(
+                (response) => {
+                  console.log('Online data saved:', response);
+                  this.userService.setSelectedDog(dogStats);
+                  this.router.navigate(['/game']);
+                },
+                (error) => {
+                  console.error('Error saving online data:', error);
+                }
+              );
             } else {
-              console.warn('Pet name is empty or not set.');
+              // Save offline data
+              this.userService.saveOfflineData({
+                username: hashedUsername,
+                petStats: dogStats,
+              });
+              this.userService.setSelectedDog(dogStats);
+              this.router.navigate(['/game']);
             }
           },
         },
@@ -179,5 +176,4 @@ export class CreatePetPage implements OnInit {
     await alert.present();
   }
   
-
 }

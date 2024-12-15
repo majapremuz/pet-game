@@ -16,12 +16,11 @@ ion-content {
 
   .dog {
     position: relative;
-
   }
 
   .dog_img {
-    height: 70vmin;
-    width: 70vmin;
+    height: 90vmin;
+    width: 90vmin;
     transition: transform 0.3s ease-in-out;
   }
 
@@ -37,7 +36,7 @@ ion-content {
 
   .heart_img {
     position: absolute;
-    left: 70%;
+    left: 50%;
     transform: translate(-50%, 50%);
     width: 10%;
     opacity: 0;
@@ -89,7 +88,7 @@ ion-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: -0.8rem;
+    margin: -0.6rem;
   }
 
   .topBtn img {
@@ -177,6 +176,7 @@ p {
   border-radius: 10px;
   z-index: 9999;
   background-color: transparent;
+  margin-top: 8rem;
 }
 
 .status-bar {

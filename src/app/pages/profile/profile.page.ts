@@ -3,10 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, IonModal } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute  } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
-import { PetService } from 'src/app/services/pet.servise';
-//import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -30,40 +28,18 @@ export class ProfilePage implements OnInit, AfterViewInit {
   currentPassword: string = '';
   newPassword: string = '';
   isModalVisible = false;
-
-
+  
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private injector: Injector,
     private cdRef: ChangeDetectorRef,
-    private alertController: AlertController,
-    //private authService: AuthService
+    private alertController: AlertController
   ) {}
 
-  private get petService(): PetService {
-    return this.injector.get(PetService);
-  }
-  
   private get userService(): UserService {
     return this.injector.get(UserService);
   }
-
-  /*ngOnInit() {
-    this.username = this.userService.getUsername();
-    
-    // Check if dog data exists in localStorage and restore
-    const selectedDog = this.petService.getSelectedDog();
-    if (selectedDog) {
-      this.petName = selectedDog.name;
-      console.log(this.petName)
-      this.dogStats = selectedDog.stats;  // Restore dog stats from localStorage
-    } else {
-      console.warn("No dog found in localStorage.");
-    }
-  
-    this.sleepTime = this.userService.getSleepTime() || '';
-    this.wakeTime = this.userService.getWakeTime() || '';
-  }*/
 
     ngOnInit() {
       const username = this.userService.getUsername();
@@ -71,68 +47,75 @@ export class ProfilePage implements OnInit, AfterViewInit {
         this.router.navigateByUrl('/login');
         return;
       }
-    
+  
       this.username = username;
       this.userId = this.userService.getUserId();
       console.log("User ID:", this.userId);
-    
-      this.petService.getPetStatsByUserId(this.userId).subscribe((petStats) => {
+  
+      // Fetch pet stats based on the user ID
+      this.userService.getPetStatsByUserId(this.userId).subscribe((petStats) => {
         if (petStats) {
           this.petName = petStats.name;
           this.petSmart = petStats.smart;
           this.petSpeed = petStats.speed;
-          this.petStrength = petStats.strength; 
+          this.petStrength = petStats.strength;
+
+          console.log('Pet stats fetched:', {
+            name: this.petName,
+            smart: this.petSmart,
+            speed: this.petSpeed,
+            strength: this.petStrength,
+          });
+
+          if (this.router.getCurrentNavigation()?.extras.state?.['levelUp']) {
+            this.openModal();
+          }
         } else {
           console.warn('No pet stats found for this user.');
         }
       });
-      this.sleepTime = this.userService.getSleepTime() || '';
-      this.wakeTime = this.userService.getWakeTime() || '';
-    }
-    
-              
-  ngAfterViewInit() {
-    console.log('LevelUpModal:', this.levelUpModal);
-    if (this.levelUpModal) {
-      const navigation = this.router.getCurrentNavigation();
-      if (navigation?.extras.state?.['levelUp'] && this.petSmart && this.petSpeed && this.petStrength) {
-        this.openModal();
-      } else {
-        console.warn('Modal is not initialized or levelUp flag not set.');
-      }
-    } else {
-      console.error('Modal reference not found!');
-    }
-  }
   
+      this.sleepTime = this.userService.getSleepTime() || '';
+    }
+  
+              
+    ngAfterViewInit() {
+      const navigation = this.router.getCurrentNavigation();
+      if (navigation?.extras.state?.['levelUp']) {
+        this.isModalVisible = true;
+        this.openModal();
+      }
+    }
+      
   saveSleepSchedule() {
     this.userService.setSleepTime(this.sleepTime);
-    this.userService.setWakeTime(this.wakeTime);
-    console.log(`Sleep schedule saved: Sleep - ${this.sleepTime}, Wake - ${this.wakeTime}`);
+    console.log(`Sleep schedule saved: Sleep - ${this.sleepTime}`);
   }
   
   
-
   openModal() {
-    this.isModalVisible = true;
-    this.levelUpModal?.present().catch(error => console.error('Error presenting modal:', error));
-  }
-
-  closeModal() {
-    this.isModalVisible = false;
-    this.levelUpModal?.dismiss().catch(error => console.error('Error dismissing modal:', error));
-  }
-
-  /*upgradeStat(stat: string) {
-    if (this.dogStats && this.dogStats.hasOwnProperty(stat)) {
-      this.dogStats[stat] = (this.dogStats[stat] || 0) + 1;
-      this.petService.updateDogStats(this.dogStats); 
-      console.log(`${stat} upgraded to:`, this.dogStats[stat]);
-    } else {
-      console.warn('Stat not found:', stat);
+    if (!this.levelUpModal) {
+      console.error('Modal is not initialized yet!');
+      return;
     }
-    this.closeModal();
-  }*/
+    this.isModalVisible = true;
+    this.levelUpModal.present().catch((error) =>
+      console.error('Error presenting modal:', error)
+    );
+  }
+  
+  closeModal() {
+    if (this.levelUpModal) {
+      this.levelUpModal.dismiss().catch((error) =>
+        console.error('Error dismissing modal:', error)
+      );
+    }
+    this.isModalVisible = false;
+  }
+
+  onModalDismiss() {
+    this.isModalVisible = false;
+  }
 
     upgradeStat(stat: string) {
       switch (stat) {
@@ -151,7 +134,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
       }
     
       // Save the updated stats
-      this.petService.updatePetStats({
+      this.userService.updatePetStats({
         name: this.petName,
         smart: this.petSmart,
         speed: this.petSpeed,
@@ -191,16 +174,16 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
     logOut() {
       this.userService.clearUserData();
-      this.petService.clearPetData();
+      this.userService.clearPetData();
       this.router.navigateByUrl('/home');
     }
     
     onLogInSuccess() {
       this.userService.initializeUserData();
-      this.petService.initializePetData();
-      console.log("pet service:", this.petService.initializePetData())
+      this.userService.initializePetData();
+      console.log("pet service:", this.userService.initializePetData())
     
-      const selectedDog = this.petService.getSelectedDog();
+      const selectedDog = this.userService.getSelectedDog();
       if (!selectedDog) {
         console.log('No selected dog found. Redirecting to pet selection page.');
         this.router.navigateByUrl('/pet-selection');
@@ -213,8 +196,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
     loadPetStats(userId: string) {
       // Fetch pet stats based on the user ID
-      this.petService.getPetStatsByUserId(userId).subscribe((petStats) => {
-        this.petService.setSelectedDog(petStats);
+      this.userService.getPetStatsByUserId(userId).subscribe((petStats) => {
+        this.userService.setSelectedDog(petStats);
         console.log(petStats)
       });
     }
@@ -243,15 +226,15 @@ export class ProfilePage implements OnInit, AfterViewInit {
   
     await alert.present();
   }
-
+  
   deleteProfile() {
     const userId = this.userService.getUserId();
     if (!userId) return;
-
+  
     this.userService.deleteProfile(userId).subscribe({
       next: () => {
         this.userService.logOut();
-        this.petService.clearPetData();
+        this.userService.clearPetData();
         this.router.navigateByUrl('/home');
       },
       error: (err) => console.error('Error deleting profile:', err),

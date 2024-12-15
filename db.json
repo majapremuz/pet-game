@@ -1,30 +1,13 @@
 {
   "users": [
     {
-      "id": "a60e",
-      "username": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
-      "password": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
-      "pushToken": "pushToken123",
       "petStats": {
-        "name": "Bobi",
-        "smart": 10,
+        "name": "fang",
+        "smart": 11,
         "speed": 5,
-        "strength": 5,
-        "image": "assets/dog 1.png"
-      }
-    },
-    {
-      "id": "6283",
-      "username": "c4033bff94b567a190e33faa551f411caef444f2",
-      "password": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-      "pushToken": "pushToken123",
-      "petStats": {
-        "name": "max",
-        "smart": 5,
-        "speed": 5,
-        "strength": 10,
-        "image": "assets/dog 3.png"
-      }
+        "strength": 5
+      },
+      "id": "25c9"
     }
   ]
 }

@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
-import { PetService } from 'src/app/services/pet.servise';
 
 @Component({
   selector: 'app-login',
@@ -26,10 +25,6 @@ export class LoginPage implements OnInit {
     return this.injector.get(UserService);
   }
 
-  private get petService(): PetService {
-    return this.injector.get(PetService);
-  }
-
   ngOnInit() {
   }
 
@@ -48,7 +43,7 @@ export class LoginPage implements OnInit {
           console.log("Login successful. Welcome, ", user.username);
           this.userService.setUsername(user.username);
           this.userService.setUserId(user.id);
-          this.router.navigateByUrl('/profile');
+          this.router.navigateByUrl('/game');
         } else {
           alert('Invalid username or password.');
         }

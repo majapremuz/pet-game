@@ -12,7 +12,7 @@ export const routes: Routes = [
   },
   {
     path: 'game',
-    loadComponent: () => import('./pages/create-pet/game/game.page').then( m => m.GamePage)
+    loadComponent: () => import('./pages/game/game.page').then( m => m.GamePage)
   },
   {
     path: 'login',
