@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import * as SHA1 from 'crypto-js/sha1';
@@ -14,8 +15,11 @@ export class UserService {
   private userId: string = '';
   private selectedDog: any = null;
 
-  constructor(private http: HttpClient) {}
-
+  constructor(
+    private router: Router,
+    private http: HttpClient
+  ) {}
+  
   // User-related methods
   setUsername(name: string) {
     this.username = name;
@@ -42,25 +46,82 @@ export class UserService {
     return this.password;
   }
 
-  isLoggedIn(): boolean {
+  /*isLoggedIn(): boolean {
     return this.username.length > 0;
-  }
+  }*/
 
-  login(username: string, password: string): Observable<any> {
+    isLoggedIn(): boolean {
+      if (!this.username || !this.userId) {
+        this.initializeUserData();
+      }
+      return !!this.username && !!this.userId;
+    }
+    
+    
+
+  /*login(username: string, password: string): Observable<any> {
     const hashedUsername = SHA1(username).toString();
     const hashedPassword = SHA1(password).toString();
     const url = `${this.apiUrl}?username=${hashedUsername}&password=${hashedPassword}`;
     return this.http.get<any[]>(url).pipe(
       tap((response) => {
         if (response.length > 0) {
+          const user = response[0];
           console.log('Login successful:', response[0]);
         } else {
           console.log('Login failed: Invalid credentials');
         }
       })
     );
-  }
+  }*/
 
+    /*login(username: string, password: string): Observable<any> {
+      const hashedUsername = SHA1(username).toString();
+      const hashedPassword = SHA1(password).toString();
+      const url = `${this.apiUrl}?username=${hashedUsername}&password=${hashedPassword}`;
+    
+      return this.http.get<any[]>(url).pipe(
+        map(users => {
+          if (users.length > 0) {
+            const user = users[0];
+            localStorage.setItem('authUser', JSON.stringify(user));
+            this.setUsername(user.username);
+            this.setUserId(user.id);
+            console.log('Login successful:', user);
+            return user;
+          } else {
+            throw new Error('Invalid credentials');
+          }
+        })
+      );
+    }*/
+
+      login(username: string, password: string): Observable<any> {
+        const hashedUsername = SHA1(username).toString();
+        const hashedPassword = SHA1(password).toString();
+        const url = `${this.apiUrl}?username=${hashedUsername}&password=${hashedPassword}`;
+        
+        return this.http.get<any[]>(url).pipe(
+          map(users => {
+            if (users.length > 0) {
+              const user = users[0];
+              localStorage.setItem('authUser', JSON.stringify(user));
+              this.setUsername(user.username);
+              this.setUserId(user.id);
+              console.log('Login successful:', user);
+      
+              // Redirect user to home or another page after login
+              this.router.navigate(['/game']);  // Adjust the route as needed
+              return user;
+            } else {
+              throw new Error('Invalid credentials');
+            }
+          })
+        );
+      }
+      
+    
+    
   saveOnlineData(data: any): Observable<any> {
     return this.http.post(this.apiUrl, data);
   }
@@ -85,11 +146,19 @@ export class UserService {
     console.log('User data cleared from service.');
   }
 
-  logOut(): void {
+  /*logOut(): void {
     this.username = '';
     this.userId = '';
     console.log('User logged out and data cleared.');
-  }
+  }*/
+
+    logOut(): void {
+      localStorage.removeItem('authUser');
+      this.clearUserData();
+      this.clearPetData();
+      this.router.navigateByUrl('/home');
+    }
+    
 
   // Pet-related methods
   setSelectedDog(dogData: any) {
@@ -139,18 +208,18 @@ export class UserService {
     }
     
     
-  getPetStatsByUserId(userId: string): Observable<any> {
-    const url = `${this.apiUrl}/${userId}`;
-    return this.http.get<any>(url).pipe(
-      map(user => user.petStats)
-    );
-  }
-
-  updatePetStats(petStats: { name: string; smart: number; speed: number; strength: number }): Observable<any> {
-    const url = `${this.apiUrl}/${this.userId}`;
-    return this.http.put(url, { petStats });
-  }
-
+    getPetStatsByUserId(userId: string): Observable<any> {
+      const url = `${this.apiUrl}/${userId}`;
+      return this.http.get<any>(url).pipe(
+        map(user => user.petStats)
+      );
+    }
+    
+    updatePetStats(petStats: { name: string; smart: number; speed: number; strength: number }): Observable<any> {
+      const url = `${this.apiUrl}/${this.userId}`;
+      return this.http.put(url, { petStats });
+    }
+    
   clearPetData() {
     this.selectedDog = null;
   }
@@ -182,9 +251,30 @@ export class UserService {
     return this.http.post<any>('/api/change-password', payload);
   }
 
-  initializeUserData() {
+  /*initializeUserData() {
     this.username = localStorage.getItem('username') || '';
     this.userId = localStorage.getItem('userId') || '';
     console.log('User data initialized:', this.username, this.userId);
-  }
+  }*/
+
+    initializeUserData() {
+      const user = localStorage.getItem('authUser');
+      console.log(localStorage.getItem('authUser'));
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        this.username = parsedUser.username;
+        this.userId = parsedUser.id;
+        console.log('User data initialized:', this.username, this.userId);
+      } else {
+        console.log('No user data found in local storage.');
+      }
+    }
+    
+
+    clearSessionData() {
+      localStorage.removeItem('authToken');
+    }
 }
+
+//authUser:"{"id":"f552","username":"a94a8fe5ccb19ba61c4c0873d391e987982fbbd3","password":"a94a8fe5ccb19ba61c4c0873d391e987982fbbd3","pushToken":"pushToken123","petStats":{"name":"boris","smart":10,"speed":5,"strength":5,"image":"assets/dog 1.png"}}"
+//authUser:"{"petStats":{"name":"boris","smart":10,"speed":6,"strength":5},"id":"8bcc"}"

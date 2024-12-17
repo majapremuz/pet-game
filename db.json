@@ -2,12 +2,12 @@
   "users": [
     {
       "petStats": {
-        "name": "fang",
-        "smart": 11,
-        "speed": 5,
-        "strength": 5
+        "name": "bobi",
+        "smart": 12,
+        "speed": 25,
+        "strength": 6
       },
-      "id": "25c9"
+      "id": "88a2"
     }
   ]
 }

@@ -25,6 +25,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   sleepTime: string = '';
   wakeTime: string = '';
   isPasswordFieldVisible: boolean = false;
+  isSleepFieldVisible: boolean = false;
   currentPassword: string = '';
   newPassword: string = '';
   isModalVisible = false;
@@ -153,6 +154,12 @@ export class ProfilePage implements OnInit, AfterViewInit {
     this.cdRef.detectChanges();
   }
 
+  toggleSleepField() {
+    this.isSleepFieldVisible = !this.isSleepFieldVisible;
+    console.log('Toggling sleep field visibility');
+    this.cdRef.detectChanges();
+  }
+
   /*changePassword() {
     if (!this.currentPassword || !this.newPassword) {
       console.warn('Both fields are required.');
@@ -172,12 +179,35 @@ export class ProfilePage implements OnInit, AfterViewInit {
     );
   }*/
 
-    logOut() {
-      this.userService.clearUserData();
-      this.userService.clearPetData();
-      this.router.navigateByUrl('/home');
+    async logOut() {
+      const alert = await this.alertController.create({
+        header: 'Confirm Logout',
+        message: 'Are you sure you want to log out?',
+        buttons: [
+          {
+            text: 'No',
+            role: 'cancel',
+          },
+          {
+            text: 'Yes',
+            handler: () => {
+              this.userService.clearUserData();
+              this.userService.clearPetData();
+              console.log('Logging out, navigating to home');
+              this.router.navigateByUrl('/home').then(() => {
+                console.log('Navigated to home');
+              });
+              console.log('User has been logged out.');
+            },
+          },
+        ],
+      });
+    
+      await alert.present();
     }
     
+    
+        
     onLogInSuccess() {
       this.userService.initializeUserData();
       this.userService.initializePetData();

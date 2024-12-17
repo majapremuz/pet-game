@@ -1,7 +1,7 @@
 import { Component, OnInit, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 
@@ -18,42 +18,64 @@ export class LoginPage implements OnInit {
 
   constructor(
     private router: Router,
-    private injector: Injector
-  ) { }
+    private injector: Injector,
+    private loadingController: LoadingController,
+    private toastController: ToastController
+  ) {}
 
   private get userService(): UserService {
     return this.injector.get(UserService);
   }
 
   ngOnInit() {
+    this.userService.initializeUserData();
   }
 
-  onLogin() {
-    if (!this.username || !this.password) {
-      alert('Please enter both username and password.');
+  async onLogin() {
+    const trimmedUsername = this.username.trim();
+    const trimmedPassword = this.password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
+      this.showToast('Please enter both username and password.', 'warning');
       return;
     }
-  
-    console.log('Logging in with:', this.username, this.password);
-  
-    this.userService.login(this.username, this.password).subscribe({
-      next: (response) => {
-        if (response.length > 0) {
-          const user = response[0];
-          console.log("Login successful. Welcome, ", user.username);
+
+    const loading = await this.loadingController.create({
+      message: 'Logging in...',
+      spinner: 'crescent',
+      duration: 5000
+    });
+    await loading.present();
+
+    this.userService.login(trimmedUsername, trimmedPassword).subscribe({
+      next: async (response) => {
+        await loading.dismiss();
+
+        if (response) {
+          const user = response;
           this.userService.setUsername(user.username);
           this.userService.setUserId(user.id);
           this.router.navigateByUrl('/game');
+          this.showToast(`Welcome!`, 'success');
         } else {
-          alert('Invalid username or password.');
+          this.showToast('Invalid username or password.', 'danger');
         }
       },
-      error: (error) => {
+      error: async (error) => {
+        await loading.dismiss();
         console.error('Login error:', error);
-        alert('Server error. Please try again later.');
+        this.showToast('Server error. Please try again later.', 'danger');
       }
     });
   }
-  
-  
+
+  private async showToast(message: string, color: string) {
+    const toast = await this.toastController.create({
+      message,
+      color,
+      duration: 3000,
+      position: 'top'
+    });
+    await toast.present();
   }
+}

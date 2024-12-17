@@ -1,20 +1,8 @@
 <ion-content [fullscreen]="true">
     <div class="profile">
       <h1>PROFILE</h1>
-    <p class="pet-name">{{ petName }}</p>
+    <p class="pet-name">Pet name: {{ petName }}</p>
 
-    <div class="password-field" *ngIf="isPasswordFieldVisible">
-      <ion-label>Current password</ion-label>
-      <ion-input [(ngModel)]="currentPassword" type="password" required></ion-input>
-
-      <ion-label>New password</ion-label>
-      <ion-input [(ngModel)]="newPassword" type="password" required></ion-input>
-
-      <button>Confirm</button>
-      <!--(click)="changePassword()"-->
-    </div>
-
-    <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>
       <div class="stats-conteiner">
       <h2>STATS</h2>
       <p>Smart: {{ petSmart }}</p>
@@ -22,7 +10,20 @@
       <p>Strength: {{ petStrength }}</p>
       </div>
 
-      <div class="sleep-time">
+      <div class="password-field" *ngIf="isPasswordFieldVisible">
+        <ion-label>Current password</ion-label>
+        <ion-input [(ngModel)]="currentPassword" type="password" required></ion-input>
+  
+        <ion-label>New password</ion-label>
+        <ion-input [(ngModel)]="newPassword" type="password" required></ion-input>
+  
+        <button>Confirm</button>
+        <!--(click)="changePassword()"-->
+      </div>
+  
+      <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>
+
+      <div class="sleep-time" *ngIf="isSleepFieldVisible">
         <h2 class="sleep-title">
           Adjust notifications
           <p>Its important that everyone gets at least 8 hours sleep.</p>
@@ -37,9 +38,11 @@
         
         <button (click)="saveSleepSchedule()">SAVE</button>
       </div>
+
+      <button (click)="toggleSleepField()" class="sleepBtn">SET NOTIFICATIONS TIME</button>
       
       <button (click)="returnToGame()">RETURN TO GAME</button>
-      <button (click)="logOut()">LOG OUT</button>
+      <button (click)="logOut()" class="logOutBtn">LOG OUT</button>
       <button (click)="deleteProfile()" class="deleteBtn">DELETE PROFILE</button>
     </div>
   

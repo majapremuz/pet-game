@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { UserService } from 'src/app/services/user.service';
 import * as SHA1 from 'crypto-js/sha1';
+import { PushNotifications, Token, PermissionStatus } from '@capacitor/push-notifications';
 
 @Component({
   selector: 'app-create-pet',
@@ -27,7 +28,7 @@ export class CreatePetPage implements OnInit {
     private router: Router,
     private alertController: AlertController,
     private injector: Injector
-  ) { }
+  ) {}
 
   private get userService(): UserService {
     return this.injector.get(UserService);
@@ -38,6 +39,38 @@ export class CreatePetPage implements OnInit {
     this.promptPlayMode();
   }
 
+  async getPushToken(): Promise<string | null> {
+    try {
+      // Request push notification permissions
+      const permissionStatus: PermissionStatus = await PushNotifications.requestPermissions();
+      if (permissionStatus.receive === 'granted') {
+        console.log('Push Notifications permission granted.');
+
+        // Register for push notifications
+        await PushNotifications.register();
+
+        // Retrieve the token
+        return new Promise((resolve) => {
+          PushNotifications.addListener('registration', (token: Token) => {
+            console.log('Push registration success:', token.value);
+            resolve(token.value);
+          });
+
+          PushNotifications.addListener('registrationError', (error) => {
+            console.error('Push registration error:', error);
+            resolve(null);
+          });
+        });
+      } else {
+        console.warn('Push Notifications permission denied.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error during push token retrieval:', error);
+      return null;
+    }
+  }
+
   async promptPlayMode() {
     const alert = await this.alertController.create({
       message: 'Želite li igrati online ili offline?',
@@ -45,17 +78,21 @@ export class CreatePetPage implements OnInit {
       buttons: [
         {
           text: 'Online',
-          handler: () => {
+          handler: async () => {
             this.playMode = 'online';
-          }
+            const token = await this.getPushToken();
+            if (!token) {
+              console.warn('Push token not received.');
+            }
+          },
         },
         {
           text: 'Offline',
           handler: () => {
             this.playMode = 'offline';
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -83,13 +120,13 @@ export class CreatePetPage implements OnInit {
       await this.promptPlayMode();
       return;
     }
-  
+
     const profileExists = !!this.userService.getUsername();
     if (!profileExists) {
       this.router.navigate(['/create-profile']);
       return;
     }
-  
+
     const alert = await this.alertController.create({
       message: 'Are you sure you want to pick this dog?',
       cssClass: 'alert',
@@ -113,8 +150,7 @@ export class CreatePetPage implements OnInit {
               console.warn('Pet name is empty.');
               return;
             }
-  
-            // Prepare dog stats based on the selected slide
+
             const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
             switch (this.currentSlideIndex) {
               case 0:
@@ -136,19 +172,19 @@ export class CreatePetPage implements OnInit {
                 dogStats.strength = 10;
                 break;
             }
-  
+
             const hashedUsername = SHA1(this.userService.getUsername()).toString();
             const hashedPassword = SHA1(this.userService.getUserPassword()).toString();
-  
+
             if (this.playMode === 'online') {
-              const pushToken = 'pushToken123'; // Replace with actual push token
+              const pushToken = await this.getPushToken();
               const onlineData = {
                 username: hashedUsername,
                 password: hashedPassword,
                 pushToken: pushToken,
                 petStats: dogStats,
               };
-  
+
               this.userService.saveOnlineData(onlineData).subscribe(
                 (response) => {
                   console.log('Online data saved:', response);
@@ -160,7 +196,6 @@ export class CreatePetPage implements OnInit {
                 }
               );
             } else {
-              // Save offline data
               this.userService.saveOfflineData({
                 username: hashedUsername,
                 petStats: dogStats,
@@ -172,8 +207,7 @@ export class CreatePetPage implements OnInit {
         },
       ],
     });
-  
+
     await alert.present();
   }
-  
 }

@@ -7,13 +7,13 @@
         <img src="assets/vs.png" alt="vs icon">
       </button>
       <button class="topBtn">
-        <img src="assets/hide.png" alt="hide icon">
+        <img src="assets/hide.png" alt="hide icon" (click)="increaseSmart()">
       </button>
       <button class="topBtn">
-        <img src="assets/ball.png" alt="ball icon">
+        <img src="assets/ball.png" alt="ball icon" (click)="increaseSpeed()">
       </button>
       <button class="topBtn">
-        <img src="assets/burried bone.png" alt="burried icon">
+        <img src="assets/burried bone.png" alt="burried icon" (click)="increaseStrength()">
       </button>
       <button class="topBtn" (click)="profile()">
         <img src="assets/pokal.png" alt="pokal icon">
@@ -23,7 +23,6 @@
     <div class="level-bar">
       <p>LV: {{ level }}</p>
       <div class="level-progress-bar" [ngStyle]="{'width': progressBarWidth + '%'}"></div>
-      <h1>{{ petName }}</h1>
     </div>
 
       <div class="stats">

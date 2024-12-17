@@ -109,6 +109,12 @@ ion-modal {
     border: 5px solid white;
 }
 
+.sleepBtn {
+    background-color: rgb(100, 164, 3);
+    border: 3px solid white;
+    text-shadow: none;
+}
+
 ion-item {
     margin: auto;
     height: 10%;
@@ -136,7 +142,7 @@ ion-item > ion-label {
 
 //password change
 .passwordBtn {
-    width: 60%;
+    width: 100%;
     background-color: rgb(102, 102, 246);
     border: 3px solid white;
     text-shadow: none;
@@ -158,6 +164,15 @@ ion-input {
     border-radius: 5px;
 }
 
+.logOutBtn {
+    background-color: rgb(235, 235, 22);
+    border: 3px solid white;
+    text-shadow: none;
+    color: black;
+}
+
 .deleteBtn {
     background-color: rgb(244, 60, 60);
+    border: 3px solid white;
+    text-shadow: none;
 }

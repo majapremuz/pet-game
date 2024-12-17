@@ -44,6 +44,9 @@ export class GamePage implements StatProperties  {
   isJumping: boolean = false;
   audio: HTMLAudioElement;
   petName: string = '';
+  petSmart: number = 0;
+  petSpeed: number = 0;
+  petStrength: number = 0;
   selectedDogImage: string = '';
   dogStats: any = {};
   showHeart: boolean = false;
@@ -81,7 +84,10 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
       if (selectedDog) {
         this.selectedDogImage = selectedDog.image;
         this.petName = selectedDog.name;
-        this.dogStats = selectedDog.stats;
+          this.petSmart = selectedDog.smart;
+          this.petSpeed = selectedDog.speed;
+          this.petStrength = selectedDog.strength;
+          console.log("dog stats: ", this.petSmart, this.petSpeed, this.petStrength)
       } else {
         console.warn("No selected dog found. Redirecting to pet selection page.");
         this.router.navigate(['/create-pet']);
@@ -311,6 +317,37 @@ updateContainerHeight(stat: StatName) {
     this.currentStatValue = this[valueKey] as number;
     this.currentStatColor = this.getStatusColor(this.currentStatValue);
   }
+
+  increaseSmart() {
+    this.petSmart = Number(this.petSmart) + 1;
+    console.log("smart: ", this.petSmart);
+    this.savePetStats();
+}
+
+increaseSpeed() {
+  this.petSpeed = Number(this.petSpeed) + 1;
+    console.log("speed: ", this.petSpeed);
+    this.savePetStats();
+}
+
+increaseStrength() {
+  this.petStrength = Number(this.petStrength) + 1;
+    console.log("strength: ", this.petStrength);
+    this.savePetStats();
+}
+
+  // Save the updated stats to the user service
+savePetStats() {
+  this.userService.updatePetStats({
+      name: this.petName,
+      smart: this.petSmart,
+      speed: this.petSpeed,
+      strength: this.petStrength,
+  }).subscribe(
+      () => console.log(`Pet stats updated successfully.`),
+      (error) => console.error("Failed to update pet stats:", error)
+  );
+}
   
   bath() {
     this.handleAction('purity');
