@@ -160,7 +160,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     this.cdRef.detectChanges();
   }
 
-  /*changePassword() {
+  changePassword() {
     if (!this.currentPassword || !this.newPassword) {
       console.warn('Both fields are required.');
       return;
@@ -168,7 +168,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
     this.userService.changePassword(this.currentPassword, this.newPassword).subscribe(
       response => {
         console.log('Password changed successfully:', response);
-      
         this.currentPassword = '';
         this.newPassword = '';
         this.isPasswordFieldVisible = false;
@@ -177,7 +176,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
         console.error('Failed to change password:', error);
       }
     );
-  }*/
+  }
+  
 
     async logOut() {
       const alert = await this.alertController.create({

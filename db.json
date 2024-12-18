@@ -1,13 +1,17 @@
 {
   "users": [
     {
+      "id": "ebb9",
+      "username": "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3",
+      "password": "test",
+      "pushToken": null,
       "petStats": {
-        "name": "bobi",
-        "smart": 12,
-        "speed": 25,
-        "strength": 6
-      },
-      "id": "88a2"
+        "name": "rex",
+        "smart": 10,
+        "speed": 5,
+        "strength": 5,
+        "image": "assets/dog 1.png"
+      }
     }
   ]
 }

@@ -17,8 +17,8 @@
         <ion-label>New password</ion-label>
         <ion-input [(ngModel)]="newPassword" type="password" required></ion-input>
   
-        <button>Confirm</button>
-        <!--(click)="changePassword()"-->
+        <button (click)="changePassword()">Confirm</button>
+
       </div>
   
       <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>

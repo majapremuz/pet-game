@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
+import { PushNotifications } from '@capacitor/push-notifications';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
@@ -80,6 +81,7 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
 
   ngOnInit() {
     this.loadGameState();
+    this.requestNotificationPermission();
     this.userService.initializePetData().subscribe(selectedDog => {
       if (selectedDog) {
         this.selectedDogImage = selectedDog.image;
@@ -97,6 +99,16 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     this.setInitialActionTimes();
     this.startStatusDecreasing();
     this.updateColorGradually();
+  }
+
+  async requestNotificationPermission() {
+    const permission = await PushNotifications.requestPermissions();
+    if (permission.receive === 'granted') {
+      console.log('Notification permission granted');
+      // Initialize FCM and get the token if needed
+    } else {
+      console.log('Notification permission denied');
+    }
   }
 
    /*setInitialActionTimes() {
@@ -155,32 +167,6 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
       });
     }
   
-  /*decreaseStat(stat: StatName, decrement: number) {
-    let valueKey: keyof StatProperties;
-
-    switch (stat) {
-        case 'hunger':
-            valueKey = 'hungerValue';
-            break;
-        case 'fatigue':
-            valueKey = 'fatigueValue';
-            break;
-        case 'purity':
-            valueKey = 'purityValue';
-            break;
-        case 'attention':
-            valueKey = 'attentionValue';
-            break;
-        default:
-            throw new Error(`Invalid stat: ${stat}`);
-    }
-
-    this[valueKey] = Math.max(this[valueKey] - decrement, 0);
-    this.checkAlert(stat);
-    this.updateContainerHeight(stat);
-    this.cdRef.markForCheck();
-}*/
-
 decreaseStat(stat: StatName, decrement: number) {
   const valueKey = `${stat}Value` as keyof StatProperties;
   this[valueKey] = Math.max(this[valueKey] - decrement, 0);
@@ -270,6 +256,35 @@ updateCurrentStat(stat: StatName) {
 checkAlert(stat: StatName) {
   const valueKey = `${stat}Value` as keyof StatProperties;
   if (this[valueKey] < 10) {
+    // Alert the user with a push notification
+    PushNotifications.requestPermissions().then((permission) => {
+      if (permission.receive === 'granted') {
+        PushNotifications.createChannel({
+          id: 'pet-care',
+          name: 'Pet Care Notifications',
+          description: 'Notifications for your pet\'s health',
+          importance: 5,
+        });
+
+        // Schedule the notification after a slight delay (e.g., 5 seconds)
+        const delayInMilliseconds = 5000; // Delay of 5 seconds
+
+        (PushNotifications as any).schedule({
+          notifications: [
+            {
+              title: `Your pet's ${stat} is low!`,
+              body: `Please take care of your pet's ${stat} by feeding, playing, or resting it.`,
+              id: new Date().getTime(),
+              schedule: { at: new Date(Date.now() + delayInMilliseconds) }, // Schedule with delay
+              sound: 'default',
+              channelId: 'pet-care',
+            }
+          ]
+        });
+      }
+    });
+
+    // Optionally alert the user immediately
     alert(`Your pet's ${stat} is critically low!`);
   }
 }
@@ -306,7 +321,7 @@ updateContainerHeight(stat: StatName) {
     setInterval(() => {
       const currentHour = new Date().getHours();
       // Map the hour (0-23) to a color value (from morning to night)
-      const colorValue = 255 - Math.floor((currentHour / 23) * 255); // Adjust as needed
+      const colorValue = 255 - Math.floor((currentHour / 23) * 255); 
       this.currentColor = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
       this.cdRef.detectChanges();
     }, 2000); // Update every hour
