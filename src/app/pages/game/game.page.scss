@@ -164,12 +164,11 @@ p {
 }
 
 .status-bar {
-  width: 40px;
-  border: 1px solid black;
-  border-radius: 5px;
+  width: 50px;
+  border: 10px solid #bb9664;
+  border-radius: 8px;
   position: absolute;
   left: 0;
-  margin-left: 1rem;
   bottom: 0;
   transition: height 0.5s ease, background-color 0.5s ease;
 }

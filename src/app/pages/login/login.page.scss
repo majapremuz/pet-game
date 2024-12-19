@@ -44,9 +44,12 @@ div {
     width: 90%;
 }
 
-ion-label {
+.label {
     font-family: "Baloo 2", sans-serif;
     font-weight: 900;
+    font-size: 1.5rem;
+    color: white;
+    margin: 0.4rem;
     text-shadow: 
     4px 4px 0 #bb9764, 
     4px -4px 0 #bb9764, 
@@ -58,13 +61,7 @@ ion-label {
      0px -4px 0 #bb9764;
 }
 
-.item.sc-ion-label-md-h, .item .sc-ion-label-md-h {
-    --color: white;
-      font-size: 1.7rem;
-      margin: 0.7rem 0;
-}
-
-ion-input {
+.input {
     background-color: #fffaef;
     border: 8px solid #bc9763;
     width: 100%;
@@ -73,12 +70,7 @@ ion-input {
     text-indent: 1rem;
 }
 
-ion-item {
-    border: none;
-    --background: #d3ba77;
-}
-
-ion-button {
+.button {
     --background: #c9ac5f;
     --color: white;
     font-family: "Baloo 2", sans-serif;
@@ -96,8 +88,7 @@ ion-button {
     0px 2px 0 #bb9764, 
     -2px 0px 0 #bb9764,
      0px -2px 0 #bb9764;
-     width: 80%;
-     height: 20vmin;
+     width: 90%;
      margin-top: 2rem;
      border: 6px solid #fffaef;
      border-radius: 5px;

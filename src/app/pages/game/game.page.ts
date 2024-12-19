@@ -92,7 +92,7 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
           console.log("dog stats: ", this.petSmart, this.petSpeed, this.petStrength)
       } else {
         console.warn("No selected dog found. Redirecting to pet selection page.");
-        this.router.navigate(['/create-pet']);
+        this.router.navigate(['/home']);
       }
     });
 
@@ -172,6 +172,7 @@ decreaseStat(stat: StatName, decrement: number) {
   this[valueKey] = Math.max(this[valueKey] - decrement, 0);
   this.updateStatColorsAndHeight(stat);
   this.updateCurrentStat(stat);
+  this.saveGameState();
 }
 
   // Update the next action time based on the stat
@@ -235,6 +236,7 @@ increaseStat(stat: StatName, increment: number) {
   this[valueKey] = Math.min(this[valueKey] + increment, 100);
   this.updateStatColorsAndHeight(stat);
   this.updateCurrentStat(stat);
+  this.saveGameState();
 }
 
 updateStatColorsAndHeight(stat: StatName) {
@@ -400,26 +402,40 @@ savePetStats() {
   }
 
   loadGameState() {
-    const savedLevel = localStorage.getItem('level');
-    const savedPoints = localStorage.getItem('points');
-    const savedPointsNeeded = localStorage.getItem('pointsNeeded');
-
-    if (savedLevel) {
-      this.level = parseInt(savedLevel);
-    }
-    if (savedPoints) {
-      this.points = parseInt(savedPoints);
-    }
-    if (savedPointsNeeded) {
-      this.pointsNeeded = parseInt(savedPointsNeeded);
+    const savedState = localStorage.getItem('gameState');
+    if (savedState) {
+      const gameState = JSON.parse(savedState);
+      this.hungerValue = gameState.hungerValue;
+      this.fatigueValue = gameState.fatigueValue;
+      this.purityValue = gameState.purityValue;
+      this.attentionValue = gameState.attentionValue;
+      this.points = gameState.points;
+      this.level = gameState.level;
+      this.petName = gameState.petName;
+      this.petSmart = gameState.petSmart;
+      this.petSpeed = gameState.petSpeed;
+      this.petStrength = gameState.petStrength;
+      this.selectedDogImage = gameState.selectedDogImage;
     }
   }
-
+  
   saveGameState() {
-    localStorage.setItem('level', this.level.toString());
-    localStorage.setItem('points', this.points.toString());
-    localStorage.setItem('pointsNeeded', this.pointsNeeded.toString());
+    const gameState = {
+      hungerValue: this.hungerValue,
+      fatigueValue: this.fatigueValue,
+      purityValue: this.purityValue,
+      attentionValue: this.attentionValue,
+      points: this.points,
+      level: this.level,
+      petName: this.petName,
+      petSmart: this.petSmart,
+      petSpeed: this.petSpeed,
+      petStrength: this.petStrength,
+      selectedDogImage: this.selectedDogImage,
+    };
+    localStorage.setItem('gameState', JSON.stringify(gameState));
   }
+  
 
   checkLevelUp() {
     if (this.points >= this.pointsNeeded) {
@@ -441,6 +457,7 @@ savePetStats() {
     if (this.points >= this.pointsNeeded) {
       this.levelUp();
     }
+    this.saveGameState();
   }
 
   // Method to handle leveling up
@@ -456,6 +473,7 @@ savePetStats() {
       this.progressBarWidth = 100;
       console.log("Maximum level reached.");
     }
+    this.saveGameState();
   }
 
   openLevelUpModal() {
