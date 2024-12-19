@@ -195,15 +195,17 @@ export class UserService {
   }
 
   // Profile management methods
-  deleteProfile(userId: string): void {
+  deleteProfile(username: string): void {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = users.filter((u: any) => u.id !== userId);
+    const updatedUsers = users.filter((u: any) => u.username !== username);
     localStorage.setItem('users', JSON.stringify(updatedUsers));
     localStorage.removeItem('authUser');
     localStorage.removeItem('offlinePetData');
-    
-    console.log('Profile deleted for user ID:', userId);
-  }
+    localStorage.removeItem('username');
+}
+
+
+  
   
 
 

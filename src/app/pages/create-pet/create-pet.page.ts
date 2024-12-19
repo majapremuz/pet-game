@@ -121,9 +121,12 @@ export class CreatePetPage implements OnInit {
       return;
     }
   
-    const profileExists = !!this.userService.getUsername();
+    const profileExists = !!this.userService.getUsername(); 
+    console.log("Profile exists:", profileExists);
+    
     if (!profileExists) {
-      this.router.navigate(['/create-profile']);
+      console.log("No profile found, redirecting to create profile.");
+      this.router.navigate(['/create-profile']); 
       return;
     }
   
@@ -151,6 +154,7 @@ export class CreatePetPage implements OnInit {
               return;
             }
   
+            // Proceed with pet selection logic
             const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
             switch (this.currentSlideIndex) {
               case 0:
@@ -201,5 +205,6 @@ export class CreatePetPage implements OnInit {
   
     await alert.present();
   }
+  
   
 }

@@ -256,19 +256,15 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
   
   deleteProfile() {
-    const userId = this.userService.getUserId();
-    if (!userId) return;
-  
-    // Call the deleteProfile method in UserService to handle deletion using localStorage
-    this.userService.deleteProfile(userId);
-  
-    // Log out and clear pet data after deletion
-    this.userService.logOut();
-    this.userService.clearPetData();
-  
-    // Navigate to the home page
-    this.router.navigateByUrl('/home');
+    if (this.username) {
+      this.userService.deleteProfile(this.username);
+      console.log(`Profile deleted for username: ${this.username}`);
+      this.router.navigateByUrl('/home'); 
+    } else {
+      console.warn('No username found. Cannot delete profile.');
+    }
   }
+  
   
 
 }
