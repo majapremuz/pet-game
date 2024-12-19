@@ -120,13 +120,13 @@ export class CreatePetPage implements OnInit {
       await this.promptPlayMode();
       return;
     }
-
+  
     const profileExists = !!this.userService.getUsername();
     if (!profileExists) {
       this.router.navigate(['/create-profile']);
       return;
     }
-
+  
     const alert = await this.alertController.create({
       message: 'Are you sure you want to pick this dog?',
       cssClass: 'alert',
@@ -150,7 +150,7 @@ export class CreatePetPage implements OnInit {
               console.warn('Pet name is empty.');
               return;
             }
-
+  
             const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
             switch (this.currentSlideIndex) {
               case 0:
@@ -172,34 +172,25 @@ export class CreatePetPage implements OnInit {
                 dogStats.strength = 10;
                 break;
             }
-
+  
             const hashedUsername = SHA1(this.userService.getUsername()).toString();
             const hashedPassword = SHA1(this.userService.getUserPassword()).toString();
-
+  
+            const selectedDogData = {
+              id: new Date().getTime(),
+              username: hashedUsername,
+              password: hashedPassword,
+              petStats: dogStats,
+            };
+  
             if (this.playMode === 'online') {
-              const pushToken = await this.getPushToken();
-              const onlineData = {
-                username: hashedUsername,
-                password: hashedPassword,
-                pushToken: pushToken,
-                petStats: dogStats,
-              };
-
-              this.userService.saveOnlineData(onlineData).subscribe(
-                (response) => {
-                  console.log('Online data saved:', response);
-                  this.userService.setSelectedDog(dogStats);
-                  this.router.navigate(['/game']);
-                },
-                (error) => {
-                  console.error('Error saving online data:', error);
-                }
-              );
+              // Store online data in local storage for offline use
+              localStorage.setItem('userData', JSON.stringify(selectedDogData));
+              this.userService.setSelectedDog(dogStats);
+              this.router.navigate(['/game']);
             } else {
-              this.userService.saveOfflineData({
-                username: hashedUsername,
-                petStats: dogStats,
-              });
+              // Save offline data directly in local storage
+              localStorage.setItem('userData', JSON.stringify(selectedDogData));
               this.userService.setSelectedDog(dogStats);
               this.router.navigate(['/game']);
             }
@@ -207,7 +198,8 @@ export class CreatePetPage implements OnInit {
         },
       ],
     });
-
+  
     await alert.present();
   }
+  
 }

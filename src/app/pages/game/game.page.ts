@@ -351,18 +351,27 @@ increaseStrength() {
     this.savePetStats();
 }
 
-  // Save the updated stats to the user service
 savePetStats() {
-  this.userService.updatePetStats({
+  const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+  
+  if (user) {
+    // Update the pet stats in the localStorage
+    user.petStats = {
       name: this.petName,
       smart: this.petSmart,
       speed: this.petSpeed,
       strength: this.petStrength,
-  }).subscribe(
-      () => console.log(`Pet stats updated successfully.`),
-      (error) => console.error("Failed to update pet stats:", error)
-  );
+    };
+
+    // Save the updated user object back to localStorage
+    localStorage.setItem('authUser', JSON.stringify(user));
+
+    console.log('Pet stats updated successfully:', user.petStats);
+  } else {
+    console.error('No user data found in local storage to update pet stats.');
+  }
 }
+
   
   bath() {
     this.handleAction('purity');

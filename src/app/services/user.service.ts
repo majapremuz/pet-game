@@ -1,48 +1,47 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import * as SHA1 from 'crypto-js/sha1';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/users';
   private username: string = '';
   private userId: string = '';
   private password: string = '';
   private selectedDog: any = null;
 
-  constructor(
-    private router: Router,
-    private http: HttpClient
-  ) {}
+  constructor(private router: Router) {}
 
   setUsername(name: string) {
     this.username = name;
+    localStorage.setItem('username', name);
     console.log('Username fetched:', this.username);
   }
 
   getUsername(): string {
-    return this.username || '';
+    return this.username || localStorage.getItem('username') || '';
   }
 
   setUserId(id: string) {
     this.userId = id;
+    localStorage.setItem('userId', id);
+    console.log("ID", this.userId)
   }
 
   getUserId(): string {
-    return this.userId || '';
+    return this.userId || localStorage.getItem('userId') ||  '';
   }
 
   setUserPassword(password: string) {
     this.password = password;
+    localStorage.setItem('password', password);
+    console.log("password", this.password)
   }
 
   getUserPassword(): string {
-    return this.password;
+    return this.password|| localStorage.getItem('password') ||  '';
   }
 
   initializeUserData(): void {
@@ -51,7 +50,7 @@ export class UserService {
       const parsedUser = JSON.parse(user);
       this.username = parsedUser.username;
       this.userId = parsedUser.id;
-      console.log('User data initialized:', this.username, this.userId);
+      console.log('User data initialized from local storage:', this.username, this.userId);
     } else {
       console.log('No user data found in local storage.');
     }
@@ -61,35 +60,28 @@ export class UserService {
   login(username: string, password: string): Observable<any> {
     const hashedUsername = SHA1(username).toString();
     const hashedPassword = SHA1(password).toString();
-    const url = `${this.apiUrl}?username=${hashedUsername}&password=${hashedPassword}`;
 
-    return this.http.get<any[]>(url).pipe(
-      map(users => {
-        if (users.length > 0) {
-          const user = users[0];
-          this.username = user.username;
-          this.userId = user.id;
-          console.log('Login successful:', user);
-          this.router.navigate(['/game']);
-          return user;
-        } else {
-          throw new Error('Invalid credentials');
-        }
-      })
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const user = users.find(
+      (u: any) => u.username === hashedUsername && u.password === hashedPassword
     );
+
+    if (user) {
+      this.username = user.username;
+      this.userId = user.id;
+      localStorage.setItem('authUser', JSON.stringify(user));
+      console.log('Login successful:', user);
+      this.router.navigate(['/game']);
+      return of(user);
+    } else {
+      throw new Error('Invalid credentials');
+    }
   }
 
+
   isLoggedIn(): Observable<boolean> {
-    if (!this.username || !this.userId) {
-      return this.fetchUserData().pipe(
-        map(user => {
-          this.username = user.username;
-          this.userId = user.id;
-          return !!this.username && !!this.userId;
-        })
-      );
-    }
-    return new Observable(observer => observer.next(true));
+    const user = localStorage.getItem('authUser');
+    return of(!!user);
   }
 
   fetchUserData(): Observable<any> {
@@ -97,24 +89,36 @@ export class UserService {
       console.warn('User ID not available. Returning empty observable.');
       return new Observable((observer) => observer.next(null));
     }
-    const url = `${this.apiUrl}/${this.userId}`;
-    return this.http.get<any>(url).pipe(
-      tap(user => console.log('Fetched user data:', user))
-    );
-  }
   
+    const user = localStorage.getItem('authUser');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      console.log('Fetched user data:', parsedUser);
+      return new Observable((observer) => observer.next(parsedUser));
+    } else {
+      console.warn('User data not found in localStorage.');
+      return new Observable((observer) => observer.next(null));
+    }
+  }
 
   saveOnlineData(data: any): Observable<any> {
-    return this.http.post(this.apiUrl, data);
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    users.push(data);
+    localStorage.setItem('users', JSON.stringify(users));
+    console.log('User data saved to localStorage:', data);
+    return new Observable((observer) => observer.next(data));
   }
 
-  saveOfflineData(data: any) {
+  saveOfflineData(data: any): void {
     const offlineData = {
       username: data.username,
       petStats: data.petStats,
     };
-    this.http.post(this.apiUrl, offlineData);
-    console.log('Offline data saved:', offlineData);
+    const offlineDataArray = JSON.parse(localStorage.getItem('offlineData') || '[]');
+    offlineDataArray.push(offlineData);
+    localStorage.setItem('offlineData', JSON.stringify(offlineDataArray));
+  
+    console.log('Offline data saved to localStorage:', offlineData);
   }
 
   getOfflineData(): any {
@@ -126,6 +130,7 @@ export class UserService {
     this.username = '';
     this.userId = '';
     this.selectedDog = null;
+    localStorage.removeItem('authUser');
     this.router.navigateByUrl('/home').then(() => {
       console.log('Redirected to home after logout.');
     }).catch(error => {
@@ -136,55 +141,53 @@ export class UserService {
   clearUserData() {
     this.username = '';
     this.userId = '';
-    console.log('User data cleared from service.');
+    this.selectedDog = null;
+    localStorage.removeItem('authUser');
+    console.log('User data cleared.');
   }
+  
 
 
   // Pet-related methods
-  setSelectedDog(dogData: any) {
-    this.selectedDog = dogData;
+  getSelectedDog() {
+    return JSON.parse(localStorage.getItem('selectedDog') || '{}');
   }
 
-  getSelectedDog(): Observable<any> {
-    const url = `${this.apiUrl}/${this.userId}`;
-    return this.http.get<any>(url).pipe(
-      tap(response => {
-        console.log('API response:', response);
-      }),
-      map(user => user.petStats)
-    );
+  setSelectedDog(dogStats: any) {
+    localStorage.setItem('selectedDog', JSON.stringify(dogStats));
   }
 
-  getPetStatsByUserId(userId: string): Observable<any> {
-    const url = `${this.apiUrl}/${userId}`;
-    return this.http.get<any>(url).pipe(
-      map(user => user.petStats)
-    );
-  }
+    getPetStatsByUsername(username: string): Observable<any> {
+      const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+      if (user && user.username === username) {
+        return of(user.petStats || null); 
+      }
+      return of(null);
+    }
 
   initializePetData(): Observable<any> {
-    return this.getSelectedDog().pipe(
-      map(stats => {
-        if (stats) {
-          this.selectedDog = stats;
-          console.log('Pet data initialized:', this.selectedDog);
-        } else {
-          console.error('No pet data found.');
-        }
-        return this.selectedDog;
-      })
-    );
+    const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+    if (user && user.petStats) {
+      this.selectedDog = user.petStats;
+      console.log('Pet data initialized:', user.petStats);
+      return of(this.selectedDog);
+    } else {
+      console.error('No pet data found.');
+      return of(null); 
+    }
   }
 
-  updatePetStats(petStats: { name: string; smart: number; speed: number; strength: number }): Observable<any> {
-    if (!this.userId) {
-      throw new Error('No user ID available for updating pet stats.');
+  updatePetStats(petStats: any): void {
+    const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+    if (user) {
+      user.petStats = petStats;
+      localStorage.setItem('authUser', JSON.stringify(user));
+      console.log('Pet stats updated:', petStats);
+    } else {
+      console.error('No user logged in to update pet stats.');
     }
-    const url = `${this.apiUrl}/${this.userId}`;
-    return this.http.put(url, { petStats }).pipe(
-      tap(response => console.log('Updated pet stats:', response))
-    );
   }
+
 
   clearPetData() {
     this.selectedDog = null;
@@ -192,34 +195,30 @@ export class UserService {
   }
 
   // Profile management methods
-  deleteProfile(userId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${userId}`).pipe(
-      tap(() => console.log('Profile deleted for user ID:', userId))
-    );
-  }
-
-    changePassword(currentPassword: string, newPassword: string): Observable<any> {
-      if (!this.userId) {
-        throw new Error('No user ID available for changing password.');
-      }
+  deleteProfile(userId: string): void {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const updatedUsers = users.filter((u: any) => u.id !== userId);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('offlinePetData');
     
-      // Fetch user data to validate current password
-      return this.http.get<any>(`${this.apiUrl}/${this.userId}`).pipe(
-        map(user => {
-          if (user.password !== currentPassword) {
-            throw new Error('Current password is incorrect.');
-          }
-          // Update user data with the new password
-          const updatedUser = { ...user, password: newPassword };
-          return updatedUser;
-        }),
-        // Save updated user data
-        switchMap(updatedUser => 
-          this.http.put(`${this.apiUrl}/${this.userId}`, updatedUser)
-        ),
-        tap(() => console.log('Password changed successfully.'))
-      );
+    console.log('Profile deleted for user ID:', userId);
+  }
+  
+
+
+  changePassword(currentPassword: string, newPassword: string): void {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const userIndex = users.findIndex((u: any) => u.id === this.userId);
+
+    if (userIndex > -1 && users[userIndex].password === SHA1(currentPassword).toString()) {
+      users[userIndex].password = SHA1(newPassword).toString();
+      localStorage.setItem('users', JSON.stringify(users));
+      console.log('Password changed successfully.');
+    } else {
+      console.error('Current password is incorrect or user not found.');
     }
+  }
     
   getSleepTime(): string {
     return ''; 

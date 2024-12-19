@@ -36,50 +36,52 @@ export class ProfilePage implements OnInit, AfterViewInit {
     private injector: Injector,
     private cdRef: ChangeDetectorRef,
     private alertController: AlertController
-  ) {}
+  ) {
+    this.userService.initializeUserData();
+  }
 
   private get userService(): UserService {
     return this.injector.get(UserService);
   }
 
-    ngOnInit() {
-      const username = this.userService.getUsername();
-      if (!username) {
-        this.router.navigateByUrl('/login');
-        return;
-      }
-  
-      this.username = username;
-      this.userId = this.userService.getUserId();
-      console.log("User ID:", this.userId);
-  
-      // Fetch pet stats based on the user ID
-      this.userService.getPetStatsByUserId(this.userId).subscribe((petStats) => {
-        if (petStats) {
-          this.petName = petStats.name;
-          this.petSmart = petStats.smart;
-          this.petSpeed = petStats.speed;
-          this.petStrength = petStats.strength;
-
-          console.log('Pet stats fetched:', {
-            name: this.petName,
-            smart: this.petSmart,
-            speed: this.petSpeed,
-            strength: this.petStrength,
-          });
-
-          if (this.router.getCurrentNavigation()?.extras.state?.['levelUp']) {
-            this.openModal();
-          }
-        } else {
-          console.warn('No pet stats found for this user.');
-        }
-      });
-  
-      this.sleepTime = this.userService.getSleepTime() || '';
+  ngOnInit() {
+    const username = this.userService.getUsername();
+    console.log("Username:", username);
+    if (!username) {
+      this.router.navigateByUrl('/login');
+      return;
     }
   
-              
+    this.username = username;
+    this.userId = this.userService.getUserId();
+    console.log("User ID:", this.userId, this.username);
+  
+    // Fetch pet stats based on the username
+    this.userService.getPetStatsByUsername(this.username).subscribe((petStats) => {
+      if (petStats) {
+        this.petName = petStats.name;
+        this.petSmart = petStats.smart;
+        this.petSpeed = petStats.speed;
+        this.petStrength = petStats.strength;
+  
+        console.log('Pet stats fetched:', {
+          name: this.petName,
+          smart: this.petSmart,
+          speed: this.petSpeed,
+          strength: this.petStrength,
+        });
+  
+        if (this.router.getCurrentNavigation()?.extras.state?.['levelUp']) {
+          this.openModal();
+        }
+      } else {
+        console.warn('No pet stats found for this user.');
+      }
+    });
+  
+    this.sleepTime = this.userService.getSleepTime() || '';
+  }
+                
     ngAfterViewInit() {
       const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state?.['levelUp']) {
@@ -134,19 +136,16 @@ export class ProfilePage implements OnInit, AfterViewInit {
           return;
       }
     
-      // Save the updated stats
       this.userService.updatePetStats({
         name: this.petName,
         smart: this.petSmart,
         speed: this.petSpeed,
         strength: this.petStrength,
-      }).subscribe(
-        () => console.log(`${stat} upgraded successfully.`),
-        (error) => console.error(`Failed to upgrade ${stat}:`, error)
-      );
-    
-      this.closeModal();
-    }
+      });
+      console.log(`${stat} upgraded successfully.`);
+
+    this.closeModal();
+  }
     
   togglePasswordField() {
     this.isPasswordFieldVisible = !this.isPasswordFieldVisible;
@@ -165,49 +164,48 @@ export class ProfilePage implements OnInit, AfterViewInit {
       console.warn('Both fields are required.');
       return;
     }
-    this.userService.changePassword(this.currentPassword, this.newPassword).subscribe(
-      response => {
-        console.log('Password changed successfully:', response);
-        this.currentPassword = '';
-        this.newPassword = '';
-        this.isPasswordFieldVisible = false;
-      },
-      error => {
-        console.error('Failed to change password:', error);
-      }
-    );
+  
+    // Directly call the service's localStorage-based method to change password
+    this.userService.changePassword(this.currentPassword, this.newPassword);
+  
+    // After attempting to change the password, reset fields and hide the form
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.isPasswordFieldVisible = false;
   }
   
-
-    async logOut() {
-      const alert = await this.alertController.create({
-        header: 'Confirm Logout',
-        message: 'Are you sure you want to log out?',
-        buttons: [
-          {
-            text: 'No',
-            role: 'cancel',
+  async logOut() {
+    const alert = await this.alertController.create({
+      header: 'Confirm Logout',
+      message: 'Are you sure you want to log out?',
+      buttons: [
+        {
+          text: 'No',
+          role: 'cancel',
+        },
+        {
+          text: 'Yes',
+          handler: () => {
+            // Call the methods to clear user and pet data
+            this.userService.clearUserData();
+            this.userService.clearPetData();
+  
+            // Navigate to home page
+            this.router.navigateByUrl('/home').then(() => {
+              console.log('Navigated to home after logout.');
+            }).catch(error => {
+              console.error('Navigation error during logout:', error);
+            });
+  
+            console.log('User has been logged out.');
           },
-          {
-            text: 'Yes',
-            handler: () => {
-              this.userService.clearUserData();
-              this.userService.clearPetData();
-              console.log('Logging out, navigating to home');
-              this.router.navigateByUrl('/home').then(() => {
-                console.log('Navigated to home');
-              });
-              console.log('User has been logged out.');
-            },
-          },
-        ],
-      });
-    
-      await alert.present();
-    }
-    
-    
-        
+        },
+      ],
+    });
+  
+    await alert.present();
+  }
+   
     onLogInSuccess() {
       this.userService.initializeUserData();
       this.userService.initializePetData();
@@ -226,7 +224,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
     loadPetStats(userId: string) {
       // Fetch pet stats based on the user ID
-      this.userService.getPetStatsByUserId(userId).subscribe((petStats) => {
+      this.userService.getPetStatsByUsername(userId).subscribe((petStats) => {
         this.userService.setSelectedDog(petStats);
         console.log(petStats)
       });
@@ -261,14 +259,16 @@ export class ProfilePage implements OnInit, AfterViewInit {
     const userId = this.userService.getUserId();
     if (!userId) return;
   
-    this.userService.deleteProfile(userId).subscribe({
-      next: () => {
-        this.userService.logOut();
-        this.userService.clearPetData();
-        this.router.navigateByUrl('/home');
-      },
-      error: (err) => console.error('Error deleting profile:', err),
-    });
+    // Call the deleteProfile method in UserService to handle deletion using localStorage
+    this.userService.deleteProfile(userId);
+  
+    // Log out and clear pet data after deletion
+    this.userService.logOut();
+    this.userService.clearPetData();
+  
+    // Navigate to the home page
+    this.router.navigateByUrl('/home');
   }
+  
 
 }
