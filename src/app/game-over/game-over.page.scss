@@ -1,0 +1,63 @@
+ion-content {
+    --background: #d3ba77;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%; 
+    height: 100%;
+    text-align: center;
+}
+
+h1 {
+    font-family: "Baloo 2", sans-serif;
+    font-size: 5rem;
+    font-weight: 900;
+    text-shadow: 
+        2px 2px 0 #bb9764, 
+        2px -2px 0 #bb9764, 
+        -2px 2px 0 #bb9764, 
+        -2px -2px 0 #bb9764, 
+        2px 0px 0 #bb9764, 
+        0px 2px 0 #bb9764, 
+        -2px 0px 0 #bb9764,
+        0px -2px 0 #bb9764;
+    color: white;
+}
+
+button {
+    background-color: #f8e19d;
+    color: white;
+    font-family: "Baloo 2", sans-serif;
+    font-size: 2rem;
+    font-weight: bolder;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 0;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+     width: 50%;
+     height: 10vmin;
+     margin-top: 1rem;
+     padding: 2rem 0;
+     border: 6px solid #bc9763;
+     border-radius: 5px;
+  }
+
+  .restartBtn {
+    font-size: 1.5rem;
+  }

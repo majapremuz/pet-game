@@ -30,4 +30,8 @@ export const routes: Routes = [
     path: 'create-profile',
     loadComponent: () => import('./pages/create-profile/create-profile.page').then( m => m.CreateProfilePage)
   },
+  {
+    path: 'game-over',
+    loadComponent: () => import('./game-over/game-over.page').then( m => m.GameOverPage)
+  },
 ];

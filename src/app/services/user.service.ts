@@ -18,10 +18,9 @@ export interface GameState {
   attentionNextAction: Date;
   points: number;
   level: number;
+  progressBarWidth: number;
   [key: string]: any;
 }
-
-//type StatProperties = 'hungerValue' | 'fatigueValue' | 'purityValue' | 'attentionValue';
 
 @Injectable({
   providedIn: 'root'
@@ -45,6 +44,7 @@ export class UserService {
     attentionNextAction: new Date(),
     points: 0,
     level: 0,
+    progressBarWidth: 0
   };
 
   constructor(private router: Router) {
@@ -97,7 +97,7 @@ export class UserService {
           this.resetGameState();
         }
       } else {
-        this.resetGameState(); // Always reset if no state found
+        this.resetGameState(); 
       }
     }
     
@@ -306,17 +306,7 @@ export class UserService {
   setSleepTime(time: string) {}
 
  // Game data handling
- /*saveGameState(gameState: any): void {
-  const currentState = this.getGameState();
-  
-  // Perform a shallow comparison instead of deep comparison if possible
-  if (currentState !== gameState) {
-    localStorage.setItem('gameState', JSON.stringify(gameState));
-    console.log('Game state saved');
-  }
-}*/
-
-
+ 
 getGameState(): any {
   const savedState = localStorage.getItem('gameState');
   return savedState ? JSON.parse(savedState) : this.getDefaultGameState();
@@ -341,12 +331,6 @@ updateStatValue(stat: keyof GameState, value: number): void {
   }
 }
 
-
-
-/*updateGameState(newState: Partial<typeof this.gameState>) {
-  this.gameState = { ...this.gameState, ...newState };
-  this.saveGameState(this.gameState); 
-}*/
 updateGameState(newState: Partial<GameState>): void {
   const savedState = localStorage.getItem('gameState');
   const currentState = this.gameState;
@@ -390,29 +374,16 @@ getDefaultGameState(): GameState {
     attentionNextAction: new Date(),
     points: 0,
     level: 0,
+    progressBarWidth: 0
   };
 }
 
-
-
-resetGameState() {
-  this.gameState = {
-    hungerValue: 100,
-    fatigueValue: 100,
-    purityValue: 100,
-    attentionValue: 100,
-    hungerColor: '#d3ba77',
-  fatigueColor: '#d3ba77',
-  purityColor: '#d3ba77',
-  attentionColor: '#d3ba77',
-    hungerNextAction: new Date(),
-    fatigueNextAction: new Date(),
-    purityNextAction: new Date(),
-    attentionNextAction: new Date(),
-    points: 0,
-    level: 0
-  };
+resetGameState(): void {
+  this.gameState = this.getDefaultGameState();
+  localStorage.removeItem('gameState');  
+  console.log('Game state has been reset.');
 }
+
 
 clearGameState(): void {
   localStorage.removeItem('gameState');

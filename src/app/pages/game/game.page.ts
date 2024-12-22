@@ -1,5 +1,5 @@
 import { Component, ChangeDetectorRef, Injector, OnDestroy, NgZone} from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
@@ -22,7 +22,7 @@ export class GamePage implements OnDestroy{
   decreaseInterval: any;
   pointsNeeded: number = 10; 
   maxPoints: number = 100; 
-  progressBarWidth: number = 0; 
+  //progressBarWidth: number = 0; 
   currentColor: string = '#d3ba77';
   isJumping: boolean = false;
   audio: HTMLAudioElement;
@@ -57,7 +57,8 @@ export class GamePage implements OnDestroy{
     private cdRef: ChangeDetectorRef,
     private router: Router,
     private injector: Injector,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private alertController: AlertController
   ) {
     const navigation = this.router.getCurrentNavigation();
   if (navigation?.extras.state) {
@@ -178,19 +179,12 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
     };*/
 
     decrementIntervals: Record<StatName, number> = {
-      hunger: 2000, // 15 seconds
-      fatigue: 20000, // 20 seconds
-      purity: 25000, // 25 seconds
-      attention: 30000, // 30 seconds
+      hunger: 1500, // 1.5 seconds
+      fatigue: 2000, // 2 seconds
+      purity: 2500, // 2.5 seconds
+      attention: 3000, // 3 seconds
     };
 
-      /*startStatusDecreasing() {
-        Object.entries(this.decrementIntervals).forEach(([stat, interval]) => {
-          setInterval(() => {
-            this.decreaseStat(stat as StatName, 1); // Decrease by 1 every interval
-          }, interval);
-        });
-      }*/
 
         startStatusDecreasing() {
           Object.entries(this.decrementIntervals).forEach(([stat, interval]) => {
@@ -263,6 +257,16 @@ handleAction(action: StatName) {
   this.updateStatColorsAndHeight(action);
 }
 
+async showLowStatAlert(stat: StatName) {
+  const alert = await this.alertController.create({
+    message: `Your pet's ${stat} is dangerously low!`,
+    buttons: ['OK']
+  });
+
+  await alert.present();
+}
+
+
 
 increaseStat(stat: StatName, increment: number) {
   const valueKey = `${stat}Value` as keyof GameState;
@@ -278,13 +282,77 @@ increaseStat(stat: StatName, increment: number) {
 decreaseStat(stat: StatName, decrement: number) {
   const valueKey = `${stat}Value` as keyof GameState;
   if (this.gameState[valueKey] !== undefined) {
+    // Decrease the stat
     this.gameState[valueKey] = Math.max((this.gameState[valueKey] as number) - decrement, 0);
+
+    // If hunger or fatigue reaches 0, give the player a chance to solve it
+    if (stat === 'hunger' || stat === 'fatigue') {
+      if (this.gameState[valueKey] === 0) {
+        this.showLowStatAlert(stat); // Alert the player
+        // Provide a chance to solve it
+        this.offerChanceToFixStat(stat);
+      }
+    }
+    
+    // If purity or attention reaches 0, give the player a chance to solve it
+    if (stat === 'purity' || stat === 'attention') {
+      if (this.gameState[valueKey] === 0) {
+        this.showLowStatAlert(stat); // Alert the player
+        // Provide a chance to solve it
+        this.offerChanceToFixStat(stat);
+      }
+    }
+
+    // If purity or attention are at 0, accelerate hunger and fatigue depletion
+    if (this.gameState.purityValue === 0 || this.gameState.attentionValue === 0) {
+      this.accelerateHungerFatigueDepletion();
+    }
+
     this.updateStatColorsAndHeight(stat);
     this.userService.updateGameState(this.gameState);
 
     // Trigger immediate UI update
     this.cdRef.detectChanges();
   }
+}
+
+// Provide a chance for the player to solve the issue (e.g., feed the pet)
+async offerChanceToFixStat(stat: StatName) {
+  const alert = await this.alertController.create({
+    message: `Your pet's ${stat} is critically low! Do you want to take action?`,
+    buttons: [
+      {
+        text: 'Yes',
+        handler: () => {
+          // Call a function to allow the player to fix the issue
+          this.handleAction(stat);
+        }
+      },
+      {
+        text: 'No',
+        handler: () => {
+          // Handle failure to act (e.g., lose the pet if no action is taken)
+          if (stat === 'hunger' || stat === 'fatigue') {
+            this.losePet();
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
+}
+
+// Accelerate hunger and fatigue depletion if purity or attention is at 0
+accelerateHungerFatigueDepletion() {
+  // Speed up the depletion intervals for hunger and fatigue
+  this.decrementIntervals.hunger = 500; // 0.5 seconds
+  this.decrementIntervals.fatigue = 1000; // 1 second
+  this.startStatusDecreasing(); // Restart the status decreasing with faster intervals
+}
+
+losePet() {
+  console.log("The pet has been lost!");
+  this.router.navigate(['/game-over']);
 }
 
 
@@ -489,7 +557,7 @@ savePetStats() {
   addPoint(points: number) {
     this.gameState.points += points;
     this.checkLevelUp();
-    this.progressBarWidth = (this.gameState.points / this.pointsNeeded) * 100;
+    this.gameState.progressBarWidth = (this.gameState.points / this.pointsNeeded) * 100;
     if (this.gameState.points >= this.pointsNeeded) {
       this.levelUp();
     }
@@ -504,7 +572,7 @@ savePetStats() {
       this.openLevelUpModal();
     } else {
       this.gameState.points = this.pointsNeeded;
-      this.progressBarWidth = 100;
+      this.gameState.progressBarWidth = 100;
       console.log("Maximum level reached.");
     }
   }
