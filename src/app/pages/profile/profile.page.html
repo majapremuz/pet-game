@@ -4,7 +4,8 @@
     <p class="pet-name">Pet name: {{ petName }}</p>
 
       <div class="stats-conteiner">
-      <h2>STATS</h2>
+      <h2>Level: {{ level }}</h2>
+      <h3>STATS</h3>
       <p>Smart: {{ petSmart }}</p>
       <p>Speed: {{ petSpeed }}</p>
       <p>Strength: {{ petStrength }}</p>
@@ -43,7 +44,7 @@
       
       <button (click)="returnToGame()">RETURN TO GAME</button>
       <button (click)="logOut()" class="logOutBtn">LOG OUT</button>
-      <button (click)="deleteProfile()" class="deleteBtn">DELETE PROFILE</button>
+      <button (click)="confirmDeleteProfile()" class="deleteBtn">DELETE PROFILE</button>
     </div>
   
 </ion-content>

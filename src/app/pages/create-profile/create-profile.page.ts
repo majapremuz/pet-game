@@ -19,10 +19,10 @@ export class CreateProfilePage implements OnInit {
   constructor(
     private router: Router,
     private userService: UserService
-  ) { }
-
-  ngOnInit() {
+  ) {
   }
+
+  ngOnInit() {}
 
   createProfile() {
     if (this.username && this.password) {

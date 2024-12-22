@@ -21,53 +21,48 @@ export class LoginPage implements OnInit {
     private injector: Injector,
     private loadingController: LoadingController,
     private toastController: ToastController
-  ) {}
+  ) {
+    this.userService.initializeUserData();
+  }
 
   private get userService(): UserService {
     return this.injector.get(UserService);
   }
 
   ngOnInit() {
-    this.userService.initializeUserData();
   }
 
   async onLogin() {
     const trimmedUsername = this.username.trim();
     const trimmedPassword = this.password.trim();
-
+  
     if (!trimmedUsername || !trimmedPassword) {
       this.showToast('Please enter both username and password.', 'warning');
       return;
     }
-
+  
     const loading = await this.loadingController.create({
       message: 'Logging in...',
       spinner: 'crescent',
       duration: 5000
     });
     await loading.present();
-
-    this.userService.login(trimmedUsername, trimmedPassword).subscribe({
-      next: async (response) => {
-        await loading.dismiss();
-
-        if (response) {
-          const user = response;
-          this.userService.setUsername(user.username);
-          this.userService.setUserId(user.id);
-          this.router.navigateByUrl('/game');
-          this.showToast(`Welcome!`, 'success');
-        } else {
-          this.showToast('Invalid username or password.', 'danger');
-        }
-      },
-      error: async (error) => {
-        await loading.dismiss();
-        console.error('Login error:', error);
-        this.showToast('Server error. Please try again later.', 'danger');
-      }
-    });
+  
+    // Check if the username and password match any saved values in localStorage
+    const savedUsername = localStorage.getItem('username');
+    const savedPassword = localStorage.getItem('password'); // Assuming you're saving the password too
+  
+    if (savedUsername === trimmedUsername && savedPassword === trimmedPassword) {
+      await loading.dismiss();
+      this.userService.setUsername(trimmedUsername); // Save username
+      this.router.navigateByUrl('/game');
+      this.showToast(`Welcome!`, 'success');
+    } else {
+      await loading.dismiss();
+      this.showToast('Invalid username or password.', 'danger');
+    }
   }
+  
 
   private async showToast(message: string, color: string) {
     const toast = await this.toastController.create({

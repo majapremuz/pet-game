@@ -6,7 +6,7 @@
       <button class="topBtn">
         <img src="assets/vs.png" alt="vs icon">
       </button>
-      <button class="topBtn">
+     <button class="topBtn">
         <img src="assets/hide.png" alt="hide icon" (click)="increaseSmart()">
       </button>
       <button class="topBtn">
@@ -20,17 +20,15 @@
     </button>
     </div>
 
-    <div class="level-bar">
-      <p>LV: {{ level }}</p>
-      <div class="level-progress-bar" [ngStyle]="{'width': progressBarWidth + '%'}"></div>
-    </div>
-
       <div class="stats">
-        <div class="status-bar-outer"></div>
-        <div class="status-bar" [ngStyle]="{'height': currentStatValue + '%', 'background-color': currentStatColor}"></div>
+       <!---<div class="status-bar-outer">
+        <div class="status-bar" [ngStyle]="{'height': progressBarWidth + '%'}"></div>-->
+        <div class="level-bar">
+          <div class="level-progress-bar" [ngStyle]="{'height': progressBarWidth + '%'}"></div>
+        </div>
     
       <div class="dog">
-        <img [src]="selectedDogImage" alt="selected dog" class="dog_img" [class.jump]="isJumping" (click)="makeDogJump()">
+        <img [src]="petImage" alt="selected dog" class="dog_img" [class.jump]="isJumping" (click)="makeDogJump()">
         <img src="assets/dog_heart.png" alt="heart icon" class="heart_img" *ngIf="showHeart">
       </div>
      </div>  
@@ -38,25 +36,25 @@
     <div class="buttons-container">
   
       <button (click)="bath()">
-        <div class="img_container" [ngStyle]="{'height': getContainerHeight(purityValue), 'background-color': '#d3ba77'}">
+        <div class="img_container" [ngStyle]="{'height': getContainerHeight(purityValue), 'background-color': getStatusColor(purityValue)}">
         <img src="assets/bath.png" alt="bath icon" class="imgBtn">
         </div>
       </button>
   
       <button (click)="sleep()">
-        <div class="img_container" [ngStyle]="{'height': getContainerHeight(fatigueValue), 'background-color': '#d3ba77'}">
+        <div class="img_container" [ngStyle]="{'height': getContainerHeight(fatigueValue), 'background-color': getStatusColor(fatigueValue)}">
         <img src="assets/lighting.png" alt="sleep icon" class="imgBtn">
         </div>
       </button>
   
       <button (click)="care()">
-        <div class="img_container" [ngStyle]="{'height': getContainerHeight(attentionValue), 'background-color': '#d3ba77'}">
+        <div class="img_container" [ngStyle]="{'height': getContainerHeight(attentionValue), 'background-color': getStatusColor(attentionValue)}">
         <img src="assets/heart.png" alt="care icon" class="imgBtn">
         </div>
       </button>
   
       <button (click)="feed()">
-        <div class="img_container" [ngStyle]="{'height': getContainerHeight(hungerValue), 'background-color': '#d3ba77'}">
+        <div class="img_container" [ngStyle]="{'height': getContainerHeight(hungerValue), 'background-color': getStatusColor(hungerValue)}">
         <img src="assets/ham.png" alt="food icon" class="imgBtn">
         </div>
       </button>

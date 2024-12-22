@@ -16,9 +16,10 @@ import { UserService } from 'src/app/services/user.service';
 export class ProfilePage implements OnInit, AfterViewInit {
   @ViewChild('levelUpModal', { static: false }) levelUpModal!: IonModal;
 
-  userId: string = '';
   username: string = '';
+  level: number = 0;
   petName: string = '';
+  petImage: string = '';
   petSmart: any;
   petSpeed: any;
   petStrength: any;
@@ -44,43 +45,47 @@ export class ProfilePage implements OnInit, AfterViewInit {
     return this.injector.get(UserService);
   }
 
-  ngOnInit() {
-    const username = this.userService.getUsername();
-    console.log("Username:", username);
-    if (!username) {
-      this.router.navigateByUrl('/login');
-      return;
-    }
-  
-    this.username = username;
-    this.userId = this.userService.getUserId();
-    console.log("User ID:", this.userId, this.username);
-  
-    // Fetch pet stats based on the username
-    this.userService.getPetStatsByUsername(this.username).subscribe((petStats) => {
-      if (petStats) {
-        this.petName = petStats.name;
-        this.petSmart = petStats.smart;
-        this.petSpeed = petStats.speed;
-        this.petStrength = petStats.strength;
-  
-        console.log('Pet stats fetched:', {
-          name: this.petName,
-          smart: this.petSmart,
-          speed: this.petSpeed,
-          strength: this.petStrength,
-        });
-  
-        if (this.router.getCurrentNavigation()?.extras.state?.['levelUp']) {
-          this.openModal();
-        }
-      } else {
-        console.warn('No pet stats found for this user.');
+    ngOnInit() {
+      const username = localStorage.getItem('username');
+      console.log("Username:", username);
+      if (!username) {
+        this.router.navigateByUrl('/login');
+        return;
       }
-    });
-  
-    this.sleepTime = this.userService.getSleepTime() || '';
-  }
+    
+      this.username = username;
+      console.log("Username:", this.username);
+    
+      // Fetch pet stats based on the username
+      this.userService.getPetStatsByUsername(this.username).subscribe((petStats) => {
+        if (petStats) {
+          this.petImage = petStats.image;
+          this.petName = petStats.name;
+          this.petSmart = petStats.smart;
+          this.petSpeed = petStats.speed;
+          this.petStrength = petStats.strength;
+    
+          console.log('Pet stats fetched:', {
+            name: this.petName,
+            smart: this.petSmart,
+            speed: this.petSpeed,
+            strength: this.petStrength,
+          });
+    
+          if (this.router.getCurrentNavigation()?.extras.state?.['levelUp']) {
+            this.level = this.level;
+            this.openModal();
+          }
+        } else {
+          console.warn('No pet stats found for this user.');
+        }
+      });
+    
+      this.sleepTime = this.userService.getSleepTime() || '';
+      this.level = this.userService.getGameState().level;
+      //this.loadLevel();
+    }
+    
                 
     ngAfterViewInit() {
       const navigation = this.router.getCurrentNavigation();
@@ -138,6 +143,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     
       this.userService.updatePetStats({
         name: this.petName,
+        image: this.petImage,
         smart: this.petSmart,
         speed: this.petSpeed,
         strength: this.petStrength,
@@ -176,7 +182,6 @@ export class ProfilePage implements OnInit, AfterViewInit {
   
   async logOut() {
     const alert = await this.alertController.create({
-      header: 'Confirm Logout',
       message: 'Are you sure you want to log out?',
       buttons: [
         {
@@ -186,17 +191,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
         {
           text: 'Yes',
           handler: () => {
-            // Call the methods to clear user and pet data
-            this.userService.clearUserData();
-            this.userService.clearPetData();
-  
-            // Navigate to home page
-            this.router.navigateByUrl('/home').then(() => {
-              console.log('Navigated to home after logout.');
-            }).catch(error => {
-              console.error('Navigation error during logout:', error);
-            });
-  
+            // Call the logout method to clear session data and navigate
+            this.userService.logOut();
             console.log('User has been logged out.');
           },
         },
@@ -205,6 +201,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   
     await alert.present();
   }
+  
    
     onLogInSuccess() {
       this.userService.initializeUserData();
@@ -229,24 +226,23 @@ export class ProfilePage implements OnInit, AfterViewInit {
         console.log(petStats)
       });
     }
-    
+
   returnToGame() {
     this.router.navigateByUrl('/game');
   }
 
   async confirmDeleteProfile() {
     const alert = await this.alertController.create({
-      header: 'Confirm',
       message: 'Are you sure you want to delete your profile? This action cannot be undone.',
       buttons: [
         {
-          text: 'Cancel',
+          text: 'NO',
           role: 'cancel',
         },
         {
-          text: 'Delete',
+          text: 'YES',
           handler: () => {
-            this.deleteProfile();
+            this.userService.deleteProfile(this.username);
           },
         },
       ],
@@ -255,16 +251,4 @@ export class ProfilePage implements OnInit, AfterViewInit {
     await alert.present();
   }
   
-  deleteProfile() {
-    if (this.username) {
-      this.userService.deleteProfile(this.username);
-      console.log(`Profile deleted for username: ${this.username}`);
-      this.router.navigateByUrl('/home'); 
-    } else {
-      console.warn('No username found. Cannot delete profile.');
-    }
-  }
-  
-  
-
 }

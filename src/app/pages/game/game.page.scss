@@ -81,6 +81,7 @@ ion-content {
     margin: 0.4rem;
     clip-path: polygon(8% 0, 94% 0, 100% 15%, 100% 87%, 92% 100%, 14% 100%, 0 90%, 0 18%);
     background-color: #bb9664;
+    box-shadow: 0 4px 80px rgb(35, 35, 35);
   }
 
   .topBtn {
@@ -99,52 +100,16 @@ ion-content {
   .img_container {
     transition: height 0.5s ease, background-color 0.5s ease;
     clip-path: polygon(8% 100%, 94% 100%, 100% 85%, 100% 13%, 92% 0%, 14% 0%, 0 10%, 0 82%); 
-    height: 18vmin;
-    width: 18vmin;
+    height: 20vmin;
+    width: 20vmin;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 5px;
-    margin-top: 5px;
     position: absolute;
     bottom: -0.6rem;
-}
-
-
-  .imgBtn {
-    height: 20vmin;
+    overflow: hidden;
+    z-index: 0;
   }
-
-  .level {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: 1fr; 
-    width: 100%;
-  }
-
-.level-bar {
-  height: 20px;
-  width: 60%;
-  border: 1px solid black;
-  background-color: white;
-  border-radius: 5px;
-  margin: 5rem 0;
-  position: relative;
-  position: absolute;
-  top: 0;
-}
-
-.level-progress-bar {
-  height: 100%; 
-  background-color: #4CAF50; 
-  transition: width 0.5s ease;
-  position: absolute;
-  top: 0;
-}
-
-p {
-  margin: -1.2rem 0.5rem;
-}
 
 .stats {
   display: flex;
@@ -163,18 +128,28 @@ p {
   margin-top: 8rem;
 }
 
-.status-bar {
-  width: 50px;
+.level {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 1fr; 
+  width: 100%;
+}
+
+.level-bar {
+  height: 100vmin;
+  width: 18vmin;
   border: 10px solid #bb9664;
+  background-color: #d3ba77;
   border-radius: 8px;
   position: absolute;
   left: 0;
   bottom: 0;
-  transition: height 0.5s ease, background-color 0.5s ease;
 }
 
-.status-bar-outer {
-  background-color: #bc9665;
-  position: absolute;
-  left: 3.9vmin;
+.level-progress-bar {
+width: 13.5vmin; 
+background-color: #faffb9; 
+transition: height 0.5s ease;
+position: absolute;
+bottom: 0;
 }

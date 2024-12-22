@@ -73,7 +73,7 @@ export class CreatePetPage implements OnInit {
 
   async promptPlayMode() {
     const alert = await this.alertController.create({
-      message: 'Želite li igrati online ili offline?',
+      message: 'Would you like to play online or offline?',
       cssClass: 'playMode',
       buttons: [
         {
@@ -191,11 +191,13 @@ export class CreatePetPage implements OnInit {
               // Store online data in local storage for offline use
               localStorage.setItem('userData', JSON.stringify(selectedDogData));
               this.userService.setSelectedDog(dogStats);
+              this.userService.initializeUserData(); 
               this.router.navigate(['/game']);
             } else {
               // Save offline data directly in local storage
               localStorage.setItem('userData', JSON.stringify(selectedDogData));
               this.userService.setSelectedDog(dogStats);
+              this.userService.initializeUserData(); 
               this.router.navigate(['/game']);
             }
           },

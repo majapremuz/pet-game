@@ -1,20 +1,13 @@
-import { Component, ChangeDetectorRef, Injector } from '@angular/core';
+import { Component, ChangeDetectorRef, Injector, OnDestroy, NgZone} from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
-import { UserService } from 'src/app/services/user.service';
+import { UserService, GameState } from 'src/app/services/user.service';
 import { PushNotifications } from '@capacitor/push-notifications';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
-
-interface StatProperties {
-  hungerValue: number;
-  fatigueValue: number;
-  purityValue: number;
-  attentionValue: number;
-}
 
 @Component({
   selector: 'app-game',
@@ -23,38 +16,36 @@ interface StatProperties {
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule],
 })
-export class GamePage implements StatProperties  {
-  hungerValue: number = 100;
-  fatigueValue: number = 100;
-  purityValue: number = 100;
-  attentionValue: number = 100;
-
-  hungerColor: string = '#d3ba77';
-  fatigueColor: string = '#d3ba77';
-  purityColor: string = '#d3ba77';
-  attentionColor: string = '#d3ba77';
+export class GamePage implements OnDestroy{
 
   value: number = 100;
   decreaseInterval: any;
-  points: number = 0; 
-  level: number = 0; 
   pointsNeeded: number = 10; 
   maxPoints: number = 100; 
   progressBarWidth: number = 0; 
   currentColor: string = '#d3ba77';
   isJumping: boolean = false;
   audio: HTMLAudioElement;
+  username: string = '';
   petName: string = '';
   petSmart: number = 0;
   petSpeed: number = 0;
   petStrength: number = 0;
-  selectedDogImage: string = '';
+  petImage: string = '';
   dogStats: any = {};
   showHeart: boolean = false;
   nextFeedTime: Date | undefined;
+  gameState: GameState;
+  currentStatValue!: number; 
+  currentStatColor!: string;
 
-  currentStatValue: number = this.hungerValue;
-currentStatColor: string = this.getStatusColor(this.hungerValue);
+  intervals: Record<StatName, any> = {
+    hunger: null,
+    fatigue: null,
+    purity: null,
+    attention: null
+  };
+  
 
    // New properties for intervals and next action times
    hungerNextAction: Date | undefined;
@@ -65,14 +56,16 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
   constructor(
     private cdRef: ChangeDetectorRef,
     private router: Router,
-    private injector: Injector
+    private injector: Injector,
+    private ngZone: NgZone
   ) {
     const navigation = this.router.getCurrentNavigation();
   if (navigation?.extras.state) {
-    this.selectedDogImage = navigation.extras.state['selectedDogImage'];
+    this.petImage = navigation.extras.state['selectedDogImage'];
     this.petName = navigation.extras.state['petName'];
   }
   this.audio = new Audio('assets/bark.wav');
+  this.gameState = this.userService.getGameState();
   }
 
   private get userService(): UserService {
@@ -80,25 +73,60 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
   }
 
   ngOnInit() {
-    this.loadGameState();
+    this.userService.initializeGameState();
+    this.gameState = this.userService.getGameState();
+    console.log("Game State: ", this.gameState);
+    this.currentStatValue = this.gameState.hungerValue;
+    this.currentStatColor = this.getStatusColor(this.gameState.hungerValue);
+    // Request notification permission
     this.requestNotificationPermission();
-    this.userService.initializePetData().subscribe(selectedDog => {
-      if (selectedDog) {
-        this.selectedDogImage = selectedDog.image;
-        this.petName = selectedDog.name;
-          this.petSmart = selectedDog.smart;
-          this.petSpeed = selectedDog.speed;
-          this.petStrength = selectedDog.strength;
-          console.log("dog stats: ", this.petSmart, this.petSpeed, this.petStrength)
-      } else {
-        console.warn("No selected dog found. Redirecting to pet selection page.");
-        this.router.navigate(['/home']);
+  
+    // Retrieve pet stats from localStorage
+    const storedPetData = localStorage.getItem('selectedDog');
+    console.log("", localStorage.getItem('selectedDog'));
+    if (storedPetData) {
+      const selectedDog = JSON.parse(storedPetData);
+      this.petImage = selectedDog.image;
+      this.petName = selectedDog.name;
+      this.petSmart = selectedDog.smart;
+      this.petSpeed = selectedDog.speed;
+      this.petStrength = selectedDog.strength;
+      console.log('Loaded pet stats from localStorage:', selectedDog);
+    } else {
+      console.warn('No pet data found. Redirecting to pet selection page.');
+      this.router.navigate(['/home']);
+    }
+  
+    // Initialize action times and start updates
+    this.setInitialActionTimes();
+    this.updateColorGradually();
+    this.startStatusDecreasing();
+  }
+
+  ngOnDestroy() {
+    Object.entries(this.intervals).forEach(([stat, intervalId]) => {
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     });
+  }
 
-    this.setInitialActionTimes();
-    this.startStatusDecreasing();
-    this.updateColorGradually();
+
+
+  get hungerValue(): number {
+    return this.userService.gethungerValue();
+  }
+
+  get attentionValue(): number {
+    return this.userService.getattentionValue();
+  }
+
+  get fatigueValue(): number {
+    return this.userService.getfatigueValue();
+  }     
+
+  get purityValue(): number {   
+    return this.userService.getpurityValue();
   }
 
   async requestNotificationPermission() {
@@ -111,6 +139,11 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
     }
   }
 
+    saveGame(): void {
+      this.userService.saveGameState(this.gameState);
+    }
+  
+
    /*setInitialActionTimes() {
     const now = new Date();
     this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
@@ -121,10 +154,10 @@ currentStatColor: string = this.getStatusColor(this.hungerValue);
 
     setInitialActionTimes() {
       const now = new Date();
-      this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(1, 2)); // 1-2 minutes
-      this.fatigueNextAction = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes
-      this.purityNextAction = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes
-      this.attentionNextAction = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute
+      this.gameState.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(1, 2)); // 1-2 minutes
+      this.gameState.fatigueNextAction = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes
+      this.gameState.purityNextAction = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes
+      this.gameState.attentionNextAction = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute
     }
 
   // Returns a random interval within the given hour range
@@ -137,43 +170,41 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
   return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
 }
 
-  /*startStatusDecreasing() {
-    const decrementIntervals: Record<StatName, number> = {
+    /*decrementIntervals: Record<StatName, number> = {
       hunger: 6 * 60 * 60 * 1000, // 6 hours
       fatigue: 24 * 60 * 60 * 1000, // 24 hours
       purity: 18 * 60 * 60 * 1000, // 18 hours
       attention: 8 * 60 * 60 * 1000, // 8 hours
-    };
-  
-    Object.entries(decrementIntervals).forEach(([stat, interval]) => {
-      setInterval(() => {
-        this.decreaseStat(stat as StatName, 10);
-      }, interval);
-    });
-  }*/
+    };*/
 
-    startStatusDecreasing() {
-      const decrementIntervals: Record<StatName, number> = {
-        hunger: 1 * 60 * 1000, // 1 minute
-        fatigue: 3 * 60 * 1000, // 3 minutes
-        purity: 2 * 60 * 1000, // 2 minutes
-        attention: 1 * 60 * 1000, // 1 minute
-      };
-    
-      Object.entries(decrementIntervals).forEach(([stat, interval]) => {
-        setInterval(() => {
-          this.decreaseStat(stat as StatName, 10); // Decrement by 10 for testing
-        }, interval);
-      });
-    }
-  
-decreaseStat(stat: StatName, decrement: number) {
-  const valueKey = `${stat}Value` as keyof StatProperties;
-  this[valueKey] = Math.max(this[valueKey] - decrement, 0);
-  this.updateStatColorsAndHeight(stat);
-  this.updateCurrentStat(stat);
-  this.saveGameState();
-}
+    decrementIntervals: Record<StatName, number> = {
+      hunger: 2000, // 15 seconds
+      fatigue: 20000, // 20 seconds
+      purity: 25000, // 25 seconds
+      attention: 30000, // 30 seconds
+    };
+
+      /*startStatusDecreasing() {
+        Object.entries(this.decrementIntervals).forEach(([stat, interval]) => {
+          setInterval(() => {
+            this.decreaseStat(stat as StatName, 1); // Decrease by 1 every interval
+          }, interval);
+        });
+      }*/
+
+        startStatusDecreasing() {
+          Object.entries(this.decrementIntervals).forEach(([stat, interval]) => {
+            // If there's already an interval running for this stat, clear it
+            if (this.intervals[stat as StatName]) {
+              clearInterval(this.intervals[stat as StatName]);
+            }
+        
+            // Set the new interval and store its ID
+            this.intervals[stat as StatName] = setInterval(() => {
+              this.decreaseStat(stat as StatName, 1); // Decrease by 1 every interval
+            }, interval);
+          });
+        }
 
   // Update the next action time based on the stat
   private updateNextActionTime(stat: StatName) {
@@ -201,19 +232,19 @@ handleAction(action: StatName) {
 
   switch (action) {
     case 'hunger':
-      nextActionTime = this.hungerNextAction;
+      nextActionTime = this.gameState.hungerNextAction;
       incrementValue = 20;
       break;
     case 'fatigue':
-      nextActionTime = this.fatigueNextAction;
+      nextActionTime = this.gameState.fatigueNextAction;
       incrementValue = 30;
       break;
     case 'purity':
-      nextActionTime = this.purityNextAction;
+      nextActionTime = this.gameState.purityNextAction;
       incrementValue = 20;
       break;
     case 'attention':
-      nextActionTime = this.attentionNextAction;
+      nextActionTime = this.gameState.attentionNextAction;
       incrementValue = 25;
       break;
   }
@@ -224,6 +255,7 @@ handleAction(action: StatName) {
     else if (now < nextActionTime) this.addPoint(0.5);
     else this.addPoint(0);
 
+    // Set the new next action time
     nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
   }
 
@@ -231,31 +263,56 @@ handleAction(action: StatName) {
   this.updateStatColorsAndHeight(action);
 }
 
+
 increaseStat(stat: StatName, increment: number) {
-  const valueKey = `${stat}Value` as keyof StatProperties;
-  this[valueKey] = Math.min(this[valueKey] + increment, 100);
+  const valueKey = `${stat}Value` as keyof GameState;
+  // Increase the stat instantly without waiting for any interval
+  this.gameState[valueKey] = Math.min(this.gameState[valueKey] + increment, 100);
   this.updateStatColorsAndHeight(stat);
   this.updateCurrentStat(stat);
-  this.saveGameState();
+  
+  // Manually trigger change detection to update the UI immediately
+  this.cdRef.detectChanges();
 }
 
-updateStatColorsAndHeight(stat: StatName) {
-  const valueKey = `${stat}Value` as keyof StatProperties;
-  const colorKey = `${stat}Color` as StatColorName;
+decreaseStat(stat: StatName, decrement: number) {
+  const valueKey = `${stat}Value` as keyof GameState;
+  if (this.gameState[valueKey] !== undefined) {
+    this.gameState[valueKey] = Math.max((this.gameState[valueKey] as number) - decrement, 0);
+    this.updateStatColorsAndHeight(stat);
+    this.userService.updateGameState(this.gameState);
 
-  const currentValue = this[valueKey] as number;
-  this[colorKey] = this.getStatusColor(currentValue);
-  this.cdRef.markForCheck();
+    // Trigger immediate UI update
+    this.cdRef.detectChanges();
+  }
+}
+
+
+updateStatColorsAndHeight(stat: StatName) {
+  const valueKey = `${stat}Value` as keyof GameState;
+  const value = this.gameState[valueKey];
+  const colorKey = `${stat}Color` as StatColorName;
+  const newColor = this.getStatusColor(value);
+
+  if (this.gameState[colorKey] !== newColor || this.gameState[valueKey] !== value) {
+    this.gameState[colorKey] = newColor;
+    this.ngZone.run(() => {
+      this.cdRef.detectChanges();
+    });
+  }
 }
 
 updateCurrentStat(stat: StatName) {
-  const valueKey = `${stat}Value` as keyof StatProperties;
+  const valueKey = `${stat}Value` as keyof GameState;
   const colorKey = `${stat}Color` as StatColorName;
-  this.currentStatValue = this[valueKey];
-  this.currentStatColor = this[colorKey];
+  console.log("gameState before update", this.gameState);
+  this.currentStatValue = this.gameState[valueKey];
+  console.log("VALUE", this.currentStatValue);
+  this.currentStatColor = this.gameState[colorKey];
+  console.log("COLOR", this.currentStatColor);
 }
 
-checkAlert(stat: StatName) {
+/*checkAlert(stat: StatName) {
   const valueKey = `${stat}Value` as keyof StatProperties;
   if (this[valueKey] < 10) {
     // Alert the user with a push notification
@@ -289,7 +346,7 @@ checkAlert(stat: StatName) {
     // Optionally alert the user immediately
     alert(`Your pet's ${stat} is critically low!`);
   }
-}
+}*/
 
 
   getStatusColor(value: number): string {
@@ -307,10 +364,11 @@ checkAlert(stat: StatName) {
   }
 
 updateContainerHeight(stat: StatName) {
-  const valueKey = `${stat}Value` as keyof StatProperties;
+  const valueKey = `${stat}Value` as keyof GameState;
   const statElement = document.getElementById(`${stat}-container`);
   if (statElement) {
-    statElement.style.height = this.getContainerHeight(this[valueKey] as number);
+    const statValue = this.gameState[valueKey] as number;
+    statElement.style.height = this.getContainerHeight(statValue);
   }
 }
 
@@ -319,21 +377,35 @@ updateContainerHeight(stat: StatName) {
     return `${value}%`; 
 }
 
-  updateColorGradually() {
-    setInterval(() => {
-      const currentHour = new Date().getHours();
-      // Map the hour (0-23) to a color value (from morning to night)
-      const colorValue = 255 - Math.floor((currentHour / 23) * 255); 
-      this.currentColor = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-      this.cdRef.detectChanges();
-    }, 2000); // Update every hour
-  }
-
-  syncCurrentStat(stat: StatName) {
-    const valueKey = `${stat}Value` as keyof StatProperties;
-    this.currentStatValue = this[valueKey] as number;
-    this.currentStatColor = this.getStatusColor(this.currentStatValue);
-  }
+    updateColorGradually(stat?: keyof GameState) {
+      if (stat) {
+        const valueKey = `${stat}Value` as keyof GameState;
+        const colorKey = `${stat}Color` as keyof GameState;
+    
+        const currentValue = this.gameState[valueKey];
+    
+        // Ensure currentValue is a number before passing it to getStatusColor
+        const newColor = this.getStatusColor(typeof currentValue === 'number' ? currentValue : 0);
+    
+        this.gameState[colorKey] = newColor;
+    
+        console.log(`Updated color for ${stat}: ${newColor}`);
+      } else {
+        this.gameState.hungerColor = this.getStatusColor(this.gameState.hungerValue);
+        this.gameState.fatigueColor = this.getStatusColor(this.gameState.fatigueValue);
+        this.gameState.purityColor = this.getStatusColor(this.gameState.purityValue);
+        this.gameState.attentionColor = this.getStatusColor(this.gameState.attentionValue);
+    
+        console.log('Updated all colors');
+      }
+    }
+    
+    syncCurrentStat(stat: StatName) {
+      const valueKey = `${stat}Value` as keyof GameState;
+      this.currentStatValue = this.userService.getStatValue(valueKey);
+      this.currentStatColor = this.getStatusColor(this.currentStatValue);
+    }
+    
 
   increaseSmart() {
     this.petSmart = Number(this.petSmart) + 1;
@@ -401,79 +473,40 @@ savePetStats() {
     this.nextFeedTime = new Date(now.getTime() + randomHours * 60 * 60 * 1000);
   }
 
-  loadGameState() {
-    const savedState = localStorage.getItem('gameState');
-    if (savedState) {
-      const gameState = JSON.parse(savedState);
-      this.hungerValue = gameState.hungerValue;
-      this.fatigueValue = gameState.fatigueValue;
-      this.purityValue = gameState.purityValue;
-      this.attentionValue = gameState.attentionValue;
-      this.points = gameState.points;
-      this.level = gameState.level;
-      this.petName = gameState.petName;
-      this.petSmart = gameState.petSmart;
-      this.petSpeed = gameState.petSpeed;
-      this.petStrength = gameState.petStrength;
-      this.selectedDogImage = gameState.selectedDogImage;
-    }
-  }
-  
-  saveGameState() {
-    const gameState = {
-      hungerValue: this.hungerValue,
-      fatigueValue: this.fatigueValue,
-      purityValue: this.purityValue,
-      attentionValue: this.attentionValue,
-      points: this.points,
-      level: this.level,
-      petName: this.petName,
-      petSmart: this.petSmart,
-      petSpeed: this.petSpeed,
-      petStrength: this.petStrength,
-      selectedDogImage: this.selectedDogImage,
-    };
-    localStorage.setItem('gameState', JSON.stringify(gameState));
-  }
-  
-
   checkLevelUp() {
-    if (this.points >= this.pointsNeeded) {
-      this.level += 1;
-      this.points = 0;
+    if (this.gameState.points >= this.pointsNeeded) {
+      this.gameState.level += 1;
+      this.gameState.points = 0;
       this.pointsNeeded = Math.floor(this.pointsNeeded * 1.1);
-      console.log('Navigating with levelUp:', this.level);
+      console.log('Navigating with levelUp:', this.gameState.level);
       // Navigate to profile page and pass a flag to trigger the level-up modal
-      this.router.navigate(['/profile'], { state: { levelUp: true } });
+      this.router.navigate(['/profile'], { state: { levelUp: true, level: this.gameState.level } });
     }
   }
   
 
   // Adds points based on user timing
   addPoint(points: number) {
-    this.points += points;
+    this.gameState.points += points;
     this.checkLevelUp();
-    this.progressBarWidth = (this.points / this.pointsNeeded) * 100;
-    if (this.points >= this.pointsNeeded) {
+    this.progressBarWidth = (this.gameState.points / this.pointsNeeded) * 100;
+    if (this.gameState.points >= this.pointsNeeded) {
       this.levelUp();
     }
-    this.saveGameState();
   }
 
   // Method to handle leveling up
   levelUp() {
-    if (this.level < 50) { 
-      this.level += 1;        
-      this.points = 0;
+    if (this.gameState.level < 50) { 
+      this.gameState.level += 1;        
+      this.gameState.points = 0;
       this.pointsNeeded = Math.ceil(this.pointsNeeded * 1.1); 
-      this.progressBarWidth = 0;
       this.openLevelUpModal();
     } else {
-      this.points = this.pointsNeeded;
+      this.gameState.points = this.pointsNeeded;
       this.progressBarWidth = 100;
       console.log("Maximum level reached.");
     }
-    this.saveGameState();
   }
 
   openLevelUpModal() {
@@ -499,7 +532,6 @@ savePetStats() {
 
   profile() {
     this.router.navigate(['/profile']);
-  }
+  };
 
 }
-
