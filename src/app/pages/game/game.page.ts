@@ -179,10 +179,10 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
     };*/
 
     decrementIntervals: Record<StatName, number> = {
-      hunger: 1500, // 1.5 seconds
-      fatigue: 2000, // 2 seconds
-      purity: 2500, // 2.5 seconds
-      attention: 3000, // 3 seconds
+      hunger: 60000, // 1 minute
+      fatigue: 120000, // 2 minutes
+      purity: 180000, // 3 minutes
+      attention: 240000, // 4 minutes
     };
 
 
@@ -195,7 +195,7 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
         
             // Set the new interval and store its ID
             this.intervals[stat as StatName] = setInterval(() => {
-              this.decreaseStat(stat as StatName, 1); // Decrease by 1 every interval
+              this.decreaseStat(stat as StatName, 1); 
             }, interval);
           });
         }
@@ -219,43 +219,54 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
     }
   }
 
-handleAction(action: StatName) {
-  const now = new Date();
-  let nextActionTime: Date | undefined;
-  let incrementValue: number = 0;
-
-  switch (action) {
-    case 'hunger':
-      nextActionTime = this.gameState.hungerNextAction;
-      incrementValue = 20;
-      break;
-    case 'fatigue':
-      nextActionTime = this.gameState.fatigueNextAction;
-      incrementValue = 30;
-      break;
-    case 'purity':
-      nextActionTime = this.gameState.purityNextAction;
-      incrementValue = 20;
-      break;
-    case 'attention':
-      nextActionTime = this.gameState.attentionNextAction;
-      incrementValue = 25;
-      break;
+  handleAction(action: StatName) {
+    const now = new Date();
+    let nextActionTime: Date | undefined;
+    let incrementValue: number = 0;
+  
+    switch (action) {
+      case 'hunger':
+        nextActionTime = this.gameState.hungerNextAction;
+        incrementValue = 20;
+        break;
+      case 'fatigue':
+        nextActionTime = this.gameState.fatigueNextAction;
+        incrementValue = 30;
+        break;
+      case 'purity':
+        nextActionTime = this.gameState.purityNextAction;
+        incrementValue = 20;
+        break;
+      case 'attention':
+        nextActionTime = this.gameState.attentionNextAction;
+        incrementValue = 25;
+        break;
+    }
+  
+    // Ensure that the stat is not at 100 before allowing the user to earn points
+    const statValue = this.gameState[`${action}Value` as keyof GameState];
+    if (statValue === 100) {
+      // If the stat is at 100, do not allow points to be earned
+      console.log(`${action} is already full. No points awarded.`);
+      return;  // Exit the function early
+    }
+  
+    // Check the time difference and award points
+    if (nextActionTime) {
+      const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000);
+      if (timeDifference <= 10) this.addPoint(1); // Add points if the time difference is within range
+      else if (now < nextActionTime) this.addPoint(0.5); // Add fewer points if not yet time
+      else this.addPoint(0); // No points if time is past
+  
+      // Set the new next action time
+      nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
+    }
+  
+    // Increase the stat value
+    this.increaseStat(action, incrementValue);
+    this.updateStatColorsAndHeight(action);
   }
-
-  if (nextActionTime) {
-    const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000);
-    if (timeDifference <= 10) this.addPoint(1);
-    else if (now < nextActionTime) this.addPoint(0.5);
-    else this.addPoint(0);
-
-    // Set the new next action time
-    nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
-  }
-
-  this.increaseStat(action, incrementValue);
-  this.updateStatColorsAndHeight(action);
-}
+  
 
 async showLowStatAlert(stat: StatName) {
   const alert = await this.alertController.create({
@@ -279,6 +290,14 @@ increaseStat(stat: StatName, increment: number) {
   this.cdRef.detectChanges();
 }
 
+alertShown: Record<StatName, boolean> = {
+  hunger: false,
+  fatigue: false,
+  purity: false,
+  attention: false
+};
+
+
 decreaseStat(stat: StatName, decrement: number) {
   const valueKey = `${stat}Value` as keyof GameState;
   if (this.gameState[valueKey] !== undefined) {
@@ -286,18 +305,20 @@ decreaseStat(stat: StatName, decrement: number) {
     this.gameState[valueKey] = Math.max((this.gameState[valueKey] as number) - decrement, 0);
 
     // If hunger or fatigue reaches 0, give the player a chance to solve it
-    if (stat === 'hunger' || stat === 'fatigue') {
-      if (this.gameState[valueKey] === 0) {
-        this.showLowStatAlert(stat); // Alert the player
+    if ((stat === 'hunger' || stat === 'fatigue') && this.gameState[valueKey] === 0) {
+      if (!this.alertShown[stat]) {
+        this.showLowStatAlert(stat); // Show the alert only if it hasn't been shown already
+        this.alertShown[stat] = true; // Mark as shown
         // Provide a chance to solve it
         this.offerChanceToFixStat(stat);
       }
     }
     
     // If purity or attention reaches 0, give the player a chance to solve it
-    if (stat === 'purity' || stat === 'attention') {
-      if (this.gameState[valueKey] === 0) {
-        this.showLowStatAlert(stat); // Alert the player
+    if ((stat === 'purity' || stat === 'attention') && this.gameState[valueKey] === 0) {
+      if (!this.alertShown[stat]) {
+        this.showLowStatAlert(stat); // Show the alert only if it hasn't been shown already
+        this.alertShown[stat] = true; // Mark as shown
         // Provide a chance to solve it
         this.offerChanceToFixStat(stat);
       }
@@ -315,6 +336,7 @@ decreaseStat(stat: StatName, decrement: number) {
     this.cdRef.detectChanges();
   }
 }
+
 
 // Provide a chance for the player to solve the issue (e.g., feed the pet)
 async offerChanceToFixStat(stat: StatName) {
