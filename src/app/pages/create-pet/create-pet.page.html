@@ -6,7 +6,7 @@
   <div *ngIf="!playMode" class="mode-warning"></div>
 
 <!-- image 1-->
-  <div class="slide fade">
+  <div class="slide fade" [ngClass]="{'active-slide': currentSlideIndex === 0}">
     <div class="container">
       <div class="pet-container">
         <div class="pet stats">
@@ -14,13 +14,13 @@
           <p>Speed: 5</p>
           <p>Strength: 5</p>
         </div>
-        <img src="assets/select dog 1.png" alt="dog 1" class="dog-img">
+        <img src="assets/select dog 1.png" alt="dog 1" class="dog-img" loading="lazy">
          </div>
     </div>
   </div>
 
   <!-- image 2-->
-  <div class="slide fade">
+  <div class="slide fade" [ngClass]="{'active-slide': currentSlideIndex === 1}">
     <div class="container">
       <div class="pet-container">
         <div class="pet stats">
@@ -28,13 +28,13 @@
           <p>Speed: 10</p>
           <p>Strength: 5</p>
         </div>
-        <img src="assets/select dog 2.png" alt="dog 2" class="dog-img">  
+        <img src="assets/select dog 2.png" alt="dog 2" class="dog-img" loading="lazy">  
       </div>
     </div>
   </div>
 
   <!-- image 3-->
-  <div class="slide fade">
+  <div class="slide fade" [ngClass]="{'active-slide': currentSlideIndex === 2}">
     <div class="container">
       <div class="pet-container">
         <div class="pet stats">
@@ -42,13 +42,13 @@
           <p>Speed: 5</p>
           <p>Strength: 10</p>
         </div>
-        <img src="assets/select dog 3.png" alt="dog 3" class="dog-img">  
+        <img src="assets/select dog 3.png" alt="dog 3" class="dog-img" loading="lazy">  
       </div>
     </div>
   </div>
 
   <!-- Navigation Buttons -->
-  <button class="prev" (click)="plusSlides(-1);">
+  <button class="prev" (click)="plusSlides(1);">
     <div class="prev"></div>
   </button>
   <button href="#next" class="next" (click)="plusSlides(-1);">
@@ -58,12 +58,11 @@
   <button class="pickBtn" (click)="game();">Pick this pet</button>
 
   <div *ngIf="showInput" class="nameInput">
-    <label for="petName">Enter Pet Name:</label>
-    <input id="petName" type="text" [(ngModel)]="petName" placeholder="Enter pet name here"/>
+    <label position="floating">Enter Pet Name:</label>
+    <input [(ngModel)]="petName" placeholder="Enter pet name here" name="petName" type="text" required/>
     <button (click)="game()" class="nameConfirmBtn">Confirm</button>
   </div>
 
 </div>
-  
   
 </ion-content>

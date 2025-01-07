@@ -3,16 +3,12 @@
     <h1>Sign up</h1>
 
     <div>
-    <label for="username">account</label>
-    <br>
-    <input type="text" id="username" name="username" [(ngModel)]="username">
+      <label position="floating" class="label">account</label>
+      <input [(ngModel)]="username" name="username" required type="text">
   
-    <label for="password">password</label>
-    <br>
-    <input type="password" id="password" name="password" [(ngModel)]="password">
+      <label position="floating" class="label">password</label> 
+      <input [(ngModel)]="password" name="password" type="password" required type="password">
     </div>
-
-    
     
     <button type="submit">SIGN UP</button>
   </form>

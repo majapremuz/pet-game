@@ -34,7 +34,7 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+@import "@ionic/angular/css/palettes/dark.system.css";
 
 .alert-wrapper {
     --background: #d3ba77; 
@@ -43,6 +43,9 @@
     --border-radius: 15px;
       border: 6px solid #bc9763;
      --max-width: 100%;
+     display: flex;
+     justify-content: center;
+     align-items: center;
 }
 
 .alert-message.sc-ion-alert-md {
@@ -58,10 +61,6 @@
      0px -2px 0 #bb9764;
 }
 
-.alert-button-group .sc-ion-alert-md {
-    width: 40%;
-  }
-  
   .alert-button.sc-ion-alert-md {
     font-family: "Baloo 2", sans-serif;
     color: white;
@@ -75,6 +74,8 @@
     0px 4px 0 #bb9764, 
     -4px 0px 0 #bb9764,
      0px -4px 0 #bb9764;
+     margin: 0 3rem;
+
   }
 
   .playMode .alert-wrapper {
@@ -100,7 +101,7 @@
 }
 
 .playMode .alert-button-group {
-    width: 110vmin;
+    width: 95vmin;
 }
 
 .playMode .alert-button {
@@ -108,12 +109,12 @@
     color: white;
     font-size: 0.9rem;
     text-shadow: 
-        4px 4px 0 #bb9764, 
-        4px -4px 0 #bb9764, 
-        -4px 4px 0 #bb9764, 
-        -4px -4px 0 #bb9764, 
-        4px 0px 0 #bb9764, 
-        0px 4px 0 #bb9764, 
-        -4px 0px 0 #bb9764,
-        0px -4px 0 #bb9764;
+        3px 3px 0 #bb9764, 
+        3px -3px 0 #bb9764, 
+        -3px 3px 0 #bb9764, 
+        -3px -3px 0 #bb9764, 
+        3px 0px 0 #bb9764, 
+        0px 3px 0 #bb9764, 
+        -3px 0px 0 #bb9764,
+        0px -3px 0 #bb9764;
 }

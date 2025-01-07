@@ -5,6 +5,8 @@ import { IonicModule, IonModal } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { Router, ActivatedRoute  } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
+import * as SHA1 from 'crypto-js/sha1';
+
 
 @Component({
   selector: 'app-profile',
@@ -47,13 +49,15 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
     ngOnInit() {
       const username = localStorage.getItem('username');
-      console.log("Username:", username);
+      const currentPassword = localStorage.getItem('password');
+      console.log("Username:", username, currentPassword);
       if (!username) {
-        this.router.navigateByUrl('/login');
+        this.router.navigate(['/login']);
         return;
       }
     
       this.username = username;
+      this.currentPassword = currentPassword || '';
       console.log("Username:", this.username);
     
       // Fetch pet stats based on the username
@@ -171,14 +175,27 @@ export class ProfilePage implements OnInit, AfterViewInit {
       return;
     }
   
-    // Directly call the service's localStorage-based method to change password
-    this.userService.changePassword(this.currentPassword, this.newPassword);
+    // Check if the current password entered by the user matches the stored password
+    const storedPassword = this.userService.getUserPassword();
+    if (this.currentPassword !== storedPassword) {
+      console.warn('Current password is incorrect.');
+      return;
+    }
   
+    // If passwords match, save the new password
+    this.userService.setUserPassword(this.newPassword);  // Save the new password
+    
     // After attempting to change the password, reset fields and hide the form
     this.currentPassword = '';
     this.newPassword = '';
+    console.log("PASSWORD: ", this.currentPassword);
+    console.log("NEW PASSWORD: ", this.newPassword);
+  
     this.isPasswordFieldVisible = false;
   }
+  
+  
+    
   
   async logOut() {
     const alert = await this.alertController.create({
@@ -211,10 +228,10 @@ export class ProfilePage implements OnInit, AfterViewInit {
       const selectedDog = this.userService.getSelectedDog();
       if (!selectedDog) {
         console.log('No selected dog found. Redirecting to pet selection page.');
-        this.router.navigateByUrl('/pet-selection');
+        this.router.navigate(['/create-pet']);
       } else {
         console.log('Selected dog found:', selectedDog);
-        this.router.navigateByUrl('/game');
+        this.router.navigate(['/game']);
       }
     }
     
@@ -228,7 +245,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     }
 
   returnToGame() {
-    this.router.navigateByUrl('/game');
+    this.router.navigate(['/game']);
   }
 
   async confirmDeleteProfile() {

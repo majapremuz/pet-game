@@ -41,37 +41,23 @@ export class CreatePetPage implements OnInit {
 
   async getPushToken(): Promise<string | null> {
     try {
-      // Request push notification permissions
       const permissionStatus: PermissionStatus = await PushNotifications.requestPermissions();
       if (permissionStatus.receive === 'granted') {
-        console.log('Push Notifications permission granted.');
-
-        // Register for push notifications
         await PushNotifications.register();
-
-        // Retrieve the token
-        return new Promise((resolve) => {
-          PushNotifications.addListener('registration', (token: Token) => {
-            console.log('Push registration success:', token.value);
-            resolve(token.value);
-          });
-
-          PushNotifications.addListener('registrationError', (error) => {
-            console.error('Push registration error:', error);
-            resolve(null);
-          });
-        });
       } else {
         console.warn('Push Notifications permission denied.');
-        return null;
       }
     } catch (error) {
       console.error('Error during push token retrieval:', error);
-      return null;
     }
+    return null;
   }
+  
+  
 
   async promptPlayMode() {
+    if (this.playMode !== null) return;  // Avoid showing the prompt if it's already set
+  
     const alert = await this.alertController.create({
       message: 'Would you like to play online or offline?',
       cssClass: 'playMode',
@@ -80,10 +66,7 @@ export class CreatePetPage implements OnInit {
           text: 'Online',
           handler: async () => {
             this.playMode = 'online';
-            const token = await this.getPushToken();
-            if (!token) {
-              console.warn('Push token not received.');
-            }
+            await this.getPushToken();
           },
         },
         {
@@ -94,119 +77,116 @@ export class CreatePetPage implements OnInit {
         },
       ],
     });
-
+  
     await alert.present();
   }
+  
 
   plusSlides(n: number) {
     this.currentSlideIndex += n;
-    if (this.currentSlideIndex >= this.slides.length) {
+    if (this.currentSlideIndex >= 3) { // Update this based on the number of slides
       this.currentSlideIndex = 0;
     } else if (this.currentSlideIndex < 0) {
-      this.currentSlideIndex = this.slides.length - 1;
+      this.currentSlideIndex = 2; // Update this based on the number of slides
     }
-    this.showSlide(this.currentSlideIndex);
   }
-
-  showSlide(index: number) {
-    this.slides = Array.from(document.getElementsByClassName('slide') as HTMLCollectionOf<HTMLElement>);
-    this.slides.forEach((slide, i) => {
-      slide.style.display = i === index ? 'block' : 'none';
-    });
-  }
-
-  async game() {
-    if (!this.playMode) {
-      await this.promptPlayMode();
-      return;
-    }
   
-    const profileExists = !!this.userService.getUsername(); 
-    console.log("Profile exists:", profileExists);
+    showSlide(index: number) {
+      this.currentSlideIndex = index;
+    }
     
-    if (!profileExists) {
-      console.log("No profile found, redirecting to create profile.");
-      this.router.navigate(['/create-profile']); 
-      return;
-    }
-  
-    const alert = await this.alertController.create({
-      message: 'Are you sure you want to pick this dog?',
-      cssClass: 'alert',
-      inputs: [
-        {
-          name: 'petName',
-          type: 'text',
-          placeholder: 'Enter pet name',
-        },
-      ],
-      buttons: [
-        {
-          text: 'No',
-          role: 'cancel',
-        },
-        {
-          text: 'Yes',
-          handler: async (data) => {
-            const petName = data.petName?.trim();
-            if (!petName) {
-              console.warn('Pet name is empty.');
-              return;
-            }
-  
-            // Proceed with pet selection logic
-            const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
-            switch (this.currentSlideIndex) {
-              case 0:
-                dogStats.image = 'assets/dog 1.png';
-                dogStats.smart = 10;
-                dogStats.speed = 5;
-                dogStats.strength = 5;
-                break;
-              case 1:
-                dogStats.image = 'assets/dog 2.png';
-                dogStats.smart = 5;
-                dogStats.speed = 10;
-                dogStats.strength = 5;
-                break;
-              case 2:
-                dogStats.image = 'assets/dog 3.png';
-                dogStats.smart = 5;
-                dogStats.speed = 5;
-                dogStats.strength = 10;
-                break;
-            }
-  
-            const hashedUsername = SHA1(this.userService.getUsername()).toString();
-            const hashedPassword = SHA1(this.userService.getUserPassword()).toString();
-  
-            const selectedDogData = {
-              id: new Date().getTime(),
-              username: hashedUsername,
-              password: hashedPassword,
-              petStats: dogStats,
-            };
-  
-            if (this.playMode === 'online') {
-              // Store online data in local storage for offline use
-              localStorage.setItem('userData', JSON.stringify(selectedDogData));
-              this.userService.setSelectedDog(dogStats);
-              this.userService.initializeUserData(); 
-              this.router.navigate(['/game']);
-            } else {
-              // Save offline data directly in local storage
-              localStorage.setItem('userData', JSON.stringify(selectedDogData));
-              this.userService.setSelectedDog(dogStats);
-              this.userService.initializeUserData(); 
-              this.router.navigate(['/game']);
-            }
+
+    async game() {
+      if (!this.playMode) {
+        await this.promptPlayMode();
+        return;
+      }
+    
+      const profileExists = !!this.userService.getUsername(); 
+      console.log("Profile exists:", profileExists);
+      
+      if (!profileExists) {
+        console.log("No profile found, redirecting to create profile.");
+        this.router.navigate(['/create-profile']); 
+        return;
+      }
+    
+      const alert = await this.alertController.create({
+        message: 'Are you sure you want to pick this dog?',
+        cssClass: 'alert',
+        inputs: [
+          {
+            name: 'petName',
+            type: 'text',
+            placeholder: 'Enter pet name',
           },
-        },
-      ],
-    });
+        ],
+        buttons: [
+          {
+            text: 'No',
+            role: 'cancel',
+          },
+          {
+            text: 'Yes',
+            handler: async (data) => {
+              const petName = data.petName?.trim();
+              if (!petName) {
+                console.warn('Pet name is empty.');
+                return;
+              }
+    
+              // Proceed with pet selection logic
+              const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
+              switch (this.currentSlideIndex) {
+                case 0:
+                  dogStats.image = 'assets/dog 1.png';
+                  dogStats.smart = 10;
+                  dogStats.speed = 5;
+                  dogStats.strength = 5;
+                  break;
+                case 1:
+                  dogStats.image = 'assets/dog 2.png';
+                  dogStats.smart = 5;
+                  dogStats.speed = 10;
+                  dogStats.strength = 5;
+                  break;
+                case 2:
+                  dogStats.image = 'assets/dog 3.png';
+                  dogStats.smart = 5;
+                  dogStats.speed = 5;
+                  dogStats.strength = 10;
+                  break;
+              }
+    
+              const hashedUsername = SHA1(this.userService.getUsername()).toString();
+              const hashedPassword = SHA1(this.userService.getUserPassword()).toString();
+    
+              const selectedDogData = {
+                id: new Date().getTime(),
+                username: hashedUsername,
+                password: hashedPassword,
+                petStats: dogStats,
+              };
+    
+              if (this.playMode === 'online') {
+                // Store online data in local storage for offline use
+                localStorage.setItem('userData', JSON.stringify(selectedDogData));
+                this.userService.setSelectedDog(dogStats);
+                this.userService.initializeUserData(); 
+                this.router.navigate(['/game']);
+              } else {
+                // Save offline data directly in local storage
+                localStorage.setItem('userData', JSON.stringify(selectedDogData));
+                this.userService.setSelectedDog(dogStats);
+                this.userService.initializeUserData(); 
+                this.router.navigate(['/game']);
+              }
+            },
+          },
+        ],
+      });
+    
+      await alert.present();
+    }
+}  
   
-    await alert.present();
-  }
-  
-  
-}

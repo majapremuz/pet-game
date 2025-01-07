@@ -25,20 +25,20 @@ ion-content {
 }
 
 h1 {
-    font-size: 4rem;
+    font-size: 3rem;
     font-family: "Baloo 2", sans-serif;
     font-weight: 900;
     word-spacing: 0.5rem;
     color: white;
     text-shadow: 
-    8px 8px 0 #bb9764, 
-    8px -8px 0 #bb9764, 
-    -8px 8px 0 #bb9764, 
-    -8px -8px 0 #bb9764, 
-    8px 0px 0 #bb9764, 
-    0px 8px 0 #bb9764, 
-    -8px 0px 0 #bb9764,
-     0px -8px 0 #bb9764;
+    7px 7px 0 #bb9764, 
+    7px -7px 0 #bb9764, 
+    -7px 7px 0 #bb9764, 
+    -7px -7px 0 #bb9764, 
+    7px 0px 0 #bb9764, 
+    0px 7px 0 #bb9764, 
+    -7px 0px 0 #bb9764,
+     0px -7px 0 #bb9764;
 }
 
 .pet-container {
@@ -54,20 +54,20 @@ h1 {
 }
 
 p {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-family: "Baloo 2", sans-serif;
     font-weight: 900;
     word-spacing: 0.5rem;
     color: white;
     text-shadow: 
-    3px 3px 0 #bb9764, 
-    3px -3px 0 #bb9764, 
-    -3px 3px 0 #bb9764, 
-    -3px -3px 0 #bb9764, 
-    3px 0px 0 #bb9764, 
-    0px 3px 0 #bb9764, 
-    -3px 0px 0 #bb9764,
-     0px -3px 0 #bb9764;
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
 }
 
 @media only screen and (max-width: 370px) {
@@ -103,6 +103,10 @@ p {
 
 .slide {
     display: none;
+  }
+
+  .active-slide {
+    display: block;
   }
   
   .fade {

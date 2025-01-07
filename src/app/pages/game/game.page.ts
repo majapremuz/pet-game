@@ -22,7 +22,6 @@ export class GamePage implements OnDestroy{
   decreaseInterval: any;
   pointsNeeded: number = 10; 
   maxPoints: number = 100; 
-  //progressBarWidth: number = 0; 
   currentColor: string = '#d3ba77';
   isJumping: boolean = false;
   audio: HTMLAudioElement;
@@ -76,7 +75,7 @@ export class GamePage implements OnDestroy{
   ngOnInit() {
     this.userService.initializeGameState();
     this.gameState = this.userService.getGameState();
-    console.log("Game State: ", this.gameState);
+    //console.log("Game State: ", this.gameState);
     this.currentStatValue = this.gameState.hungerValue;
     this.currentStatColor = this.getStatusColor(this.gameState.hungerValue);
     // Request notification permission
@@ -179,10 +178,10 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
     };*/
 
     decrementIntervals: Record<StatName, number> = {
-      hunger: 60000, // 1 minute
-      fatigue: 120000, // 2 minutes
-      purity: 180000, // 3 minutes
-      attention: 240000, // 4 minutes
+      hunger: 6000, // 1 minute
+      fatigue: 6000, // 2 minutes
+      purity: 6000, // 3 minutes
+      attention: 4000, // 4 minutes
     };
 
 
@@ -243,29 +242,31 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
         break;
     }
   
-    // Ensure that the stat is not at 100 before allowing the user to earn points
-    const statValue = this.gameState[`${action}Value` as keyof GameState];
-    if (statValue === 100) {
-      // If the stat is at 100, do not allow points to be earned
+    // Ensure the stat is not already full
+    const valueKey = `${action}Value` as keyof GameState;
+    if (this.gameState[valueKey] === 100) {
       console.log(`${action} is already full. No points awarded.`);
-      return;  // Exit the function early
+      return;
     }
   
-    // Check the time difference and award points
+    // Award points based on timing
     if (nextActionTime) {
-      const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000);
-      if (timeDifference <= 10) this.addPoint(1); // Add points if the time difference is within range
-      else if (now < nextActionTime) this.addPoint(0.5); // Add fewer points if not yet time
-      else this.addPoint(0); // No points if time is past
+      const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000); // time diff in minutes
+      if (timeDifference <= 10) this.addPoint(1); // Close enough to scheduled time
+      else if (now < nextActionTime) this.addPoint(0.5); // Early action, fewer points
+      else this.addPoint(0); // Late action, no points
   
-      // Set the new next action time
+      // Schedule the next action time for the stat
       nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
     }
   
-    // Increase the stat value
+    // Instantly increase the stat
     this.increaseStat(action, incrementValue);
+  
+    // Update visual elements like colors and heights
     this.updateStatColorsAndHeight(action);
   }
+  
   
 
 async showLowStatAlert(stat: StatName) {
@@ -281,14 +282,12 @@ async showLowStatAlert(stat: StatName) {
 
 increaseStat(stat: StatName, increment: number) {
   const valueKey = `${stat}Value` as keyof GameState;
-  // Increase the stat instantly without waiting for any interval
   this.gameState[valueKey] = Math.min(this.gameState[valueKey] + increment, 100);
-  this.updateStatColorsAndHeight(stat);
-  this.updateCurrentStat(stat);
-  
-  // Manually trigger change detection to update the UI immediately
+  this.saveGame();
   this.cdRef.detectChanges();
+  this.checkLevelUp();
 }
+
 
 alertShown: Record<StatName, boolean> = {
   hunger: false,
@@ -572,6 +571,9 @@ savePetStats() {
       // Navigate to profile page and pass a flag to trigger the level-up modal
       this.router.navigate(['/profile'], { state: { levelUp: true, level: this.gameState.level } });
     }
+    if (this.gameState.level >= 50) {
+      this.showMaxLevelAlert();
+    }
   }
   
 
@@ -597,6 +599,14 @@ savePetStats() {
       this.gameState.progressBarWidth = 100;
       console.log("Maximum level reached.");
     }
+  }
+
+  async showMaxLevelAlert() {
+    const alert = await this.alertController.create({
+      message: 'Your dog has reached its full potential and can no longer level up.',
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 
   openLevelUpModal() {

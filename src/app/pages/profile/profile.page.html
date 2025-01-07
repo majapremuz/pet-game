@@ -12,11 +12,11 @@
       </div>
 
       <div class="password-field" *ngIf="isPasswordFieldVisible">
-        <ion-label>Current password</ion-label>
-        <ion-input [(ngModel)]="currentPassword" type="password" required></ion-input>
+        <label>Current password</label>
+        <input [(ngModel)]="currentPassword" type="password" required>
   
-        <ion-label>New password</ion-label>
-        <ion-input [(ngModel)]="newPassword" type="password" required></ion-input>
+        <label>New password</label>
+        <input [(ngModel)]="newPassword" type="password" required>
   
         <button (click)="changePassword()">Confirm</button>
 
@@ -24,7 +24,7 @@
   
       <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>
 
-      <div class="sleep-time" *ngIf="isSleepFieldVisible">
+      <!--<div class="sleep-time" *ngIf="isSleepFieldVisible">
         <h2 class="sleep-title">
           Adjust notifications
           <p>Its important that everyone gets at least 8 hours sleep.</p>
@@ -40,7 +40,7 @@
         <button (click)="saveSleepSchedule()">SAVE</button>
       </div>
 
-      <button (click)="toggleSleepField()" class="sleepBtn">SET NOTIFICATIONS TIME</button>
+      <button (click)="toggleSleepField()" class="sleepBtn">SET NOTIFICATIONS TIME</button>-->
       
       <button (click)="returnToGame()">RETURN TO GAME</button>
       <button (click)="logOut()" class="logOutBtn">LOG OUT</button>

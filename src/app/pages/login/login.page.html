@@ -2,13 +2,14 @@
       <form (ngSubmit)="onLogin()">
         <h1>login</h1>
         <div>
-            <ion-label position="floating" class="label">account</ion-label>
-            <ion-input [(ngModel)]="username" name="username" required class="input"></ion-input>
+            <label position="floating" class="label">account</label>
+            <input [(ngModel)]="username" name="username" required class="input" type="text">
+            
+            <label position="floating" class="label">password</label>  
+            <input [(ngModel)]="password" name="password" type="password" required class="input" type="password">
 
-            <ion-label position="floating" class="label">password</ion-label>  
-            <ion-input [(ngModel)]="password" name="password" type="password" required class="input"></ion-input>
         </div> 
-        <ion-button type="submit" class="button">LOGIN</ion-button>
+        <button type="submit" class="button">LOGIN</button>
       </form>
     
 </ion-content>

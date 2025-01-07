@@ -50,11 +50,11 @@ export class LoginPage implements OnInit {
   
     // Check if the username and password match any saved values in localStorage
     const savedUsername = localStorage.getItem('username');
-    const savedPassword = localStorage.getItem('password'); // Assuming you're saving the password too
+    const savedPassword = localStorage.getItem('password');
   
     if (savedUsername === trimmedUsername && savedPassword === trimmedPassword) {
       await loading.dismiss();
-      this.userService.setUsername(trimmedUsername); // Save username
+      this.userService.setUsername(trimmedUsername);
       this.router.navigateByUrl('/game');
       this.showToast(`Welcome!`, 'success');
     } else {

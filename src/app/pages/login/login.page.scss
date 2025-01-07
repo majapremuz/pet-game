@@ -15,7 +15,6 @@ form {
     box-shadow: -2px -5px 0px 8px #bc9763;
     position: absolute;
     bottom: 0;
-    height: 60%;
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -71,8 +70,8 @@ div {
 }
 
 .button {
-    --background: #c9ac5f;
-    --color: white;
+    background: #c9ac5f;
+    color: white;
     font-family: "Baloo 2", sans-serif;
     font-size: 2rem;
     font-weight: bolder;
@@ -90,7 +89,7 @@ div {
      0px -2px 0 #bb9764;
      width: 90%;
      height: 18vmin;
-     margin-top: 2rem;
+     margin: 2rem 0;
      border: 6px solid #fffaef;
      border-radius: 5px;
      --box-shadow: none;

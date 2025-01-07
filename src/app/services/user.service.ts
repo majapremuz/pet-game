@@ -69,8 +69,9 @@ export class UserService {
   }
 
   getUserPassword(): string {
-    return this.password || '';
+    return this.password || localStorage.getItem('password') || ''; 
   }
+  
 
       initializeUserData(): void {
         this.username = localStorage.getItem('username') || '';
@@ -83,7 +84,7 @@ export class UserService {
         // Merge saved state with defaults to avoid missing properties
         const initializedState = { ...defaultState, ...savedState };
         this.setGameState(initializedState);
-        console.log('Initialized game state:', initializedState);
+        //console.log('Initialized game state:', initializedState);
       }
       
     
@@ -131,16 +132,19 @@ export class UserService {
   
 
   isLoggedIn(): Observable<boolean> {
-    const user = localStorage.getItem('username');
-    return of(!!user);
+    const username = sessionStorage.getItem('username');
+    const password = sessionStorage.getItem('password');
+    const selectedDog = sessionStorage.getItem('selectedDog');
+    return of(!!username && !!password && !!selectedDog);
   }
+  
   
 
   saveOnlineData(data: any): Observable<any> {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     users.push(data);
     localStorage.setItem('users', JSON.stringify(users));
-    console.log('User data saved to localStorage:', data);
+    //console.log('User data saved to localStorage:', data);
     return new Observable((observer) => observer.next(data));
   }
 
@@ -161,24 +165,24 @@ export class UserService {
     return data ? JSON.parse(data) : null;
   }
 
-    logOut(): void {
-      this.username = '';
-      this.password = '';
-      this.selectedDog = null;
-      this.resetGameState();
-  
-      sessionStorage.clear();
-    
-      this.router.navigate(['/home'], { replaceUrl: true }).then(() => {
-        console.log('Redirected to home and cleared session state.');
-      });
-    
-      console.log('User logged out. Session cleared.');
-    }
-    
-    
-    
-  
+      logOut(): void {
+        // Save the current game state to localStorage before clearing session data
+        if (this.gameState) {
+          localStorage.setItem('gameState', JSON.stringify(this.gameState));
+        }
+      
+        // Clear session-specific data
+        this.username = '';
+        this.password = '';
+        this.selectedDog = null;
+        sessionStorage.clear();
+      
+        this.router.navigate(['/home'], { replaceUrl: true }).then(() => {
+          console.log('Redirected to home and cleared session state.');
+        });
+      
+        console.log('User logged out. Session cleared.');
+      }
   
   // Pet-related methods
   getSelectedDog() {
@@ -286,7 +290,7 @@ export class UserService {
     this.initializeGameState();
   }
     
-  changePassword(currentPassword: string, newPassword: string): void {
+  /*changePassword(currentPassword: string, newPassword: string): void {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     const userIndex = users.findIndex((u: any) => u.id === this.username);
 
@@ -297,7 +301,20 @@ export class UserService {
     } else {
       console.error('Current password is incorrect or user not found.');
     }
-  }
+  }*/
+
+    changePassword(currentPassword: string, newPassword: string): boolean {
+      if (this.password === SHA1(currentPassword).toString()) {
+        this.password = SHA1(newPassword).toString();
+        localStorage.setItem('password', this.password);
+        console.log('Password changed successfully');
+        return true;
+      } else {
+        console.error('Current password is incorrect');
+        return false;
+      }
+    }
+    
     
   getSleepTime(): string {
     return ''; 
@@ -316,7 +333,7 @@ getGameState(): any {
 setGameState(newGameState: any): void {
   this.gameState = newGameState;
   localStorage.setItem('gameState', JSON.stringify(newGameState));
-  console.log('Game state updated:', newGameState);
+  //console.log('Game state updated:', newGameState);
 }
 
 
@@ -343,7 +360,7 @@ updateGameState(newState: Partial<GameState>): void {
 
   if (hasChanges && isDifferentFromSaved) {
     this.gameState = { ...this.gameState, ...newState };
-    console.log('Updated game state:', this.gameState);
+    //console.log('Updated game state:', this.gameState);
     this.saveGameState(this.gameState); // Persist changes
   }
 }
@@ -351,7 +368,7 @@ updateGameState(newState: Partial<GameState>): void {
 saveGameState(gameState: GameState): void {
   // Store the game state in localStorage
   localStorage.setItem('gameState', JSON.stringify(gameState));
-  console.log('Game state saved:', gameState);
+  //console.log('Game state saved:', gameState);
 }
 
 
