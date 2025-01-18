@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService, GameState } from 'src/app/services/user.service';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
@@ -128,61 +129,50 @@ export class GamePage implements OnDestroy{
   get purityValue(): number {   
     return this.userService.getpurityValue();
   }
-
-  async requestNotificationPermission() {
-    const permission = await PushNotifications.requestPermissions();
-    if (permission.receive === 'granted') {
-      console.log('Notification permission granted');
-      // Initialize FCM and get the token if needed
-    } else {
-      console.log('Notification permission denied');
-    }
-  }
-
     saveGame(): void {
       this.userService.saveGameState(this.gameState);
     }
   
 
-   /*setInitialActionTimes() {
+   setInitialActionTimes() {
     const now = new Date();
     this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
     this.fatigueNextAction = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
     this.purityNextAction = new Date(now.getTime() + 18 * 60 * 60 * 1000); // 18 hours
     this.attentionNextAction = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hours
-  }*/
+  }
 
-    setInitialActionTimes() {
+    /*setInitialActionTimes() {
       const now = new Date();
       this.gameState.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(1, 2)); // 1-2 minutes
       this.gameState.fatigueNextAction = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes
       this.gameState.purityNextAction = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes
       this.gameState.attentionNextAction = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute
-    }
+    }*/
 
   // Returns a random interval within the given hour range
-  /*getRandomInterval(minHours: number, maxHours: number): number {
+  getRandomInterval(minHours: number, maxHours: number): number {
     const randomHours = Math.floor(Math.random() * (maxHours - minHours + 1) + minHours);
     return randomHours * 60 * 60 * 1000;
-  }*/
-getRandomInterval(minMinutes: number, maxMinutes: number): number {
+  }
+/*getRandomInterval(minMinutes: number, maxMinutes: number): number {
   const randomMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1) + minMinutes);
   return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
-}
+}*/
 
-    /*decrementIntervals: Record<StatName, number> = {
+    decrementIntervals: Record<StatName, number> = {
       hunger: 6 * 60 * 60 * 1000, // 6 hours
       fatigue: 24 * 60 * 60 * 1000, // 24 hours
       purity: 18 * 60 * 60 * 1000, // 18 hours
       attention: 8 * 60 * 60 * 1000, // 8 hours
-    };*/
+    };
 
-    decrementIntervals: Record<StatName, number> = {
+    /*decrementIntervals: Record<StatName, number> = {
       hunger: 6000, // 1 minute
       fatigue: 6000, // 2 minutes
       purity: 6000, // 3 minutes
       attention: 4000, // 4 minutes
-    };
+    };*/
 
 
         startStatusDecreasing() {
@@ -200,7 +190,10 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
         }
 
   // Update the next action time based on the stat
-  private updateNextActionTime(stat: StatName) {
+  private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
+    const baseInterval = this.getRandomInterval(6, 12); // osnovni interval
+    const adjustedInterval = baseInterval + adjustByHours * 60 * 60 * 1000;
+    this[`${stat}NextAction`] = new Date(Date.now() + adjustedInterval);
     const now = Date.now();
     switch(stat) {
       case 'hunger':
@@ -218,6 +211,67 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
     }
   }
 
+  async requestNotificationPermission() {
+    const permission = await PushNotifications.requestPermissions();
+    if (permission.receive === 'granted') {
+      console.log('Notification permission granted');
+      // Initialize FCM and get the token if needed
+    } else {
+      console.log('Notification permission denied');
+    }
+  }
+
+  async scheduleNotification(action: StatName, nextActionTime: Date) {
+    const userSleepTimeString = this.userService.getSleepTime();
+    const userSleepTime = userSleepTimeString ? new Date(userSleepTimeString) : null;
+    const titles: Record<StatName, string> = {
+      hunger: 'Time to Feed!',
+      fatigue: 'Time to Rest!',
+      purity: 'Time for a Bath!',
+      attention: 'Time for Attention!',
+    };
+  
+    const bodies: Record<StatName, string> = {
+      hunger: `Your pet is getting hungry. Make sure to feed ${this.petName}!`,
+      fatigue: `Your pet is getting tired. It's time for some rest!`,
+      purity: `Your pet needs a bath to stay clean!`,
+      attention: `Your pet is feeling lonely. Give it some attention!`,
+    };
+
+    if (userSleepTime && nextActionTime > userSleepTime) {
+      console.log('Skipping notification as it is after sleep time.');
+      return;
+    }
+  
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          id: this.getNotificationId(action),
+          title: titles[action],
+          body: bodies[action],
+          schedule: { at: nextActionTime },
+          actionTypeId: '',
+          extra: { action },
+        },
+      ],
+    }).then(() => {
+      console.log('Notification scheduled:', action, nextActionTime);
+    }).catch((err) => {
+      console.error('Error scheduling notification:', err);
+    });
+  }
+
+  getNotificationId(action: StatName): number {
+    const ids: Record<StatName, number> = {
+      hunger: 1,
+      fatigue: 2,
+      purity: 3,
+      attention: 4,
+    };
+    return ids[action];
+  }
+  
+
   handleAction(action: StatName) {
     const now = new Date();
     let nextActionTime: Date | undefined;
@@ -230,43 +284,72 @@ getRandomInterval(minMinutes: number, maxMinutes: number): number {
         break;
       case 'fatigue':
         nextActionTime = this.gameState.fatigueNextAction;
-        incrementValue = 30;
+        incrementValue = 25;
         break;
       case 'purity':
         nextActionTime = this.gameState.purityNextAction;
-        incrementValue = 20;
+        incrementValue = 30;
         break;
       case 'attention':
         nextActionTime = this.gameState.attentionNextAction;
-        incrementValue = 25;
+        incrementValue = 35;
         break;
     }
   
-    // Ensure the stat is not already full
     const valueKey = `${action}Value` as keyof GameState;
+  
     if (this.gameState[valueKey] === 100) {
       console.log(`${action} is already full. No points awarded.`);
       return;
     }
   
-    // Award points based on timing
     if (nextActionTime) {
       const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000); // time diff in minutes
-      if (timeDifference <= 10) this.addPoint(1); // Close enough to scheduled time
-      else if (now < nextActionTime) this.addPoint(0.5); // Early action, fewer points
-      else this.addPoint(0); // Late action, no points
   
-      // Schedule the next action time for the stat
+      if (timeDifference <= 10) {
+        this.addPoint(1); // Close to scheduled time
+      } else if (now < nextActionTime) {
+        this.addPoint(0.5); // Early action
+      } else {
+        this.addPoint(0); // Late action
+      }
+  
+      if (timeDifference <= 10) {
+        this.addPoint(1); // Additional bonus points
+      } else if (now.getTime() < nextActionTime.getTime()) {
+        this.addPoint(0.5); // Early action bonus
+        this.updateNextActionTime(action); // Extend next action interval
+        this.scheduleNotification(action, nextActionTime);
+      } else {
+        if (this.gameState[valueKey] != null) {
+          this.gameState[valueKey] -= 10; // Penalty for late action
+        }
+        this.updateNextActionTime(action); // Shorten next action interval
+      }
+  
+      // Handle early or late actions by adjusting the next action time
+      if (timeDifference < -10) {
+        this.updateNextActionTime(action, 2); // Extend by 2 hours
+      } else if (timeDifference > 10) {
+        this.updateNextActionTime(action, -1); // Shorten by 1 hour
+      }
+  
+      if (now.getTime() - nextActionTime.getTime() > 12 * 60 * 60 * 1000) {
+        console.log("Feeding missed. Severe penalty applied.");
+        if (this.gameState[valueKey] != null) {
+          this.gameState[valueKey] -= 20; // Severe penalty
+        }
+      }
+  
+      // Update next action time with random interval
       nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
     }
   
-    // Instantly increase the stat
-    this.increaseStat(action, incrementValue);
-  
-    // Update visual elements like colors and heights
-    this.updateStatColorsAndHeight(action);
+    this.ngZone.run(() => {
+      this.increaseStat(action, incrementValue); // Immediate UI update
+      this.updateStatColorsAndHeight(action);
+    });
   }
-  
   
 
 async showLowStatAlert(stat: StatName) {
@@ -282,11 +365,15 @@ async showLowStatAlert(stat: StatName) {
 
 increaseStat(stat: StatName, increment: number) {
   const valueKey = `${stat}Value` as keyof GameState;
-  this.gameState[valueKey] = Math.min(this.gameState[valueKey] + increment, 100);
-  this.saveGame();
-  this.cdRef.detectChanges();
-  this.checkLevelUp();
+  
+  this.ngZone.run(() => {
+    this.gameState[valueKey] = Math.min(this.gameState[valueKey] + increment, 100);
+    this.saveGame();
+    this.checkLevelUp();
+    this.cdRef.detectChanges(); // Ensure UI reflects changes
+  });
 }
+
 
 
 alertShown: Record<StatName, boolean> = {
@@ -581,7 +668,7 @@ savePetStats() {
   addPoint(points: number) {
     this.gameState.points += points;
     this.checkLevelUp();
-    this.gameState.progressBarWidth = (this.gameState.points / this.pointsNeeded) * 100;
+    this.gameState.progressBarWidth = (this.gameState.points / this.pointsNeeded)  * 100;
     if (this.gameState.points >= this.pointsNeeded) {
       this.levelUp();
     }

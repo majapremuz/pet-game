@@ -171,15 +171,20 @@ label {
     font-size: 1.5rem;
 }
 
-input {
+.alert-input sc-ion-alert-md {
     width: 80%;
     border-radius: 5px;
-    color: black;
-    text-align: center;
-}
-
-.alert-input.sc-ion-alert-md::placeholder {
     color: white;
+    text-shadow: 
+    2px 2px 0 #bb9764, 
+    2px -2px 0 #bb9764, 
+    -2px 2px 0 #bb9764, 
+    -2px -2px 0 #bb9764, 
+    2px 0px 0 #bb9764, 
+    0px 2px 0 #bb9764, 
+    -2px 0px 0 #bb9764,
+     0px -2px 0 #bb9764;
+    text-align: center;
 }
 
 .nameConfirmBtn {

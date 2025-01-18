@@ -130,9 +130,9 @@ export class ControllerService {
       )
       .then((res: any) => {
         if(res.status == true && res.data?.valid != false){
-          resolve(res.data);
+          resolve(res);
         }else{
-          reject({error: {error: 'server_error', error_description: res.message}, data: res.data});
+          reject({error: {error: 'server_error', error_description: res.message}, data: res});
         }
       })
       .catch((err) => {
@@ -191,9 +191,9 @@ export class ControllerService {
       )
       .then((res: any) => {
         if(res.status == true && res.data?.valid != false){
-          resolve(res.data);
+          resolve(res);
         }else{
-          reject({error: {error: 'server_error', error_description: res.message}, data: res.data});
+          reject({error: {error: 'server_error', error_description: res.message}, data: res});
         }
       })
       .catch((err) => {
@@ -204,7 +204,7 @@ export class ControllerService {
           else{
             // get offline refresh token
             this.oauthClientAuthorize().then(() =>{
-              this.postServer(url, data).then(data_2 => {
+              this.putServer(url, data).then(data_2 => {
                 resolve(data_2);
               }).catch((err_2) => {
                 reject(err_2);
@@ -318,9 +318,9 @@ export class ControllerService {
 
       if(cache == true && cachedData != undefined){
         if(cachedData.status == true && cachedData.data?.valid != false){
-          resolve(cachedData.data);
+          resolve(cachedData);
         }else{
-          reject({error: {error: 'server_error', error_description: cachedData.message}, data: cachedData.data});
+          reject({error: {error: 'server_error', error_description: cachedData.message}, data: cachedData});
         }
       }else{
 
@@ -339,17 +339,17 @@ export class ControllerService {
 
             this.setStorage(cache_data.key, JSON.stringify(cache_data)).then(() => {
               if(res.status == true && res.data?.valid != false){
-                resolve(res.data);
+                resolve(res);
               }else{
-                reject({error: {error: 'server_error', error_description: res.message}, data: res.data});
+                reject({error: {error: 'server_error', error_description: res.message}, data: res});
               }
             });
           }
           else{
             if(res.status == true && res.data?.valid != false){
-              resolve(res.data);
+              resolve(res);
             }else{
-              reject({error: {error: 'server_error', error_description: res.message}, data: res.data});
+              reject({error: {error: 'server_error', error_description: res.message}, data: res});
             }
           }
         })
@@ -420,6 +420,98 @@ export class ControllerService {
       errorMessage.type = AlertType.Warning;
       return errorMessage;
     }
+  }
+
+  async setNotificationToken(token: string){
+    let old_token = await this._getNotificationTokenFromStorage();
+    let loged_user = 0;
+    let sendToken: boolean = false;
+
+    // ako ne saljem token u funckiju
+    // onda uzmi stari token
+    // ovo koristim kao trigger za promjenu usera
+    if(token == ''){
+      token = old_token.token;
+    }
+
+    // if(this.isLogin() == true){
+    //   loged_user = this.user.user_id;
+    // }
+
+    // ako token nije isti kao stari
+    // onda ga salji ponovno
+    if(old_token.token != token){
+      sendToken = true;
+    }
+    else{
+      if(old_token.send == false){
+        sendToken = true;
+      }
+    }
+
+    // ako user nije isti kao stari
+    // onda token salji ponovno
+    if(old_token.user != loged_user){
+      sendToken = true;
+    }
+    else{
+      if(old_token.send == false){
+        sendToken = true;
+      }
+    }
+
+    if(token == ''){
+      sendToken = false;
+    }
+
+    let promise = new Promise((resolve, reject) => {
+      if(sendToken == true){
+
+        let send_data = {
+          token: token,
+          company: environment.company_id
+        };
+        this.postServer('/api/notification/token', send_data).then((data: ApiResult)=> {
+          if(data.status == true){
+            let store_string = JSON.stringify({
+              token: token,
+              user: loged_user,
+              send: true
+            });
+            this.setStorage(FCM_TOKEN_KEY, store_string);
+            resolve(true);
+          }else{
+            reject(false);
+          }
+        }).catch(err => {
+          reject(err);
+        });
+      }
+      else{
+        resolve(true);
+      }
+    });
+    return promise;
+  }
+
+  async _getNotificationTokenFromStorage(){
+    let token_string = await this.getStorage(FCM_TOKEN_KEY);
+    let token_obj: {
+      token: string,
+      user: number,
+      send: boolean
+    };
+    if(token_string != null){
+      token_obj = JSON.parse(token_string);
+    }else{
+      token_obj = {
+        token: '',
+        user: 0,
+        send: false
+      };
+    }
+    
+    return token_obj;
   }
 
 
@@ -519,6 +611,12 @@ export class ControllerService {
     this.loader.present();
   }
 
+  wait(ms = 5000){
+    return new Promise((resolve, reject) => {
+      setTimeout(() => resolve(true), ms);
+    });
+  }
+
   async hideLoader(): Promise<void>{
     await this.loader.dismiss();
     this.loader = null;
@@ -540,5 +638,3 @@ export class ControllerService {
     return await this.storage.create();
   }
 }
-
-

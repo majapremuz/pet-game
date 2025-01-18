@@ -6,6 +6,7 @@ import { AlertController } from '@ionic/angular';
 import { Router, ActivatedRoute  } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 import * as SHA1 from 'crypto-js/sha1';
+import { ToastController } from '@ionic/angular';
 
 
 @Component({
@@ -38,7 +39,8 @@ export class ProfilePage implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private injector: Injector,
     private cdRef: ChangeDetectorRef,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private toastController: ToastController
   ) {
     this.userService.initializeUserData();
   }
@@ -99,12 +101,22 @@ export class ProfilePage implements OnInit, AfterViewInit {
       }
     }
       
-  saveSleepSchedule() {
-    this.userService.setSleepTime(this.sleepTime);
-    console.log(`Sleep schedule saved: Sleep - ${this.sleepTime}`);
-  }
+    async saveSleepSchedule() {
+      this.userService.setSleepTime(this.sleepTime);
+      console.log(`Sleep schedule saved: Sleep - ${this.sleepTime}`);
+    
+      // Show a toast message
+      const toast = await this.toastController.create({
+        message: `Sleep time set to ${this.sleepTime}.`,
+        duration: 3000,
+        position: 'middle',
+        color: 'success'
+      });
+    
+      await toast.present();
+    }
   
-  
+
   openModal() {
     if (!this.levelUpModal) {
       console.error('Modal is not initialized yet!');

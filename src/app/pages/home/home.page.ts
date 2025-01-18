@@ -6,6 +6,7 @@ import { App } from '@capacitor/app';
 //import { UserService } from 'src/app/services/user.service';
 import { UserService } from '../../services/user.service';
 import { NavController } from '@ionic/angular';
+import { ScheduleOptions } from '@capacitor/local-notifications';
 
 @Component({
   selector: 'app-home',

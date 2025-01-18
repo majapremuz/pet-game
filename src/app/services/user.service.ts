@@ -316,11 +316,29 @@ export class UserService {
     }
     
     
-  getSleepTime(): string {
-    return ''; 
-  }
+    getSleepTime(): string | null {
+      return localStorage.getItem('sleepTime');
+    }
 
-  setSleepTime(time: string) {}
+  setSleepTime(time: string) {
+    localStorage.setItem('sleepTime', time);
+    console.log(`Sleep time set: ${time}`);
+}
+
+isSleepTime(): boolean {
+  const sleepTime = localStorage.getItem('sleepTime');
+  if (!sleepTime) return false;  // If no sleep time is set, notifications are allowed.
+
+  const currentTime = new Date();
+  const sleepStart = new Date(sleepTime);  // Assuming sleep time is stored as a valid date string.
+
+  // Check if the current time is within the sleep time period (e.g., 10 PM to 6 AM)
+  const sleepEnd = new Date(sleepStart);
+  sleepEnd.setHours(sleepStart.getHours() + 8);  // Assuming 8 hours of sleep.
+
+  return currentTime >= sleepStart && currentTime <= sleepEnd;
+}
+
 
  // Game data handling
  
@@ -405,6 +423,39 @@ resetGameState(): void {
 clearGameState(): void {
   localStorage.removeItem('gameState');
   console.log('Game state cleared');
+}
+
+updateNextActionTime(stat: keyof GameState, interval: number): void {
+  const currentTime = new Date();
+  const nextActionTime = new Date(currentTime.getTime() + interval);  // Set the next action time based on the interval (in milliseconds)
+
+  this.gameState[`${stat}NextAction`] = nextActionTime;  // Update the next action time for the stat
+  this.saveGameState(this.gameState);  // Save the updated game state
+  console.log(`${stat} next action time updated to:`, nextActionTime);
+}
+
+performHungerAction(): void {
+  // Perform hunger-related action (decrease hunger value)
+  this.updateStatValue('hungerValue', this.gameState.hungerValue - 10);  // Decrease hunger
+  this.updateNextActionTime('hunger', 10000);  // Set the next hunger action in 10 seconds (example interval)
+}
+
+performFatigueAction(): void {
+  // Perform fatigue-related action (decrease fatigue value)
+  this.updateStatValue('fatigueValue', this.gameState.fatigueValue - 10);  // Decrease fatigue
+  this.updateNextActionTime('fatigue', 15000);  // Set the next fatigue action in 15 seconds (example interval)
+}
+
+performPurityAction(): void {
+  // Perform purity-related action (decrease purity value)
+  this.updateStatValue('purityValue', this.gameState.purityValue - 10);  // Decrease purity
+  this.updateNextActionTime('purity', 20000);  // Set the next purity action in 20 seconds (example interval)
+}
+
+performAttentionAction(): void {
+  // Perform attention-related action (decrease attention value)
+  this.updateStatValue('attentionValue', this.gameState.attentionValue - 10);  // Decrease attention
+  this.updateNextActionTime('attention', 5000);  // Set the next attention action in 5 seconds (example interval)
 }
 
 
