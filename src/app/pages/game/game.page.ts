@@ -1,11 +1,12 @@
-import { Component, ChangeDetectorRef, Injector, OnDestroy, NgZone} from '@angular/core';
-import { IonicModule, AlertController } from '@ionic/angular';
+import { Component, ChangeDetectorRef, ViewChild, Injector, OnDestroy, NgZone} from '@angular/core';
+import { IonicModule, IonModal, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
 import { UserService, GameState } from 'src/app/services/user.service';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { state } from '@angular/animations';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
@@ -18,8 +19,10 @@ type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attention
   imports: [IonicModule, CommonModule, FormsModule],
 })
 export class GamePage implements OnDestroy{
+  @ViewChild('levelUpModal', { static: false }) levelUpModal!: IonModal;
 
   value: number = 100;
+  level: number = 0;
   decreaseInterval: any;
   pointsNeeded: number = 10; 
   maxPoints: number = 100; 
@@ -38,6 +41,7 @@ export class GamePage implements OnDestroy{
   gameState: GameState;
   currentStatValue!: number; 
   currentStatColor!: string;
+  isModalVisible = false;
 
   intervals: Record<StatName, any> = {
     hunger: null,
@@ -79,6 +83,7 @@ export class GamePage implements OnDestroy{
     //console.log("Game State: ", this.gameState);
     this.currentStatValue = this.gameState.hungerValue;
     this.currentStatColor = this.getStatusColor(this.gameState.hungerValue);
+  
     // Request notification permission
     this.requestNotificationPermission();
   
@@ -98,10 +103,18 @@ export class GamePage implements OnDestroy{
       this.router.navigate(['/home']);
     }
   
+     // Check if the user leveled up (persist state using a service or local variable)
+  if (this.userService.getLevelUpState()) {
+    this.openModal();
+    this.userService.resetLevelUpState();
+  }
+  
+    console.log("LEVEL UP: ", this.level)
     // Initialize action times and start updates
     this.setInitialActionTimes();
     this.updateColorGradually();
     this.startStatusDecreasing();
+    this.level = this.userService.getGameState().level;
   }
 
   ngOnDestroy() {
@@ -134,21 +147,21 @@ export class GamePage implements OnDestroy{
     }
   
 
-   setInitialActionTimes() {
+   /*setInitialActionTimes() {
     const now = new Date();
     this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
     this.fatigueNextAction = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
     this.purityNextAction = new Date(now.getTime() + 18 * 60 * 60 * 1000); // 18 hours
     this.attentionNextAction = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hours
-  }
+  }*/
 
-    /*setInitialActionTimes() {
+    setInitialActionTimes() {
       const now = new Date();
       this.gameState.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(1, 2)); // 1-2 minutes
       this.gameState.fatigueNextAction = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes
       this.gameState.purityNextAction = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes
       this.gameState.attentionNextAction = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute
-    }*/
+    }
 
   // Returns a random interval within the given hour range
   getRandomInterval(minHours: number, maxHours: number): number {
@@ -160,19 +173,19 @@ export class GamePage implements OnDestroy{
   return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
 }*/
 
-    decrementIntervals: Record<StatName, number> = {
+    /*decrementIntervals: Record<StatName, number> = {
       hunger: 6 * 60 * 60 * 1000, // 6 hours
       fatigue: 24 * 60 * 60 * 1000, // 24 hours
       purity: 18 * 60 * 60 * 1000, // 18 hours
       attention: 8 * 60 * 60 * 1000, // 8 hours
-    };
+    };*/
 
-    /*decrementIntervals: Record<StatName, number> = {
+    decrementIntervals: Record<StatName, number> = {
       hunger: 6000, // 1 minute
       fatigue: 6000, // 2 minutes
       purity: 6000, // 3 minutes
       attention: 4000, // 4 minutes
-    };*/
+    };
 
 
         startStatusDecreasing() {
@@ -655,8 +668,9 @@ savePetStats() {
       this.gameState.points = 0;
       this.pointsNeeded = Math.floor(this.pointsNeeded * 1.1);
       console.log('Navigating with levelUp:', this.gameState.level);
-      // Navigate to profile page and pass a flag to trigger the level-up modal
-      this.router.navigate(['/profile'], { state: { levelUp: true, level: this.gameState.level } });
+      // Set level-up state and open the modal
+      this.userService.setLevelUpState(true);
+      this.openModal();
     }
     if (this.gameState.level >= 50) {
       this.showMaxLevelAlert();
@@ -680,13 +694,41 @@ savePetStats() {
       this.gameState.level += 1;        
       this.gameState.points = 0;
       this.pointsNeeded = Math.ceil(this.pointsNeeded * 1.1); 
-      this.openLevelUpModal();
+      this.openModal();
     } else {
       this.gameState.points = this.pointsNeeded;
       this.gameState.progressBarWidth = 100;
       console.log("Maximum level reached.");
     }
   }
+
+  upgradeStat(stat: string) {
+    switch (stat) {
+      case 'smart':
+        this.petSmart = (this.petSmart || 0) + 1;
+        break;
+      case 'speed':
+        this.petSpeed = (this.petSpeed || 0) + 1;
+        break;
+      case 'strength':
+        this.petStrength = (this.petStrength || 0) + 1;
+        break;
+      default:
+        console.warn('Stat not found:', stat);
+        return;
+    }
+  
+    this.userService.updatePetStats({
+      name: this.petName,
+      image: this.petImage,
+      smart: this.petSmart,
+      speed: this.petSpeed,
+      strength: this.petStrength,
+    });
+    console.log(`${stat} upgraded successfully.`);
+
+  this.closeModal();
+}
 
   async showMaxLevelAlert() {
     const alert = await this.alertController.create({
@@ -696,8 +738,16 @@ savePetStats() {
     await alert.present();
   }
 
-  openLevelUpModal() {
-    this.router.navigate(['/profile'], { state: { levelUp: true } });
+  openModal() {
+    this.isModalVisible = true;
+}
+
+closeModal() {
+    this.isModalVisible = false;
+}
+
+  onModalDismiss() {
+    this.isModalVisible = false;
   }
 
   makeDogJump() {

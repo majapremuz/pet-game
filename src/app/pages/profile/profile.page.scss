@@ -68,39 +68,6 @@ button {
      border-radius: 5px;
 }
 
-//modal
-ion-modal {
-    display: grid;
-    place-items: center;
-    justify-content: center;
-    align-items: center;
-    height: 50%;
-    --background: #bc9763;
-    --backdrop-opacity: 0;
-  }
-  
-  .modalCloseBtn {
-    --background: rgb(255, 62, 62);
-    width: 10%;
-    margin-left: 0.5rem;
-  }
-  
-  .modalTitle {
-    font-family: "Baloo 2", sans-serif;
-    font-size: 1.2rem;
-    padding: 0 1rem;
-  }
-  
-  
-  .statBtn {
-    width: 70%;
-    margin: 1rem auto;
-    --background: #d3ba77;
-    --box-shadow: none;
-    font-family: "Baloo 2", sans-serif;
-  }
-  
-
 //sleep time
 .sleep-time {
     background-color: #bc9763;

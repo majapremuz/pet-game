@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild, AfterViewInit, Injector, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Injector, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, IonModal } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { Router, ActivatedRoute  } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
@@ -17,7 +17,6 @@ import { ToastController } from '@ionic/angular';
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class ProfilePage implements OnInit, AfterViewInit {
-  @ViewChild('levelUpModal', { static: false }) levelUpModal!: IonModal;
 
   username: string = '';
   level: number = 0;
@@ -32,7 +31,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   isSleepFieldVisible: boolean = false;
   currentPassword: string = '';
   newPassword: string = '';
-  isModalVisible = false;
+  //isModalVisible = false;
   
   constructor(
     private router: Router,
@@ -78,13 +77,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
             strength: this.petStrength,
           });
     
-          if (this.router.getCurrentNavigation()?.extras.state?.['levelUp']) {
-            this.level = this.level;
-            this.openModal();
-          }
-        } else {
-          console.warn('No pet stats found for this user.');
-        }
+        }  
       });
     
       this.sleepTime = this.userService.getSleepTime() || '';
@@ -94,11 +87,11 @@ export class ProfilePage implements OnInit, AfterViewInit {
     
                 
     ngAfterViewInit() {
-      const navigation = this.router.getCurrentNavigation();
+      /*const navigation = this.router.getCurrentNavigation();
       if (navigation?.extras.state?.['levelUp']) {
-        this.isModalVisible = true;
-        this.openModal();
-      }
+        //this.isModalVisible = true;
+        //this.openModal();
+      }*/
     }
       
     async saveSleepSchedule() {
@@ -117,7 +110,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     }
   
 
-  openModal() {
+  /*openModal() {
     if (!this.levelUpModal) {
       console.error('Modal is not initialized yet!');
       return;
@@ -139,35 +132,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
   onModalDismiss() {
     this.isModalVisible = false;
-  }
-
-    upgradeStat(stat: string) {
-      switch (stat) {
-        case 'smart':
-          this.petSmart = (this.petSmart || 0) + 1;
-          break;
-        case 'speed':
-          this.petSpeed = (this.petSpeed || 0) + 1;
-          break;
-        case 'strength':
-          this.petStrength = (this.petStrength || 0) + 1;
-          break;
-        default:
-          console.warn('Stat not found:', stat);
-          return;
-      }
-    
-      this.userService.updatePetStats({
-        name: this.petName,
-        image: this.petImage,
-        smart: this.petSmart,
-        speed: this.petSpeed,
-        strength: this.petStrength,
-      });
-      console.log(`${stat} upgraded successfully.`);
-
-    this.closeModal();
-  }
+  }*/
     
   togglePasswordField() {
     this.isPasswordFieldVisible = !this.isPasswordFieldVisible;

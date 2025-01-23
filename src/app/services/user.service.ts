@@ -29,6 +29,7 @@ export class UserService {
   private username: string = '';
   private password: string = '';
   private selectedDog: any = null;
+  private levelUpState = false;
   private gameState: GameState = {
     hungerValue: 100,
     fatigueValue: 100,
@@ -432,6 +433,18 @@ updateNextActionTime(stat: keyof GameState, interval: number): void {
   this.gameState[`${stat}NextAction`] = nextActionTime;  // Update the next action time for the stat
   this.saveGameState(this.gameState);  // Save the updated game state
   console.log(`${stat} next action time updated to:`, nextActionTime);
+}
+
+setLevelUpState(state: boolean) {
+  this.levelUpState = state;
+}
+
+getLevelUpState(): boolean {
+  return this.levelUpState;
+}
+
+resetLevelUpState() {
+  this.levelUpState = false;
 }
 
 performHungerAction(): void {
