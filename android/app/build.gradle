@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "dog.game"
-  compileSdkVersion compileSdkVersion
+  compileSdkVersion minSdkVersion
   defaultConfig {
         applicationId "dog.game"
         minSdkVersion rootProject.ext.minSdkVersion
