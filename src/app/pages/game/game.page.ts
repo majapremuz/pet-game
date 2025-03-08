@@ -12,11 +12,10 @@ type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
 
 @Component({
-  selector: 'app-game',
-  templateUrl: 'game.page.html',
-  styleUrls: ['game.page.scss'],
-  standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+    selector: 'app-game',
+    templateUrl: 'game.page.html',
+    styleUrls: ['game.page.scss'],
+    imports: [IonicModule, CommonModule, FormsModule]
 })
 export class GamePage implements OnDestroy{
   @ViewChild('levelUpModal', { static: false }) levelUpModal!: IonModal;

@@ -10,11 +10,10 @@ import { ToastController } from '@ionic/angular';
 
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.page.html',
-  styleUrls: ['./profile.page.scss'],
-  standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+    selector: 'app-profile',
+    templateUrl: './profile.page.html',
+    styleUrls: ['./profile.page.scss'],
+    imports: [IonicModule, CommonModule, FormsModule]
 })
 export class ProfilePage implements OnInit, AfterViewInit {
 

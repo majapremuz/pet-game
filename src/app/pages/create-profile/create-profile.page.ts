@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 
 @Component({
-  selector: 'app-create-profile',
-  templateUrl: './create-profile.page.html',
-  styleUrls: ['./create-profile.page.scss'],
-  standalone: true,
-  imports: [IonContent, IonHeader, IonTitle, IonToolbar, CommonModule, FormsModule]
+    selector: 'app-create-profile',
+    templateUrl: './create-profile.page.html',
+    styleUrls: ['./create-profile.page.scss'],
+    imports: [IonicModule, CommonModule, FormsModule]
 })
 export class CreateProfilePage implements OnInit {
   username: string = '';

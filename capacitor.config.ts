@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
   appId: 'dog.game',
   appName: 'Fetch the bone',
   webDir: 'www',
-  bundledWebRuntime: false,
 
   plugins: {
     LocalNotifications: {

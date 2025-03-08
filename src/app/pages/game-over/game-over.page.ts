@@ -4,11 +4,10 @@ import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 
 @Component({
-  selector: 'app-game-over',
-  templateUrl: './game-over.page.html',
-  styleUrls: ['./game-over.page.scss'],
-  standalone: true,
-  imports: [IonicModule]
+    selector: 'app-game-over',
+    templateUrl: './game-over.page.html',
+    styleUrls: ['./game-over.page.scss'],
+    imports: [IonicModule]
 })
 export class GameOverPage implements OnInit {
 

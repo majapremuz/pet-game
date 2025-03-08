@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import * as SHA1 from 'crypto-js/sha1';
+import SHA1 from 'crypto-js/sha1';
+
 
 export interface GameState {
   hungerValue: number;

@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef  } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { App } from '@capacitor/app';
 //import { UserService } from 'src/app/services/user.service';
@@ -9,11 +9,10 @@ import { NavController } from '@ionic/angular';
 import { ScheduleOptions } from '@capacitor/local-notifications';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
-  standalone: true,
-  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent],
+    selector: 'app-home',
+    templateUrl: 'home.page.html',
+    styleUrls: ['home.page.scss'],
+    imports: [CommonModule, IonicModule],
 })
 export class HomePage implements OnInit {
   @ViewChild('createPetButton') createPetButton!: ElementRef;
