@@ -1,8 +1,12 @@
 ion-content {
-  --background: url("/assets/game background.jpg");
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  --background: url("/assets/game background.jpg") no-repeat center center / cover;
+  background-attachment: fixed;
+  background-size: contain;
   background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 
 .conteiner {
@@ -74,15 +78,6 @@ ion-content {
     right: 0;
     padding: 0.5rem;
   }
-
-  /*button {
-    height: 20vmin;
-    width: 20vmin;
-    margin: 0.4rem;
-    clip-path: polygon(8% 0, 94% 0, 100% 15%, 100% 87%, 92% 100%, 14% 100%, 0 90%, 0 18%);
-    background-color: #bb9664;
-    box-shadow: 0 4px 80px rgb(35, 35, 35);
-  }*/
 
   button {
     height: 20vmin;
@@ -236,4 +231,13 @@ ion-modal::part(content) {
   --box-shadow: none;
   font-family: "Baloo 2", sans-serif;
   font-size: 0.8rem;
+}
+
+@media (min-width: 360px) {
+  .dog_img {
+    height: 80vmin;
+    width: 80vmin;
+    position: relative;
+    bottom: 5rem;
+  }
 }

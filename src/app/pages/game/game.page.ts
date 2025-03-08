@@ -147,21 +147,21 @@ export class GamePage implements OnDestroy{
     }
   
 
-   /*setInitialActionTimes() {
+   setInitialActionTimes() {
     const now = new Date();
     this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
     this.fatigueNextAction = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
     this.purityNextAction = new Date(now.getTime() + 18 * 60 * 60 * 1000); // 18 hours
     this.attentionNextAction = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hours
-  }*/
+  }
 
-    setInitialActionTimes() {
+    /*setInitialActionTimes() {
       const now = new Date();
       this.gameState.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(1, 2)); // 1-2 minutes
       this.gameState.fatigueNextAction = new Date(now.getTime() + 3 * 60 * 1000); // 3 minutes
       this.gameState.purityNextAction = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes
       this.gameState.attentionNextAction = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute
-    }
+    }*/
 
   // Returns a random interval within the given hour range
   getRandomInterval(minHours: number, maxHours: number): number {
@@ -173,19 +173,19 @@ export class GamePage implements OnDestroy{
   return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
 }*/
 
-    /*decrementIntervals: Record<StatName, number> = {
+    decrementIntervals: Record<StatName, number> = {
       hunger: 6 * 60 * 60 * 1000, // 6 hours
       fatigue: 24 * 60 * 60 * 1000, // 24 hours
       purity: 18 * 60 * 60 * 1000, // 18 hours
       attention: 8 * 60 * 60 * 1000, // 8 hours
-    };*/
+    }
 
-    decrementIntervals: Record<StatName, number> = {
+    /*decrementIntervals: Record<StatName, number> = {
       hunger: 6000, // 1 minute
       fatigue: 6000, // 2 minutes
       purity: 6000, // 3 minutes
       attention: 4000, // 4 minutes
-    };
+    };*/
 
 
         startStatusDecreasing() {

@@ -12,7 +12,7 @@ ion-content {
 form {
     background-color: #d3ba77;
     border-radius: 50px 50px 0px 0px;
-    box-shadow: -2px -5px 0px 10px #bc9763;
+    box-shadow: -2px -5px 0px 8px #bc9763;
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -73,7 +73,7 @@ input {
 }
 
 button {
-    background-color: #c9ac5f;
+    background: #c9ac5f;
     color: white;
     font-family: "Baloo 2", sans-serif;
     font-size: 2rem;
@@ -90,12 +90,12 @@ button {
     0px 2px 0 #bb9764, 
     -2px 0px 0 #bb9764,
      0px -2px 0 #bb9764;
-     width: 80%;
-     height: 10vmin;
-     margin-top: 1rem;
-     padding: 2rem 0;
+     width: 90%;
+     height: 18vmin;
+     margin: 2rem 0;
      border: 6px solid #fffaef;
      border-radius: 5px;
+     --box-shadow: none;
 }
 
 

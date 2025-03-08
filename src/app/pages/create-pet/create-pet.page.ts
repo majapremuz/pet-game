@@ -35,9 +35,16 @@ export class CreatePetPage implements OnInit {
   }
 
   ngOnInit() {
+    const profileExists = !!this.userService.getUsername();
+    if (!profileExists) {
+      console.warn('No profile found. Redirecting to create profile.');
+      this.router.navigate(['/create-profile']);
+      return;
+    }
     this.showSlide(this.currentSlideIndex);
     this.promptPlayMode();
   }
+  
 
   async getPushToken(): Promise<string | null> {
     try {
@@ -56,7 +63,7 @@ export class CreatePetPage implements OnInit {
   
 
   async promptPlayMode() {
-    if (this.playMode !== null) return;  // Avoid showing the prompt if it's already set
+    if (this.playMode !== null) return; 
   
     const alert = await this.alertController.create({
       message: 'Would you like to play online or offline?',
@@ -102,15 +109,6 @@ export class CreatePetPage implements OnInit {
         return;
       }
     
-      const profileExists = !!this.userService.getUsername(); 
-      console.log("Profile exists:", profileExists);
-      
-      if (!profileExists) {
-        console.log("No profile found, redirecting to create profile.");
-        this.router.navigate(['/create-profile']); 
-        return;
-      }
-    
       const alert = await this.alertController.create({
         message: 'Are you sure you want to pick this dog?',
         cssClass: 'alert',
@@ -135,52 +133,14 @@ export class CreatePetPage implements OnInit {
                 return;
               }
     
-              // Proceed with pet selection logic
-              const dogStats: any = { name: petName, smart: 0, speed: 0, strength: 0, image: '' };
-              switch (this.currentSlideIndex) {
-                case 0:
-                  dogStats.image = 'assets/dog 1.png';
-                  dogStats.smart = 10;
-                  dogStats.speed = 5;
-                  dogStats.strength = 5;
-                  break;
-                case 1:
-                  dogStats.image = 'assets/dog 2.png';
-                  dogStats.smart = 5;
-                  dogStats.speed = 10;
-                  dogStats.strength = 5;
-                  break;
-                case 2:
-                  dogStats.image = 'assets/dog 3.png';
-                  dogStats.smart = 5;
-                  dogStats.speed = 5;
-                  dogStats.strength = 10;
-                  break;
-              }
-    
-              const hashedUsername = SHA1(this.userService.getUsername()).toString();
-              const hashedPassword = SHA1(this.userService.getUserPassword()).toString();
-    
-              const selectedDogData = {
-                id: new Date().getTime(),
-                username: hashedUsername,
-                password: hashedPassword,
-                petStats: dogStats,
-              };
+              const dogStats = this.getDogStats(this.currentSlideIndex, petName);
     
               if (this.playMode === 'online') {
-                // Store online data in local storage for offline use
-                localStorage.setItem('userData', JSON.stringify(selectedDogData));
-                this.userService.setSelectedDog(dogStats);
-                this.userService.initializeUserData(); 
-                this.router.navigate(['/game']);
+                this.saveOnline(dogStats);
               } else {
-                // Save offline data directly in local storage
-                localStorage.setItem('userData', JSON.stringify(selectedDogData));
-                this.userService.setSelectedDog(dogStats);
-                this.userService.initializeUserData(); 
-                this.router.navigate(['/game']);
+                this.saveOffline(dogStats);
               }
+              this.router.navigate(['/game']);
             },
           },
         ],
@@ -188,5 +148,39 @@ export class CreatePetPage implements OnInit {
     
       await alert.present();
     }
+    
+    getDogStats(index: number, petName: string) {
+      const stats = [
+        { image: 'assets/dog 1.png', smart: 10, speed: 5, strength: 5 },
+        { image: 'assets/dog 2.png', smart: 5, speed: 10, strength: 5 },
+        { image: 'assets/dog 3.png', smart: 5, speed: 5, strength: 10 },
+      ];
+    
+      return { ...stats[index], name: petName };
+    }
+    
+    saveOnline(dogStats: any) {
+      const selectedDogData = this.prepareDogData(dogStats);
+      localStorage.setItem('userData', JSON.stringify(selectedDogData));
+      this.userService.setSelectedDog(dogStats);
+      this.userService.initializeUserData();
+    }
+    
+    saveOffline(dogStats: any) {
+      const selectedDogData = this.prepareDogData(dogStats);
+      localStorage.setItem('userData', JSON.stringify(selectedDogData));
+      this.userService.setSelectedDog(dogStats);
+      this.userService.initializeUserData();
+    }
+    
+    prepareDogData(dogStats: any) {
+      return {
+        id: new Date().getTime(),
+        username: SHA1(this.userService.getUsername()).toString(),
+        password: SHA1(this.userService.getUserPassword()).toString(),
+        petStats: dogStats,
+      };
+    }
+    
 }  
   
