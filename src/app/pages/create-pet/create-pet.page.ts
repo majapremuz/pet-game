@@ -90,10 +90,10 @@ export class CreatePetPage implements OnInit {
 
   plusSlides(n: number) {
     this.currentSlideIndex += n;
-    if (this.currentSlideIndex >= 3) { // Update this based on the number of slides
+    if (this.currentSlideIndex >= 3) {
       this.currentSlideIndex = 0;
     } else if (this.currentSlideIndex < 0) {
-      this.currentSlideIndex = 2; // Update this based on the number of slides
+      this.currentSlideIndex = 2;
     }
   }
   

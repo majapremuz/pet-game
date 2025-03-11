@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
+import { Platform, ToastController } from '@ionic/angular';
 
 @Component({
     selector: 'app-create-profile',
@@ -17,11 +18,29 @@ export class CreateProfilePage implements OnInit {
 
   constructor(
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private platform: Platform,
+    private toastController: ToastController
   ) {
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.platform.backButton.subscribeWithPriority(9999, () => {
+      if (!this.userService.getUsername()) {
+        this.showToast("You must create a profile before going back!");
+      }
+    });
+  }
+
+  async showToast(message: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 3000,
+      position: 'bottom',
+      color: 'warning'
+    });
+    await toast.present();
+  }
 
   createProfile() {
     if (this.username && this.password) {

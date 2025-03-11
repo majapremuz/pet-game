@@ -75,21 +75,21 @@ export class UserService {
   }
   
 
-      initializeUserData(): void {
-        this.username = localStorage.getItem('username') || '';
-      this.password = localStorage.getItem('password') || '';
-      const storedPetData = localStorage.getItem('selectedDog');
-      this.selectedDog = storedPetData ? JSON.parse(storedPetData) : null;
-        const savedState = this.getGameState();
-        const defaultState = this.getDefaultGameState();
-      
-        // Merge saved state with defaults to avoid missing properties
-        const initializedState = { ...defaultState, ...savedState };
-        this.setGameState(initializedState);
-        //console.log('Initialized game state:', initializedState);
-      }
-      
+  initializeUserData(): void {
+    const firstLaunch = localStorage.getItem('firstLaunch');
     
+    if (!firstLaunch) {
+      // First time launching after installation, clear localStorage
+      localStorage.clear();
+      localStorage.setItem('firstLaunch', 'true');
+    }
+  
+    this.username = localStorage.getItem('username') || '';
+    this.password = localStorage.getItem('password') || '';
+    const storedPetData = localStorage.getItem('selectedDog');
+    this.selectedDog = storedPetData ? JSON.parse(storedPetData) : null;
+  }
+      
     initializeGameState(): void {
       const savedState = localStorage.getItem('gameState');
       if (savedState) {
@@ -134,14 +134,12 @@ export class UserService {
   
 
   isLoggedIn(): Observable<boolean> {
-    const username = sessionStorage.getItem('username');
-    const password = sessionStorage.getItem('password');
-    const selectedDog = sessionStorage.getItem('selectedDog');
+    const username = localStorage.getItem('username');
+    const password = localStorage.getItem('password');
+    const selectedDog = localStorage.getItem('selectedDog');
     return of(!!username && !!password && !!selectedDog);
   }
   
-  
-
   saveOnlineData(data: any): Observable<any> {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
     users.push(data);

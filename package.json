@@ -13,6 +13,8 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-devkit/core": "^19.2.1",
+    "@angular-devkit/schematics": "^19.2.1",
     "@angular/animations": "^19.2.1",
     "@angular/common": "^19.2.1",
     "@angular/compiler": "^19.2.1",
@@ -34,6 +36,7 @@
     "@ionic/storage-angular": "^4.0.0",
     "@ngx-translate/core": "^15.0.0",
     "@ngx-translate/http-loader": "^8.0.0",
+    "@schematics/angular": "^19.2.1",
     "crypto-js": "^4.2.0",
     "ionicons": "^7.0.0",
     "moment": "^2.30.1",

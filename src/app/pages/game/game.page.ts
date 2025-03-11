@@ -180,8 +180,8 @@ export class GamePage implements OnDestroy{
     }
 
     /*decrementIntervals: Record<StatName, number> = {
-      hunger: 6000, // 1 minute
-      fatigue: 6000, // 2 minutes
+      hunger: 2000, // 1 minute
+      fatigue: 5000, // 2 minutes
       purity: 6000, // 3 minutes
       attention: 4000, // 4 minutes
     };*/
