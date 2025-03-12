@@ -192,11 +192,11 @@ ion-modal {
   place-items: center;
   justify-content: center;
   align-items: center;
-  height: 30%;
+  height: 70vmin;
   --background: #bc9763;
   --backdrop-opacity: 0;
   position: absolute;
-  top: 50%;
+  top: 10%;
   padding-bottom: 1rem;
 }
 
@@ -274,8 +274,8 @@ ion-modal::part(content) {
     width: 10.5vmin; 
     }
 
-    ion-modal {
-      height: auto;
+    .top-btn-container {
+      padding-top: 2rem;
     }
 }
 
@@ -289,10 +289,6 @@ ion-modal::part(content) {
 
   .level-progress-bar {
     width: 11.2vmin; 
-    }
-
-    ion-modal {
-      height: auto;
     }
 } 
 
