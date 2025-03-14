@@ -1,11 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "dog.game"
-  //compileSdkVersion minSdkVersion
-  compileSdk rootProject.ext.compileSdkVersion
-  defaultConfig {
-        applicationId "dog.game"
+    namespace "com.prolink.fetchthebone"
+    compileSdk rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.prolink.fetchthebone"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

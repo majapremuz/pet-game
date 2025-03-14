@@ -1,4 +1,4 @@
-package dog.game;
+package com.prolink.fetchthebone;
 
 import com.getcapacitor.BridgeActivity;
 
