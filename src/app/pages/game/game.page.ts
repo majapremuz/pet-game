@@ -19,6 +19,7 @@ type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attention
 })
 export class GamePage implements OnDestroy{
   @ViewChild('levelUpModal', { static: false }) levelUpModal!: IonModal;
+  @ViewChild('actionModal', { static: false }) actionModal!: IonModal; 
 
   value: number = 100;
   level: number = 0;
@@ -40,7 +41,9 @@ export class GamePage implements OnDestroy{
   gameState: GameState;
   currentStatValue!: number; 
   currentStatColor!: string;
-  isModalVisible = false;
+  isLevelUpModalVisible: boolean = false;
+  isActionModalVisible: boolean = false;
+  nextActionMessage: string | undefined; 
 
   intervals: Record<StatName, any> = {
     hunger: null,
@@ -88,7 +91,7 @@ export class GamePage implements OnDestroy{
   
     // Retrieve pet stats from localStorage
     const storedPetData = localStorage.getItem('selectedDog');
-    console.log("", localStorage.getItem('selectedDog'));
+    //console.log("", localStorage.getItem('selectedDog'));
     if (storedPetData) {
       const selectedDog = JSON.parse(storedPetData);
       this.petImage = selectedDog.image;
@@ -96,7 +99,7 @@ export class GamePage implements OnDestroy{
       this.petSmart = selectedDog.smart;
       this.petSpeed = selectedDog.speed;
       this.petStrength = selectedDog.strength;
-      console.log('Loaded pet stats from localStorage:', selectedDog);
+      //console.log('Loaded pet stats from localStorage:', selectedDog);
     } else {
       console.warn('No pet data found. Redirecting to pet selection page.');
       this.router.navigate(['/home']);
@@ -104,11 +107,11 @@ export class GamePage implements OnDestroy{
   
      // Check if the user leveled up (persist state using a service or local variable)
   if (this.userService.getLevelUpState()) {
-    this.openModal();
+    this.openLevelUpModal();
     this.userService.resetLevelUpState();
   }
   
-    console.log("LEVEL UP: ", this.level)
+    //console.log("LEVEL UP: ", this.level)
     // Initialize action times and start updates
     this.setInitialActionTimes();
     this.updateColorGradually();
@@ -167,6 +170,7 @@ export class GamePage implements OnDestroy{
     const randomHours = Math.floor(Math.random() * (maxHours - minHours + 1) + minHours);
     return randomHours * 60 * 60 * 1000;
   }
+
 /*getRandomInterval(minMinutes: number, maxMinutes: number): number {
   const randomMinutes = Math.floor(Math.random() * (maxMinutes - minMinutes + 1) + minMinutes);
   return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
@@ -203,25 +207,65 @@ export class GamePage implements OnDestroy{
 
   // Update the next action time based on the stat
   private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
-    const baseInterval = this.getRandomInterval(6, 12); // osnovni interval
+    const baseInterval = this.getRandomInterval(6, 12) * 60 * 60 * 1000; // Convert to ms
     const adjustedInterval = baseInterval + adjustByHours * 60 * 60 * 1000;
-    this[`${stat}NextAction`] = new Date(Date.now() + adjustedInterval);
     const now = Date.now();
+    
+    let newActionTime = new Date(now + adjustedInterval);
+
+    console.log("updateNextActionTime", newActionTime);
+
     switch(stat) {
       case 'hunger':
-        this.hungerNextAction = new Date(now + this.getRandomInterval(6, 12));
+        newActionTime = new Date(now + 24 * 60 * 60 * 1000);
         break;
       case 'fatigue':
-        this.fatigueNextAction = new Date(now + 24 * 60 * 60 * 1000);
+        newActionTime = new Date(now + 24 * 60 * 60 * 1000);
         break;
       case 'purity':
-        this.purityNextAction = new Date(now + 18 * 60 * 60 * 1000);
+        newActionTime = new Date(now + 18 * 60 * 60 * 1000);
         break;
       case 'attention':
-        this.attentionNextAction = new Date(now + 8 * 60 * 60 * 1000);
+        newActionTime = new Date(now + 8 * 60 * 60 * 1000);
         break;
     }
+
+    this[`${stat}NextAction`] = newActionTime;
+    this.gameState[`${stat}NextAction`] = newActionTime;
+
+    console.log(`Updated ${stat} next action time:`, newActionTime);
+}
+
+/*private updateNextActionTime(stat: StatName, adjustBySeconds: number = 0) {
+  const baseInterval = this.getRandomInterval(10, 20); // 10-20 seconds
+  const adjustedInterval = baseInterval + adjustBySeconds * 1000; // Convert to ms
+  const now = Date.now();
+  
+  let newActionTime = new Date(now + adjustedInterval);
+
+  //console.log("updateNextActionTime", newActionTime);
+
+  switch(stat) {
+    case 'hunger':
+      newActionTime = new Date(now + 10 * 1000); // 10 seconds
+      break;
+    case 'fatigue':
+      newActionTime = new Date(now + 20 * 1000); // 20 seconds
+      break;
+    case 'purity':
+      newActionTime = new Date(now + 30 * 1000); // 30 seconds
+      break;
+    case 'attention':
+      newActionTime = new Date(now + 40 * 1000); // 40 seconds
+      break;
   }
+
+  this[`${stat}NextAction`] = newActionTime;
+  this.gameState[`${stat}NextAction`] = newActionTime;
+
+  //console.log(`Updated ${stat} next action time:`, newActionTime);
+}
+*/
 
   async requestNotificationPermission() {
     const permission = await PushNotifications.requestPermissions();
@@ -286,83 +330,76 @@ export class GamePage implements OnDestroy{
 
   handleAction(action: StatName) {
     const now = new Date();
-    let nextActionTime: Date | undefined;
     let incrementValue: number = 0;
   
     switch (action) {
       case 'hunger':
-        nextActionTime = this.gameState.hungerNextAction;
         incrementValue = 20;
         break;
       case 'fatigue':
-        nextActionTime = this.gameState.fatigueNextAction;
         incrementValue = 25;
         break;
       case 'purity':
-        nextActionTime = this.gameState.purityNextAction;
         incrementValue = 30;
         break;
       case 'attention':
-        nextActionTime = this.gameState.attentionNextAction;
         incrementValue = 35;
         break;
     }
-  
+
     const valueKey = `${action}Value` as keyof GameState;
-  
+
     if (this.gameState[valueKey] === 100) {
-      console.log(`${action} is already full. No points awarded.`);
-      return;
+        console.log(`${action} is already full. No points awarded.`);
+        return;
     }
-  
-    if (nextActionTime) {
-      const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000); // time diff in minutes
-  
-      if (timeDifference <= 10) {
-        this.addPoint(1); // Close to scheduled time
-      } else if (now < nextActionTime) {
-        this.addPoint(0.5); // Early action
-      } else {
-        this.addPoint(0); // Late action
-      }
-  
-      if (timeDifference <= 10) {
-        this.addPoint(1); // Additional bonus points
-      } else if (now.getTime() < nextActionTime.getTime()) {
-        this.addPoint(0.5); // Early action bonus
-        this.updateNextActionTime(action); // Extend next action interval
-        this.scheduleNotification(action, nextActionTime);
-      } else {
-        if (this.gameState[valueKey] != null) {
-          this.gameState[valueKey] -= 10; // Penalty for late action
-        }
-        this.updateNextActionTime(action); // Shorten next action interval
-      }
-  
-      // Handle early or late actions by adjusting the next action time
-      if (timeDifference < -10) {
-        this.updateNextActionTime(action, 2); // Extend by 2 hours
-      } else if (timeDifference > 10) {
-        this.updateNextActionTime(action, -1); // Shorten by 1 hour
-      }
-  
-      if (now.getTime() - nextActionTime.getTime() > 12 * 60 * 60 * 1000) {
+
+    // Ensure the next action time is properly updated
+    this.updateNextActionTime(action);
+    const nextActionTime = new Date(this[`${action}NextAction`] ?? Date.now());
+
+
+    const timeDifference = Math.abs(now.getTime() - nextActionTime.getTime()) / (60 * 1000); // time diff in minutes
+
+    if (timeDifference <= 10) {
+        this.addPoint(1);
+    } else if (now < nextActionTime) {
+        this.addPoint(0.5);
+        this.showAlert("Early Action!", "You acted early and earned 0.5 points!");
+    } else {
+        this.addPoint(0);
+        this.showAlert("Late Action!", "You acted late. No points awarded.");
+    }
+
+    if (timeDifference > 10) {
+        this.updateNextActionTime(action, -1); // Shorten by 1 hour if late
+    } else if (timeDifference < -10) {
+        this.updateNextActionTime(action, 2); // Extend by 2 hours if too early
+    }
+
+    if (now.getTime() - nextActionTime.getTime() > 12 * 60 * 60 * 1000) {
         console.log("Feeding missed. Severe penalty applied.");
         if (this.gameState[valueKey] != null) {
-          this.gameState[valueKey] -= 20; // Severe penalty
+            this.gameState[valueKey] -= 20;
         }
-      }
-  
-      // Update next action time with random interval
-      nextActionTime.setTime(now.getTime() + this.getRandomInterval(6, 12));
     }
-  
+
     this.ngZone.run(() => {
-      this.increaseStat(action, incrementValue); // Immediate UI update
-      this.updateStatColorsAndHeight(action);
+        this.increaseStat(action, incrementValue);
+        this.updateStatColorsAndHeight(action);
     });
-  }
+}
+
   
+  async showAlert(title: string, message: string) {
+    const alert = await this.alertController.create({
+        header: title,
+        message: message,
+        buttons: ['OK']
+    });
+
+    await alert.present();
+}
 
 async showLowStatAlert(stat: StatName) {
   const alert = await this.alertController.create({
@@ -493,11 +530,11 @@ updateStatColorsAndHeight(stat: StatName) {
 updateCurrentStat(stat: StatName) {
   const valueKey = `${stat}Value` as keyof GameState;
   const colorKey = `${stat}Color` as StatColorName;
-  console.log("gameState before update", this.gameState);
+  //console.log("gameState before update", this.gameState);
   this.currentStatValue = this.gameState[valueKey];
-  console.log("VALUE", this.currentStatValue);
+  //console.log("VALUE", this.currentStatValue);
   this.currentStatColor = this.gameState[colorKey];
-  console.log("COLOR", this.currentStatColor);
+  //console.log("COLOR", this.currentStatColor);
 }
 
 /*checkAlert(stat: StatName) {
@@ -638,21 +675,25 @@ savePetStats() {
   bath() {
     this.handleAction('purity');
     this.updateCurrentStat('purity');
+    this.openActionModal('purity');
   }
 
   sleep() {
     this.handleAction('fatigue');
     this.updateCurrentStat('fatigue');
+    this.openActionModal('fatigue');
   }
 
   care() {
     this.handleAction('attention');
     this.updateCurrentStat('attention');
+    this.openActionModal('attention');
   }
 
   feed() {
     this.handleAction('hunger');
     this.updateCurrentStat('hunger');
+    this.openActionModal('hunger');
   }
 
   setNextFeedTime() {
@@ -669,7 +710,8 @@ savePetStats() {
       console.log('Navigating with levelUp:', this.gameState.level);
       // Set level-up state and open the modal
       this.userService.setLevelUpState(true);
-      this.openModal();
+      console.log('Opening level-up modal');
+      this.openLevelUpModal();
     }
     if (this.gameState.level >= 50) {
       this.showMaxLevelAlert();
@@ -680,8 +722,10 @@ savePetStats() {
   // Adds points based on user timing
   addPoint(points: number) {
     this.gameState.points += points;
+    console.log("Points added: ", points);
     this.checkLevelUp();
     this.gameState.progressBarWidth = (this.gameState.points / this.pointsNeeded)  * 100;
+    console.log("Points: ", this.gameState.points, this.pointsNeeded, this.gameState.progressBarWidth);
     if (this.gameState.points >= this.pointsNeeded) {
       this.levelUp();
     }
@@ -693,7 +737,7 @@ savePetStats() {
       this.gameState.level += 1;        
       this.gameState.points = 0;
       this.pointsNeeded = Math.ceil(this.pointsNeeded * 1.1); 
-      this.openModal();
+      this.openLevelUpModal();
     } else {
       this.gameState.points = this.pointsNeeded;
       this.gameState.progressBarWidth = 100;
@@ -726,7 +770,7 @@ savePetStats() {
     });
     console.log(`${stat} upgraded successfully.`);
 
-  this.closeModal();
+  this.closeLevelUpModal();
 }
 
   async showMaxLevelAlert() {
@@ -737,16 +781,82 @@ savePetStats() {
     await alert.present();
   }
 
-  openModal() {
-    this.isModalVisible = true;
+  openActionModal(action: StatName) {
+    const now = new Date();
+    let nextActionTime: Date | undefined = new Date(this[`${action}NextAction`] ?? Date.now());
+    console.log(`Retrieved ${action} next action time:`, nextActionTime);
+
+    console.log(`Modal - Retrieved ${action} next action time:`, nextActionTime);
+
+    // If invalid, use fallback
+    if (isNaN(nextActionTime.getTime())) {
+        nextActionTime = new Date(now.getTime() + this.decrementIntervals[action]);
+    }
+
+    // Calculate time difference
+    const diffInMs = nextActionTime.getTime() - now.getTime();
+
+    console.log("minutes", diffInMs);
+    const timeDiff = this.calculateTimeDifference(nextActionTime, now);
+    
+    console.log("Modal - Time difference:", timeDiff);
+
+    if (diffInMs > 60000) {
+      this.nextActionMessage = this.getActionMessage(action, timeDiff);
+      this.isActionModalVisible = true;
+  } else {
+      console.log("Action time is now, performing action immediately.");
+      this.handleAction(action);
+      this.isActionModalVisible = false;
+  }
 }
 
-closeModal() {
-    this.isModalVisible = false;
+
+  getActionMessage(action: StatName, timeDiff: string): string {
+    const messages = {
+      hunger: `${this.petName} isn't hungry now. You can feed it in ${timeDiff}`,
+      fatigue: `${this.petName} isn't tired now. You can put it to sleep in ${timeDiff}`,
+      purity: `${this.petName} isn't dirty now. You can clean it in ${timeDiff}`,
+      attention: `${this.petName} doesn't require your attention now. You can take care of it in ${timeDiff}`,
+    };
+
+    return messages[action] || 'Unknown action';
+  }
+
+
+  calculateTimeDifference(nextActionTime: Date, now: Date): string {
+    let diffInMs = Math.max(0, nextActionTime.getTime() - now.getTime());
+    if (diffInMs === 0) return "now";
+    let totalMinutes = Math.floor(diffInMs / (1000 * 60)); 
+    let hours = Math.floor(totalMinutes / 60);
+    let minutes = totalMinutes % 60;
+
+    return `${hours} hours and ${minutes} minutes`;
 }
 
-  onModalDismiss() {
-    this.isModalVisible = false;
+
+  openLevelUpModal() {
+    this.isLevelUpModalVisible = true;
+    this.levelUpModal.present();
+    console.log("Level Up Modal opened");
+}
+
+closeLevelUpModal() {
+    this.isLevelUpModalVisible = false;
+    this.levelUpModal.dismiss();
+}
+
+closeActionModal() {
+  this.isActionModalVisible = false;
+  this.actionModal.dismiss();
+}
+
+  onLevelUpModalDismiss() {
+    this.isLevelUpModalVisible = false;
+  }
+
+  onActionModalDismiss() {
+    this.isActionModalVisible = false;
   }
 
   makeDogJump() {

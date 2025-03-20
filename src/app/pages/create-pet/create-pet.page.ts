@@ -7,6 +7,7 @@ import { AlertController } from '@ionic/angular';
 import { UserService } from 'src/app/services/user.service';
 import SHA1 from 'crypto-js/sha1';
 import { PushNotifications, Token, PermissionStatus } from '@capacitor/push-notifications';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
     selector: 'app-create-pet',
@@ -26,7 +27,8 @@ export class CreatePetPage implements OnInit {
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private injector: Injector
+    private injector: Injector,
+    private cdr: ChangeDetectorRef
   ) {}
 
   private get userService(): UserService {
@@ -163,6 +165,7 @@ export class CreatePetPage implements OnInit {
       localStorage.setItem('userData', JSON.stringify(selectedDogData));
       this.userService.setSelectedDog(dogStats);
       this.userService.initializeUserData();
+      this.cdr.markForCheck();
     }
     
     saveOffline(dogStats: any) {

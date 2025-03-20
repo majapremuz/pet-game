@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import SHA1 from 'crypto-js/sha1';
-
+import sha1 from 'crypto-js/sha1';
 
 export interface GameState {
   hungerValue: number;
@@ -107,8 +106,8 @@ export class UserService {
     
   // User-related methods
   login(username: string, password: string): Observable<any> {
-    const hashedUsername = SHA1(username).toString();
-    const hashedPassword = SHA1(password).toString();
+    const hashedUsername = sha1(username).toString();
+    const hashedPassword = sha1(password).toString();
   
     console.log('login: ', hashedUsername, hashedPassword);
   
@@ -304,8 +303,8 @@ export class UserService {
   }*/
 
     changePassword(currentPassword: string, newPassword: string): boolean {
-      if (this.password === SHA1(currentPassword).toString()) {
-        this.password = SHA1(newPassword).toString();
+      if (this.password === sha1(currentPassword).toString()) {
+        this.password = sha1(newPassword).toString();
         localStorage.setItem('password', this.password);
         console.log('Password changed successfully');
         return true;

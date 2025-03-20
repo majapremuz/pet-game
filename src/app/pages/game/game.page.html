@@ -58,15 +58,26 @@
   
   </div>
 
-  <ion-modal #levelUpModal [isOpen]="isModalVisible" (willDismiss)="onModalDismiss()" align="center">
+  <ion-modal #levelUpModal [isOpen]="isLevelUpModalVisible" (willDismiss)="onLevelUpModalDismiss()" align="center" class="levelUpModal">
     <ng-template>
-      <!--<ion-button (click)="closeModal()" slot="end" class="modalCloseBtn">X</ion-button>-->
+      <!--<ion-button (click)="closeLevelUpModal()" slot="end" class="modalCloseBtn">X</ion-button>-->
       <h2 class="modalTitle">Select a stat to upgrade:</h2>
       <ion-button (click)="upgradeStat('smart')" class="statBtn">Smart</ion-button>
       <ion-button (click)="upgradeStat('speed')" class="statBtn">Speed</ion-button>
       <ion-button (click)="upgradeStat('strength')" class="statBtn">Strength</ion-button>
     </ng-template>
   </ion-modal>
+
+
+  <ion-modal #actionModal [isOpen]="isActionModalVisible" (willDismiss)="onActionModalDismiss()" class="actionModal">
+    <ion-content>
+      <div *ngIf="nextActionMessage">
+        <ion-button (click)="closeActionModal()" class="modalCloseBtn" slot="end">X</ion-button>
+        <p>{{ nextActionMessage }}</p>
+      </div>
+    </ion-content>
+  </ion-modal>
+  
   
 </ion-content>
 
