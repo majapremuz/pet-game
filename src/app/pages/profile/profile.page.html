@@ -11,7 +11,7 @@
       <p>Strength: {{ petStrength }}</p>
       </div>
 
-      <div class="password-field" *ngIf="isPasswordFieldVisible">
+      <!--<div class="password-field" *ngIf="isPasswordFieldVisible">
         <label>Current password</label>
         <input [(ngModel)]="currentPassword" type="password" required>
   
@@ -22,7 +22,7 @@
 
       </div>
   
-      <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>
+      <button class="passwordBtn" (click)="togglePasswordField()">CHANGE PASSWORD</button>-->
 
       <div class="sleep-time" *ngIf="isSleepFieldVisible">
         <h2 class="sleep-title">
@@ -42,9 +42,10 @@
 
       <button (click)="toggleSleepField()" class="sleepBtn">SET NOTIFICATIONS TIME</button>
       
-      <button (click)="returnToGame()">RETURN TO GAME</button>
-      <button (click)="logOut()" class="logOutBtn">LOG OUT</button>
-      <button (click)="confirmDeleteProfile()" class="deleteBtn">DELETE PROFILE</button>
+      <button (click)="returnToGame()" class="returnBtn">RETURN TO GAME</button>
+      <!--<button (click)="logOut()" class="logOutBtn">LOG OUT</button>
+      <button (click)="confirmDeleteProfile()" class="deleteBtn">DELETE PROFILE</button>-->
+      <button (click)="quitApp()" class="quitBtn">QUIT</button>
     </div>
   
 </ion-content>

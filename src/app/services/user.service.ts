@@ -63,18 +63,18 @@ export class UserService {
     return this.username || '';
   }
 
-  setUserPassword(password: string) {
+  /*setUserPassword(password: string) {
     this.password = password;
     localStorage.setItem('password', password);
     console.log('Password set');
-  }
+  }*/
 
-  getUserPassword(): string {
+  /*getUserPassword(): string {
     return this.password || localStorage.getItem('password') || ''; 
-  }
+  }*/
   
 
-  initializeUserData(): void {
+  /*initializeUserData(): void {
     const firstLaunch = localStorage.getItem('firstLaunch');
     
     if (!firstLaunch) {
@@ -87,7 +87,13 @@ export class UserService {
     this.password = localStorage.getItem('password') || '';
     const storedPetData = localStorage.getItem('selectedDog');
     this.selectedDog = storedPetData ? JSON.parse(storedPetData) : null;
-  }
+  }*/
+
+    initializeUserData(): void {
+      const storedPetData = localStorage.getItem('selectedDog');
+      this.selectedDog = storedPetData ? JSON.parse(storedPetData) : null;
+    }
+    
       
     initializeGameState(): void {
       const savedState = localStorage.getItem('gameState');
@@ -105,7 +111,7 @@ export class UserService {
     
     
   // User-related methods
-  login(username: string, password: string): Observable<any> {
+  /*login(username: string, password: string): Observable<any> {
     const hashedUsername = sha1(username).toString();
     const hashedPassword = sha1(password).toString();
   
@@ -129,15 +135,22 @@ export class UserService {
       console.error('Invalid credentials');
       throw new Error('Invalid credentials');
     }
-  }
+  }*/
   
 
-  isLoggedIn(): Observable<boolean> {
+  /*isLoggedIn(): Observable<boolean> {
     const username = localStorage.getItem('username');
     const password = localStorage.getItem('password');
     const selectedDog = localStorage.getItem('selectedDog');
     return of(!!username && !!password && !!selectedDog);
-  }
+  }*/
+
+    isLoggedIn(): Observable<boolean> {
+      const selectedDog = localStorage.getItem('selectedDog');
+      return of(!!selectedDog);
+    }
+    
+    
   
   saveOnlineData(data: any): Observable<any> {
     const users = JSON.parse(localStorage.getItem('users') || '[]');
@@ -302,7 +315,7 @@ export class UserService {
     }
   }*/
 
-    changePassword(currentPassword: string, newPassword: string): boolean {
+    /*changePassword(currentPassword: string, newPassword: string): boolean {
       if (this.password === sha1(currentPassword).toString()) {
         this.password = sha1(newPassword).toString();
         localStorage.setItem('password', this.password);
@@ -312,7 +325,7 @@ export class UserService {
         console.error('Current password is incorrect');
         return false;
       }
-    }
+    }*/
     
     
     getSleepTime(): string | null {

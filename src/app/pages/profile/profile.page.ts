@@ -7,6 +7,7 @@ import { Router, ActivatedRoute  } from '@angular/router';
 import { UserService } from 'src/app/services/user.service';
 import * as SHA1 from 'crypto-js/sha1';
 import { ToastController } from '@ionic/angular';
+import { App } from '@capacitor/app';
 
 
 @Component({
@@ -48,7 +49,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
 
     ngOnInit() {
-      const username = localStorage.getItem('username');
+      /*const username = localStorage.getItem('username');
       const currentPassword = localStorage.getItem('password');
       console.log("Username:", username, currentPassword);
       if (!username) {
@@ -58,7 +59,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     
       this.username = username;
       this.currentPassword = currentPassword || '';
-      console.log("Username:", this.username);
+      console.log("Username:", this.username);*/
     
       // Fetch pet stats based on the username
       this.userService.getPetStatsByUsername(this.username).subscribe((petStats) => {
@@ -145,7 +146,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     this.cdRef.detectChanges();
   }
 
-  changePassword() {
+  /*changePassword() {
     if (!this.currentPassword || !this.newPassword) {
       console.warn('Both fields are required.');
       return;
@@ -168,7 +169,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
     console.log("NEW PASSWORD: ", this.newPassword);
   
     this.isPasswordFieldVisible = false;
-  }
+  }*/
   
   
     
@@ -196,7 +197,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
   }
   
    
-    onLogInSuccess() {
+    /*onLogInSuccess() {
       this.userService.initializeUserData();
       this.userService.initializePetData();
       console.log("pet service:", this.userService.initializePetData())
@@ -209,7 +210,7 @@ export class ProfilePage implements OnInit, AfterViewInit {
         console.log('Selected dog found:', selectedDog);
         this.router.navigate(['/game']);
       }
-    }
+    }*/
     
 
     loadPetStats(userId: string) {
@@ -222,6 +223,10 @@ export class ProfilePage implements OnInit, AfterViewInit {
 
   returnToGame() {
     this.router.navigate(['/game']);
+  }
+
+  quitApp() {
+    App.exitApp();
   }
 
   async confirmDeleteProfile() {

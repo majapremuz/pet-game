@@ -42,7 +42,7 @@ export class CreateProfilePage implements OnInit {
     await toast.present();
   }
 
-  createProfile() {
+  /*createProfile() {
     if (this.username && this.password) {
       this.userService.setUsername(this.username);
       this.userService.setUserPassword(this.password);
@@ -50,6 +50,6 @@ export class CreateProfilePage implements OnInit {
     } else {
       alert('Please enter a username and password');
     }
-  }
+  }*/
 
 }

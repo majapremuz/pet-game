@@ -36,14 +36,14 @@ export class CreatePetPage implements OnInit {
   }
 
   ngOnInit() {
-    const profileExists = !!this.userService.getUsername();
+   /* const profileExists = !!this.userService.getUsername();
     if (!profileExists) {
       console.warn('No profile found. Redirecting to create profile.');
       this.router.navigate(['/create-profile']);
       return;
-    }
+    }*/
     this.showSlide(this.currentSlideIndex);
-    this.promptPlayMode();
+    //this.promptPlayMode();
   }
   
 
@@ -63,7 +63,7 @@ export class CreatePetPage implements OnInit {
   
   
 
-  async promptPlayMode() {
+  /*async promptPlayMode() {
     if (this.playMode !== null) return; 
   
     const alert = await this.alertController.create({
@@ -87,7 +87,7 @@ export class CreatePetPage implements OnInit {
     });
   
     await alert.present();
-  }
+  }*/
   
 
   plusSlides(n: number) {
@@ -105,10 +105,10 @@ export class CreatePetPage implements OnInit {
     
 
     async game() {
-      if (!this.playMode) {
+      /*if (!this.playMode) {
         await this.promptPlayMode();
         return;
-      }
+      }*/
     
       const alert = await this.alertController.create({
         message: 'Are you sure you want to pick this dog?',
@@ -179,7 +179,7 @@ export class CreatePetPage implements OnInit {
       return {
         id: new Date().getTime(),
         username: SHA1(this.userService.getUsername()).toString(),
-        password: SHA1(this.userService.getUserPassword()).toString(),
+        //password: SHA1(this.userService.getUserPassword()).toString(),
         petStats: dogStats,
       };
     }
