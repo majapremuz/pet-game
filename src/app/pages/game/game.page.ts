@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { UserService, GameState } from 'src/app/services/user.service';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { state } from '@angular/animations';
 
 type StatName = 'hunger' | 'fatigue' | 'purity' | 'attention';
 type StatColorName = 'hungerColor' | 'fatigueColor' | 'purityColor' | 'attentionColor';
@@ -201,7 +200,8 @@ export class GamePage implements OnDestroy{
             // Set the new interval and store its ID
             this.intervals[stat as StatName] = setInterval(() => {
               this.decreaseStat(stat as StatName, 1); 
-            }, interval);
+            }, interval / 100);
+            console.log(`Started interval for ${stat}:`, this.intervals[stat as StatName]);
           });
         }
 
@@ -235,37 +235,6 @@ export class GamePage implements OnDestroy{
 
     console.log(`Updated ${stat} next action time:`, newActionTime);
 }
-
-/*private updateNextActionTime(stat: StatName, adjustBySeconds: number = 0) {
-  const baseInterval = this.getRandomInterval(10, 20); // 10-20 seconds
-  const adjustedInterval = baseInterval + adjustBySeconds * 1000; // Convert to ms
-  const now = Date.now();
-  
-  let newActionTime = new Date(now + adjustedInterval);
-
-  //console.log("updateNextActionTime", newActionTime);
-
-  switch(stat) {
-    case 'hunger':
-      newActionTime = new Date(now + 10 * 1000); // 10 seconds
-      break;
-    case 'fatigue':
-      newActionTime = new Date(now + 20 * 1000); // 20 seconds
-      break;
-    case 'purity':
-      newActionTime = new Date(now + 30 * 1000); // 30 seconds
-      break;
-    case 'attention':
-      newActionTime = new Date(now + 40 * 1000); // 40 seconds
-      break;
-  }
-
-  this[`${stat}NextAction`] = newActionTime;
-  this.gameState[`${stat}NextAction`] = newActionTime;
-
-  //console.log(`Updated ${stat} next action time:`, newActionTime);
-}
-*/
 
   async requestNotificationPermission() {
     const permission = await PushNotifications.requestPermissions();
@@ -444,18 +413,16 @@ decreaseStat(stat: StatName, decrement: number) {
       if (!this.alertShown[stat]) {
         this.showLowStatAlert(stat); // Show the alert only if it hasn't been shown already
         this.alertShown[stat] = true; // Mark as shown
-        // Provide a chance to solve it
-        this.offerChanceToFixStat(stat);
+        this.offerChanceToFixStat(stat); // Provide a chance to solve it
       }
     }
-    
+
     // If purity or attention reaches 0, give the player a chance to solve it
     if ((stat === 'purity' || stat === 'attention') && this.gameState[valueKey] === 0) {
       if (!this.alertShown[stat]) {
         this.showLowStatAlert(stat); // Show the alert only if it hasn't been shown already
         this.alertShown[stat] = true; // Mark as shown
-        // Provide a chance to solve it
-        this.offerChanceToFixStat(stat);
+        this.offerChanceToFixStat(stat); // Provide a chance to solve it
       }
     }
 
@@ -784,32 +751,25 @@ savePetStats() {
   openActionModal(action: StatName) {
     const now = new Date();
     let nextActionTime: Date | undefined = new Date(this[`${action}NextAction`] ?? Date.now());
-    console.log(`Retrieved ${action} next action time:`, nextActionTime);
-
-    console.log(`Modal - Retrieved ${action} next action time:`, nextActionTime);
-
+  
     // If invalid, use fallback
     if (isNaN(nextActionTime.getTime())) {
-        nextActionTime = new Date(now.getTime() + this.decrementIntervals[action]);
+      nextActionTime = new Date(now.getTime() + this.decrementIntervals[action]);
     }
-
+  
     // Calculate time difference
     const diffInMs = nextActionTime.getTime() - now.getTime();
-
-    console.log("minutes", diffInMs);
     const timeDiff = this.calculateTimeDifference(nextActionTime, now);
-    
-    console.log("Modal - Time difference:", timeDiff);
-
+  
     if (diffInMs > 60000) {
       this.nextActionMessage = this.getActionMessage(action, timeDiff);
       this.isActionModalVisible = true;
-  } else {
+    } else {
       console.log("Action time is now, performing action immediately.");
       this.handleAction(action);
       this.isActionModalVisible = false;
+    }
   }
-}
 
 
   getActionMessage(action: StatName, timeDiff: string): string {
