@@ -31,10 +31,10 @@ export class UserService {
   private selectedDog: any = null;
   private levelUpState = false;
   private gameState: GameState = {
-    hungerValue: 100,
-    fatigueValue: 100,
-    purityValue: 100,
-    attentionValue: 100,
+    hungerValue: 50,
+    fatigueValue: 50,
+    purityValue: 50,
+    attentionValue: 50,
     hungerColor: '#d3ba77',
     fatigueColor: '#d3ba77',  
     purityColor: '#d3ba77',
@@ -332,24 +332,34 @@ export class UserService {
       return localStorage.getItem('sleepTime');
     }
 
-  setSleepTime(time: string) {
-    localStorage.setItem('sleepTime', time);
-    console.log(`Sleep time set: ${time}`);
-}
+    setSleepTime(time: string) {
+      const currentDate = new Date();
+      const [hours, minutes] = time.split(':').map(Number);
+    
+      // Validate parsed hours and minutes
+      if (isNaN(hours) || isNaN(minutes)) {
+        console.error('Invalid time provided:', time);
+        return;
+      }
+    
+      // Set the sleep time for the current day
+      const sleepTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes);
+    
+      localStorage.setItem('sleepTime', sleepTime.toISOString());
+      console.log(`Sleep time set: ${sleepTime}`);
+    }
 
-isSleepTime(): boolean {
-  const sleepTime = localStorage.getItem('sleepTime');
-  if (!sleepTime) return false;  // If no sleep time is set, notifications are allowed.
-
-  const currentTime = new Date();
-  const sleepStart = new Date(sleepTime);  // Assuming sleep time is stored as a valid date string.
-
-  // Check if the current time is within the sleep time period (e.g., 10 PM to 6 AM)
-  const sleepEnd = new Date(sleepStart);
-  sleepEnd.setHours(sleepStart.getHours() + 8);  // Assuming 8 hours of sleep.
-
-  return currentTime >= sleepStart && currentTime <= sleepEnd;
-}
+    isSleepTime(): boolean {
+      const sleepTimeString = localStorage.getItem('sleepTime');
+      if (!sleepTimeString) return false; // If no sleep time is set, notifications are allowed.
+    
+      const sleepStart = new Date(sleepTimeString);
+      const sleepEnd = new Date(sleepStart);
+      sleepEnd.setHours(sleepStart.getHours() + 8); // Assuming 8 hours of sleep.
+    
+      const currentTime = new Date();
+      return currentTime >= sleepStart && currentTime <= sleepEnd;
+    }
 
 
  // Game data handling
@@ -407,10 +417,10 @@ saveGameState(gameState: GameState): void {
 
 getDefaultGameState(): GameState {
   return {
-    hungerValue: 100,
-    fatigueValue: 100,
-    purityValue: 100,
-    attentionValue: 100,
+    hungerValue: 50,
+    fatigueValue: 50,
+    purityValue: 50,
+    attentionValue: 50,
     hungerColor: '#d3ba77',
     fatigueColor: '#d3ba77',
     purityColor: '#d3ba77',

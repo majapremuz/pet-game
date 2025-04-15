@@ -95,15 +95,33 @@ export class ProfilePage implements OnInit, AfterViewInit {
     }
       
     async saveSleepSchedule() {
-      this.userService.setSleepTime(this.sleepTime);
-      console.log(`Sleep schedule saved: Sleep - ${this.sleepTime}`);
+      if (!this.sleepTime) {
+        const toast = await this.toastController.create({
+          message: 'Please select a valid time.',
+          duration: 3000,
+          position: 'middle',
+          color: 'danger',
+        });
+        await toast.present();
+        return;
+      }
     
-      // Show a toast message
+      // Extract the time in HH:mm format from the ISO string
+      const sleepTimeDate = new Date(this.sleepTime);
+      const hours = sleepTimeDate.getHours().toString().padStart(2, '0');
+      const minutes = sleepTimeDate.getMinutes().toString().padStart(2, '0');
+      const formattedTime = `${hours}:${minutes}`;
+    
+      // Save the sleep time using the UserService
+      this.userService.setSleepTime(formattedTime);
+      console.log(`Sleep schedule saved: Sleep - ${formattedTime}`);
+    
+      // Show a success toast message
       const toast = await this.toastController.create({
-        message: `Sleep time set to ${this.sleepTime}.`,
+        message: `Sleep time set to ${formattedTime}.`,
         duration: 3000,
         position: 'middle',
-        color: 'success'
+        color: 'success',
       });
     
       await toast.present();

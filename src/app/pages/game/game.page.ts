@@ -42,7 +42,12 @@ export class GamePage implements OnDestroy{
   currentStatColor!: string;
   isLevelUpModalVisible: boolean = false;
   isActionModalVisible: boolean = false;
-  nextActionMessage: string | undefined; 
+  nextActionMessage: string | undefined;
+  
+  private _hungerValue: number = 0;
+  private _fatigueValue: number = 0;
+  private _purityValue: number = 0;
+  private _attentionValue: number = 0;
 
   intervals: Record<StatName, any> = {
     hunger: null,
@@ -129,19 +134,47 @@ export class GamePage implements OnDestroy{
 
 
   get hungerValue(): number {
-    return this.userService.gethungerValue();
+    if (this._hungerValue === 0) {
+      this._hungerValue = this.userService.gethungerValue();
+    }
+    return this._hungerValue;
+  }
+  
+  updateHungerValue() {
+    this._hungerValue = this.userService.gethungerValue();
   }
 
   get attentionValue(): number {
-    return this.userService.getattentionValue();
+    if (this._attentionValue === 0) {
+      this._attentionValue = this.userService.getattentionValue();
+    }
+    return this._hungerValue;
+  }
+  
+  updateAttentionValue() {
+    this._attentionValue = this.userService.getattentionValue();
   }
 
   get fatigueValue(): number {
-    return this.userService.getfatigueValue();
-  }     
+    if (this._fatigueValue === 0) {
+      this._fatigueValue = this.userService.getfatigueValue();
+    }
+    return this._fatigueValue;
+  }
+  
+  updatFatigueValue() {
+    this._fatigueValue = this.userService.getfatigueValue();
+  }    
 
-  get purityValue(): number {   
-    return this.userService.getpurityValue();
+  get purityValue(): number {
+    if (this._purityValue === 0) {
+      this._purityValue = this.userService.getpurityValue();
+    }
+    return this._purityValue;
+  }
+  
+  updatePurityValue() {
+    this._purityValue = this.userService.getpurityValue();
   }
     saveGame(): void {
       this.userService.saveGameState(this.gameState);
@@ -234,6 +267,7 @@ export class GamePage implements OnDestroy{
     this.gameState[`${stat}NextAction`] = newActionTime;
 
     console.log(`Updated ${stat} next action time:`, newActionTime);
+    this.scheduleNotification(stat, newActionTime);
 }
 
   async requestNotificationPermission() {
@@ -352,10 +386,11 @@ export class GamePage implements OnDestroy{
             this.gameState[valueKey] -= 20;
         }
     }
-
+    this.updateNextActionTime(action);
     this.ngZone.run(() => {
         this.increaseStat(action, incrementValue);
         this.updateStatColorsAndHeight(action);
+        this.cdRef.detectChanges();
     });
 }
 
@@ -388,7 +423,7 @@ increaseStat(stat: StatName, increment: number) {
     this.gameState[valueKey] = Math.min(this.gameState[valueKey] + increment, 100);
     this.saveGame();
     this.checkLevelUp();
-    this.cdRef.detectChanges(); // Ensure UI reflects changes
+    this.cdRef.detectChanges();
   });
 }
 
@@ -433,8 +468,6 @@ decreaseStat(stat: StatName, decrement: number) {
 
     this.updateStatColorsAndHeight(stat);
     this.userService.updateGameState(this.gameState);
-
-    // Trigger immediate UI update
     this.cdRef.detectChanges();
   }
 }
@@ -496,12 +529,17 @@ updateStatColorsAndHeight(stat: StatName) {
 
 updateCurrentStat(stat: StatName) {
   const valueKey = `${stat}Value` as keyof GameState;
-  const colorKey = `${stat}Color` as StatColorName;
-  //console.log("gameState before update", this.gameState);
-  this.currentStatValue = this.gameState[valueKey];
-  //console.log("VALUE", this.currentStatValue);
-  this.currentStatColor = this.gameState[colorKey];
-  //console.log("COLOR", this.currentStatColor);
+  const colorKey = `${stat}Color` as keyof GameState;
+
+  this.ngZone.run(() => {
+    this.currentStatValue = this.gameState[valueKey];
+    this.currentStatColor = this.gameState[colorKey];
+
+    console.log('Updated currentStatValue:', this.currentStatValue);
+    console.log('Updated currentStatColor:', this.currentStatColor);
+
+    this.cdRef.detectChanges();
+  });
 }
 
 /*checkAlert(stat: StatName) {
@@ -643,24 +681,29 @@ savePetStats() {
     this.handleAction('purity');
     this.updateCurrentStat('purity');
     this.openActionModal('purity');
+    this.cdRef.detectChanges();
   }
 
   sleep() {
     this.handleAction('fatigue');
     this.updateCurrentStat('fatigue');
     this.openActionModal('fatigue');
+    this.cdRef.detectChanges();
   }
 
   care() {
     this.handleAction('attention');
     this.updateCurrentStat('attention');
     this.openActionModal('attention');
+    this.cdRef.detectChanges();
   }
 
   feed() {
     this.handleAction('hunger');
     this.updateCurrentStat('hunger');
     this.openActionModal('hunger');
+    this.cdRef.detectChanges();
+    console.log('Updated hungerValue:', this.gameState.hungerValue);
   }
 
   setNextFeedTime() {
