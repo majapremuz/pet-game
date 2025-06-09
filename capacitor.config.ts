@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.prolink.fetchthebone',
+  appId: 'com.zita.fetchthebone',
   appName: 'Fetch the bone',
   webDir: 'www',
 

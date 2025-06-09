@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Fetch the bone</string>
     <string name="title_activity_main">Fetch the bone</string>
-    <string name="package_name">com.prolink.fetchthebone</string>
-    <string name="custom_url_scheme">com.prolink.fetchthebone</string>
+    <string name="package_name">com.zita.fetchthebone</string>
+    <string name="custom_url_scheme">com.zita.fetchthebone</string>
 </resources>
