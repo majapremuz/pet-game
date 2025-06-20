@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import sha1 from 'crypto-js/sha1';
+import { StatName } from '../pages/game/game.page';
 
 export interface GameState {
   hungerValue: number;
@@ -16,11 +17,15 @@ export interface GameState {
   fatigueNextAction: Date;
   purityNextAction: Date;
   attentionNextAction: Date;
+  lastDecrementTime: Record<StatName, number>;
   points: number;
   level: number;
   progressBarWidth: number;
   [key: string]: any;
 }
+
+const now = Date.now();
+
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +48,12 @@ export class UserService {
     fatigueNextAction: new Date(),
     purityNextAction: new Date(),
     attentionNextAction: new Date(),
+    lastDecrementTime: {
+      hunger: Date.now(),
+      fatigue: Date.now(),
+      purity: Date.now(),
+      attention: Date.now()
+    },
     points: 0,
     level: 0,
     progressBarWidth: 0
@@ -429,6 +440,12 @@ getDefaultGameState(): GameState {
     fatigueNextAction: new Date(),
     purityNextAction: new Date(),
     attentionNextAction: new Date(),
+    lastDecrementTime: {
+      hunger: now,
+      fatigue: now,
+      purity: now,
+      attention: now
+    },
     points: 0,
     level: 0,
     progressBarWidth: 0
@@ -507,6 +524,25 @@ getpurityValue(): number {
 
 getfatigueValue(): number {
   return this.gameState.fatigueValue;   
+}
+
+getLastDecrementTime(stat: StatName): number {
+  return this.gameState.lastDecrementTime?.[stat] || Date.now();
+}
+
+setLastDecrementTime(stat: StatName, time: number): void {
+  this.gameState.lastDecrementTime[stat] = time;
+  this.saveGameState(this.gameState);
+}
+
+getNextActionTime(stat: StatName): Date {
+  return this.gameState[`${stat}NextAction`] ?? new Date();
+}
+
+setNextActionTime(stat: StatName, time: Date): void {
+  console.log(`[setNextActionTime] Saving nextActionTime for ${stat}:`, time.toISOString());
+  this.gameState[`${stat}NextAction`] = time;
+  this.saveGameState(this.gameState);
 }
 
 }
