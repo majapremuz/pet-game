@@ -1,4 +1,4 @@
-package com.prolink.fetchthebone;
+package com.zita.fetchthebone;
 
 import com.getcapacitor.BridgeActivity;
 

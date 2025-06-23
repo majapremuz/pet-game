@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.prolink.fetchthebone"
+    namespace "com.zita.fetchthebone"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.prolink.fetchthebone"
+        applicationId "com.zita.fetchthebone"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 100
