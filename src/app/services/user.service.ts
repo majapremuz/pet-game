@@ -526,14 +526,17 @@ getfatigueValue(): number {
   return this.gameState.fatigueValue;   
 }
 
-getLastDecrementTime(stat: StatName): number {
-  return this.gameState.lastDecrementTime?.[stat] || Date.now();
+setLastDecrementTime(stat: StatName, time: number) {
+  const data = JSON.parse(localStorage.getItem('decrementTimes') || '{}');
+  data[stat] = time;
+  localStorage.setItem('decrementTimes', JSON.stringify(data));
 }
 
-setLastDecrementTime(stat: StatName, time: number): void {
-  this.gameState.lastDecrementTime[stat] = time;
-  this.saveGameState(this.gameState);
+getLastDecrementTime(stat: StatName): number | null {
+  const data = JSON.parse(localStorage.getItem('decrementTimes') || '{}');
+  return data[stat] ?? null;
 }
+
 
 getNextActionTime(stat: StatName): Date {
   return this.gameState[`${stat}NextAction`] ?? new Date();

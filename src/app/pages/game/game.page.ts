@@ -45,10 +45,10 @@ export class GamePage implements OnDestroy{
   isActionModalVisible: boolean = false;
   nextActionMessage: string | undefined;
   
-  private _hungerValue: number = 0;
+  /*private _hungerValue: number = 0;
   private _fatigueValue: number = 0;
   private _purityValue: number = 0;
-  private _attentionValue: number = 0;
+  private _attentionValue: number = 0;*/
 
   intervals: Record<StatName, any> = {
     hunger: null,
@@ -134,48 +134,21 @@ export class GamePage implements OnDestroy{
 
 
   get hungerValue(): number {
-    if (this._hungerValue === 0) {
-      this._hungerValue = this.userService.gethungerValue();
-    }
-    return this._hungerValue;
-  }
-  
-  updateHungerValue() {
-    this._hungerValue = this.userService.gethungerValue();
+    return this.gameState.hungerValue;
   }
 
   get attentionValue(): number {
-    if (this._attentionValue === 0) {
-      this._attentionValue = this.userService.getattentionValue();
-    }
-    return this._hungerValue;
-  }
-  
-  updateAttentionValue() {
-    this._attentionValue = this.userService.getattentionValue();
+    return this.gameState.attentionValue;
   }
 
   get fatigueValue(): number {
-    if (this._fatigueValue === 0) {
-      this._fatigueValue = this.userService.getfatigueValue();
-    }
-    return this._fatigueValue;
+    return this.gameState.fatigueValue;
   }
   
-  updatFatigueValue() {
-    this._fatigueValue = this.userService.getfatigueValue();
-  }    
-
   get purityValue(): number {
-    if (this._purityValue === 0) {
-      this._purityValue = this.userService.getpurityValue();
-    }
-    return this._purityValue;
+    return this.gameState.purityValue;
   }
-  
-  updatePurityValue() {
-    this._purityValue = this.userService.getpurityValue();
-  }
+
     saveGame(): void {
       this.userService.saveGameState(this.gameState);
     }
@@ -243,11 +216,17 @@ processMissedDecrements() {
     console.log(`Elapsed ms for ${stat}:`, elapsed);
 
     if (elapsed >= interval) {
-      const missed = Math.floor(elapsed / interval);
-      console.log(`Missed decrements for ${stat}:`, missed);
-      this.decreaseStat(stat as StatName, missed);
-      this.userService.setLastDecrementTime(stat as StatName, now);
-    }
+  const missed = Math.floor(elapsed / interval);
+  console.log(`Missed decrements for ${stat}:`, missed);
+
+  this.decreaseStat(stat as StatName, missed);
+
+  const newNextAction = new Date(now + interval);
+  (this as any)[`${stat}NextAction`] = newNextAction;
+  this.gameState[`${stat}NextAction`] = newNextAction;
+
+  this.userService.setLastDecrementTime(stat as StatName, now);
+}
   });
 }
 
@@ -285,12 +264,12 @@ processMissedDecrements() {
   return randomMinutes * 60 * 1000; // Convert minutes to milliseconds
 }*/
 
-lastDecrementTime: Record<StatName, number> = {
+/*lastDecrementTime: Record<StatName, number> = {
   hunger: Date.now(),
   fatigue: Date.now(),
   purity: Date.now(),
   attention: Date.now(),
-};
+};*/
 
 
     decrementIntervals: Record<StatName, number> = {
@@ -309,30 +288,46 @@ lastDecrementTime: Record<StatName, number> = {
 
 
 startStatusDecreasing() {
-  // Clear any existing interval
-  if (this.statusInterval) {
-    clearInterval(this.statusInterval);
-  }
+  console.log('✅ startStatusDecreasing() called');
+  if (this.statusInterval) clearInterval(this.statusInterval);
 
-  //Handle any missed decrements due to app being closed
-  this.processMissedDecrements();
-
-  //Start regular checking loop
   this.statusInterval = setInterval(() => {
+     console.log('⏰ Interval tick');
     const now = Date.now();
 
     Object.entries(this.decrementIntervals).forEach(([stat, interval]) => {
-      const elapsed = now - this.lastDecrementTime[stat as StatName];
+      const statKey = stat as StatName;
+      let last = this.userService.getLastDecrementTime(statKey);
 
-      if (elapsed >= interval) {
-        const timesToDecrement = Math.floor(elapsed / interval);
-        for (let i = 0; i < timesToDecrement; i++) {
-          this.decreaseStat(stat as StatName, 1);
-        }
-        this.lastDecrementTime[stat as StatName] = now;
+      // If no saved time, initialize
+      if (!last) {
+        last = Date.now();
+        this.userService.setLastDecrementTime(statKey, last);
+      }
+
+      if (!last || now < last) {
+      last = now - interval;
+      this.userService.setLastDecrementTime(statKey, last);
+    }
+
+      console.log(`⏱ ${statKey}: now=${now}, last=${last}, interval=${interval}, diff=${now - last}`);
+
+      while (now - last >= interval) {
+        console.log(`⏬ Decreasing ${statKey} (interval met)`);
+
+        this.decreaseStat(statKey, 1);
+
+        last += interval;
+        this.userService.setLastDecrementTime(statKey, last);
+
+        // Update nextAction time
+        const nextAction = new Date(last + interval);
+        this[`${statKey}NextAction`] = nextAction;
+        this.gameState[`${statKey}NextAction`] = nextAction;
       }
     });
-  }, 60000); // every 1 min
+    this.saveGame();
+  }, 60000); // every 1 minute
 }
 
 
@@ -489,7 +484,7 @@ private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
     }
   }
 
-  this.lastDecrementTime[action] = Date.now();
+  //this.userService.setLastDecrementTime(action, Date.now());
 
   this.ngZone.run(() => {
     this.increaseStat(action, incrementValue);
@@ -543,6 +538,7 @@ alertShown: Record<StatName, boolean> = {
 
 decreaseStat(stat: StatName, decrement: number) {
   const valueKey = `${stat}Value` as keyof GameState;
+  console.log(`Decreasing ${stat} by ${decrement}. Current value:`, this.gameState[valueKey]);
   if (this.gameState[valueKey] !== undefined) {
     // Decrease the stat
     this.gameState[valueKey] = Math.max((this.gameState[valueKey] as number) - decrement, 0);
@@ -554,6 +550,7 @@ decreaseStat(stat: StatName, decrement: number) {
         this.alertShown[stat] = true;
         this.offerChanceToFixStat(stat);
       }
+      this.userService.saveGameState(this.gameState);
     }
 
     // If purity or attention reaches 0, give the player a chance to solve it
