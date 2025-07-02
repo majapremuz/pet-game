@@ -1,0 +1,16 @@
+<ion-segment [(ngModel)]="selectedChallenge">
+  <ion-segment-button value="smart">Find Toy</ion-segment-button>
+  <ion-segment-button value="speed">Fetch</ion-segment-button>
+  <ion-segment-button value="strength">Dig Bone</ion-segment-button>
+</ion-segment>
+
+<ion-list *ngIf="opponents.length > 0">
+  <ion-item *ngFor="let opponent of opponents" (click)="selectOpponent(opponent)">
+    <ion-label>
+      <h2>{{ opponent.name }}</h2>
+      <p>Smart: {{ opponent.smart }}, Speed: {{ opponent.speed }}, Strength: {{ opponent.strength }}</p>
+    </ion-label>
+  </ion-item>
+</ion-list>
+
+<ion-button [disabled]="!selectedOpponent" (click)="startVS()">Start VS</ion-button>

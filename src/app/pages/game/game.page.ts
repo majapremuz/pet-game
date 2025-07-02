@@ -116,8 +116,6 @@ export class GamePage implements OnDestroy{
     this.openLevelUpModal();
     this.userService.resetLevelUpState();
   }
-
-    this.processMissedDecrements();
     this.updateColorGradually();
     this.startStatusDecreasing();
     this.level = this.userService.getGameState().level;
@@ -131,7 +129,9 @@ export class GamePage implements OnDestroy{
     });
   }
 
-
+  ionViewDidEnter() {
+  this.processMissedDecrements();
+}
 
   get hungerValue(): number {
     return this.gameState.hungerValue;
@@ -272,19 +272,20 @@ processMissedDecrements() {
 };*/
 
 
-    decrementIntervals: Record<StatName, number> = {
+    /*decrementIntervals: Record<StatName, number> = {
       hunger: 6 * 60 * 60 * 1000, // 6 hours
       fatigue: 24 * 60 * 60 * 1000, // 24 hours
       purity: 18 * 60 * 60 * 1000, // 18 hours
       attention: 8 * 60 * 60 * 1000, // 8 hours
-    }
+    }*/
 
-    /*decrementIntervals: Record<StatName, number> = {
-      hunger: 2000, // 1 minute
-      fatigue: 5000, // 2 minutes
-      purity: 6000, // 3 minutes
-      attention: 4000, // 4 minutes
-    };*/
+      decrementIntervals: Record<StatName, number> ={
+      hunger: 10 * 60 * 1000, // every 10 minutes
+      fatigue: 60 * 60 * 1000, // every 1 hour
+      purity: 30 * 60 * 1000, // every 30 min
+      attention: 20 * 60 * 1000, // every 20 min
+}
+
 
 
 startStatusDecreasing() {
@@ -315,7 +316,15 @@ startStatusDecreasing() {
       while (now - last >= interval) {
         console.log(`⏬ Decreasing ${statKey} (interval met)`);
 
-        this.decreaseStat(statKey, 1);
+        //this.decreaseStat(statKey, 1);
+
+        this.decreaseStat(statKey, {
+            hunger: 3,
+            fatigue: 5,
+            purity: 2,
+            attention: 4,
+          }[statKey]);
+
 
         last += interval;
         this.userService.setLastDecrementTime(statKey, last);
@@ -334,41 +343,40 @@ startStatusDecreasing() {
 private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
   const now = Date.now();
 
-  let newActionTime: Date;
+  let baseHours: number;
 
-  switch(stat) {
+  switch (stat) {
     case 'hunger':
-      newActionTime = new Date(now + (24 + adjustByHours) * 60 * 60 * 1000);
+      baseHours = 6;
       break;
     case 'fatigue':
-      newActionTime = new Date(now + (24 + adjustByHours) * 60 * 60 * 1000);
+      baseHours = 24;
       break;
     case 'purity':
-      newActionTime = new Date(now + (18 + adjustByHours) * 60 * 60 * 1000);
+      baseHours = 18;
       break;
     case 'attention':
-      newActionTime = new Date(now + (8 + adjustByHours) * 60 * 60 * 1000);
+      baseHours = 8;
       break;
     default:
-      // fallback to your random interval + adjustment
-      const baseInterval = this.getRandomInterval(6, 12) * 60 * 60 * 1000;
-      const adjustedInterval = baseInterval + adjustByHours * 60 * 60 * 1000;
-      newActionTime = new Date(now + adjustedInterval);
+      baseHours = this.getRandomInterval(6, 12) / (60 * 60 * 1000); // fallback
   }
 
-  // Defensive check: don't allow time to be in the past
+  const totalHours = baseHours + adjustByHours;
+  let newActionTime = new Date(now + totalHours * 60 * 60 * 1000);
+
+  // Prevent past timestamps
   if (newActionTime.getTime() <= now) {
     newActionTime = new Date(now + 60 * 60 * 1000); // at least 1 hour ahead
-    console.warn(`Next action time for ${stat} was in the past or now. Resetting to 1 hour from now.`);
+    console.warn(`Next action time for ${stat} was in the past. Reset to 1 hour ahead.`);
   }
 
   this[`${stat}NextAction`] = newActionTime;
   this.gameState[`${stat}NextAction`] = newActionTime;
 
-  console.log(`Updated ${stat} next action time:`, newActionTime);
+  console.log(`✅ Updated ${stat} next action time:`, newActionTime);
   this.scheduleNotification(stat, newActionTime);
 }
-
 
   async requestNotificationPermission() {
     const permission = await PushNotifications.requestPermissions();
@@ -431,7 +439,7 @@ private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
   }
   
 
-  handleAction(action: StatName) {
+  /*handleAction(action: StatName) {
   const now = new Date();
   let incrementValue: number = 0;
 
@@ -456,42 +464,146 @@ private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
     console.log(`${action} is already full. No points awarded.`);
     return;
   }
-  const nextActionTime = new Date(this[`${action}NextAction`] ?? Date.now());
 
+  const nextActionTime = new Date(this[`${action}NextAction`] ?? Date.now());
   const timeDifference = (now.getTime() - nextActionTime.getTime()) / (60 * 1000); // in minutes
+
+  // Handle points and show alert, but only apply effect if within valid time
+  let isActionAllowed = false;
+
   if (Math.abs(timeDifference) <= 10) {
     this.addPoint(1);
+    isActionAllowed = true;
   } else if (timeDifference < -10) {
     this.addPoint(0.5);
-    this.showAlert("Early Action!", "You acted early and earned 0.5 points!");
+    this.showAlert("Too Early!", this.getEarlyMessage(action));
   } else {
     this.addPoint(0);
-    this.showAlert("Late Action!", "You acted late. No points awarded.");
+    this.showAlert("Too Late!", this.getLateMessage(action));
   }
 
   if (timeDifference > 10) {
-    this.updateNextActionTime(action, -1); // Late: shorten by 1 hour
+    this.updateNextActionTime(action, -1); // Late: shorten
   } else if (timeDifference < -10) {
-    this.updateNextActionTime(action, 2);  // Early: extend by 2 hours
+    this.updateNextActionTime(action, 2); // Early: extend
   } else {
-    this.updateNextActionTime(action);     // On time: set normally
+    this.updateNextActionTime(action); // On time
   }
 
-  if (timeDifference > 720) { // 12 hours
+  if (timeDifference > 720) { // More than 12 hours late
     console.log("Feeding missed. Severe penalty applied.");
     if (this.gameState[valueKey] != null) {
       this.gameState[valueKey] -= 20;
     }
   }
 
-  //this.userService.setLastDecrementTime(action, Date.now());
+  // Only apply stat increase if on-time
+  if (isActionAllowed) {
+    this.ngZone.run(() => {
+      this.increaseStat(action, incrementValue);
+      this.updateStatColorsAndHeight(action);
+      this.cdRef.detectChanges();
+    });
+  } else {
+    console.log(`${action} action blocked due to invalid timing.`);
+  }
+}*/
 
-  this.ngZone.run(() => {
-    this.increaseStat(action, incrementValue);
-    this.updateStatColorsAndHeight(action);
-    this.cdRef.detectChanges();
-  });
+handleAction(action: StatName) {
+  const now = new Date();
+  const valueKey = `${action}Value` as keyof GameState;
+
+  // Don't do anything if already full
+  if (this.gameState[valueKey] === 100) {
+    console.log(`${action} is already full.`);
+    return;
+  }
+
+  const nextActionTime = new Date(this[`${action}NextAction`] ?? Date.now());
+  const timeDiffMs = now.getTime() - nextActionTime.getTime();
+  const timeDiffMins = timeDiffMs / (60 * 1000);
+
+  // Define bounds
+  const EARLY_BOUND = -10; // 10 min before
+  const LATE_BOUND = 10;   // 10 min after
+  const MISSED_BOUND = 720; // 12 hours late
+
+  // Too early
+  if (timeDiffMins < EARLY_BOUND) {
+    this.addPoint(0.5);
+    this.showAlert("Too Early!", this.getEarlyMessage(action));
+    console.warn(`[BLOCKED] ${action} too early by ${Math.abs(timeDiffMins).toFixed(1)} mins`);
+    return;
+  }
+
+  // Too late (missed care)
+  if (timeDiffMins > MISSED_BOUND) {
+    this.gameState[valueKey] = Math.max(this.gameState[valueKey] - 20, 0);
+    this.saveGame();
+    this.showAlert("Missed!", `${action} was missed by over 12 hours.`);
+    return;
+  }
+
+  // Slightly late
+  if (timeDiffMins > LATE_BOUND) {
+    this.addPoint(0);
+    this.showAlert("Too Late!", this.getLateMessage(action));
+    this.updateNextActionTime(action, -1); // Shorten next interval
+  }
+  // Slightly early
+  else if (timeDiffMins < EARLY_BOUND) {
+    this.showAlert("Too Early!", this.getEarlyMessage(action));
+    console.warn(`[BLOCKED] ${action} too early by ${Math.abs(timeDiffMins).toFixed(1)} mins`);
+    return; // ❗ block everything, don’t add points or extend time
 }
+
+  // On time
+  else {
+    this.addPoint(1);
+    this.updateNextActionTime(action); // Regular update
+  }
+
+  // ✅ ONLY increase stat if within acceptable bounds
+  if (timeDiffMins >= EARLY_BOUND && timeDiffMins <= MISSED_BOUND) {
+    this.ngZone.run(() => {
+      const increment = this.getIncrementForAction(action);
+      this.increaseStat(action, increment);
+      this.updateStatColorsAndHeight(action);
+      this.cdRef.detectChanges();
+    });
+  }
+}
+
+private getIncrementForAction(action: StatName): number {
+  switch (action) {
+    case 'hunger': return 20;
+    case 'fatigue': return 25;
+    case 'purity': return 30;
+    case 'attention': return 35;
+    default: return 0;
+  }
+}
+
+getEarlyMessage(action: StatName): string {
+  const messages: Record<StatName, string> = {
+    hunger: "You fed the dog too early. Only 0.5 points awarded!",
+    fatigue: "You tried to put the dog to sleep too early. Only 0.5 points awarded!",
+    purity: "You tried to clean the dog too early. Only 0.5 points awarded!",
+    attention: "You tried to play with the dog too early. Only 0.5 points awarded!",
+  };
+  return messages[action];
+}
+
+getLateMessage(action: StatName): string {
+  const messages: Record<StatName, string> = {
+    hunger: "You fed the dog too late. No points awarded.",
+    fatigue: "You let the dog stay up too late. No points awarded.",
+    purity: "You cleaned the dog too late. No points awarded.",
+    attention: "You gave attention too late. No points awarded.",
+  };
+  return messages[action];
+}
+
 
   
   async showAlert(title: string, message: string) {
@@ -950,14 +1062,22 @@ savePetStats() {
 
 
   calculateTimeDifference(nextActionTime: Date, now: Date): string {
-    let diffInMs = Math.max(0, nextActionTime.getTime() - now.getTime());
-    if (diffInMs === 0) return "now";
-    let totalMinutes = Math.floor(diffInMs / (1000 * 60)); 
-    let hours = Math.floor(totalMinutes / 60);
-    let minutes = totalMinutes % 60;
+  let diffInMs = Math.max(0, nextActionTime.getTime() - now.getTime());
+  if (diffInMs === 0) return "now";
 
-    return `${hours} hours and ${minutes} minutes`;
+  let totalMinutes = Math.floor(diffInMs / (1000 * 60)); 
+  let days = Math.floor(totalMinutes / (60 * 24));
+  let hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  let minutes = totalMinutes % 60;
+
+  const parts = [];
+  if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+  if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+  if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+
+  return parts.join(' and ');
 }
+
 
 
   openLevelUpModal() {
