@@ -22,6 +22,10 @@ export interface GameState {
   level: number;
   progressBarWidth: number;
   [key: string]: any;
+  hungerEarlyGiven?: boolean;
+  fatigueEarlyGiven?: boolean;
+  purityEarlyGiven?: boolean;
+  earlyGiven?: boolean;
 }
 
 const now = Date.now();
@@ -464,14 +468,14 @@ clearGameState(): void {
   console.log('Game state cleared');
 }
 
-updateNextActionTime(stat: keyof GameState, interval: number): void {
+/*updateNextActionTime(stat: keyof GameState, interval: number): void {
   const currentTime = new Date();
   const nextActionTime = new Date(currentTime.getTime() + interval);  // Set the next action time based on the interval (in milliseconds)
 
   this.gameState[`${stat}NextAction`] = nextActionTime;  // Update the next action time for the stat
   this.saveGameState(this.gameState);  // Save the updated game state
   console.log(`${stat} next action time updated to:`, nextActionTime);
-}
+}*/
 
 setLevelUpState(state: boolean) {
   this.levelUpState = state;
@@ -485,7 +489,7 @@ resetLevelUpState() {
   this.levelUpState = false;
 }
 
-performHungerAction(): void {
+/*performHungerAction(): void {
   // Perform hunger-related action (decrease hunger value)
   this.updateStatValue('hungerValue', this.gameState.hungerValue - 10);  // Decrease hunger
   this.updateNextActionTime('hunger', 10000);  // Set the next hunger action in 10 seconds (example interval)
@@ -507,7 +511,7 @@ performAttentionAction(): void {
   // Perform attention-related action (decrease attention value)
   this.updateStatValue('attentionValue', this.gameState.attentionValue - 10);  // Decrease attention
   this.updateNextActionTime('attention', 5000);  // Set the next attention action in 5 seconds (example interval)
-}
+}*/
 
 
 gethungerValue(): number {

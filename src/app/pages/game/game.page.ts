@@ -529,11 +529,18 @@ handleAction(action: StatName) {
   const MISSED_BOUND = 720; // 12 hours late
 
   // Too early
+  const earlyKey = `${action}EarlyGiven` as keyof GameState;
+
   if (timeDiffMins < EARLY_BOUND) {
+    if (!this.gameState[earlyKey]) {
     this.addPoint(0.5);
+    this.gameState[earlyKey] = true;
     this.showAlert("Too Early!", this.getEarlyMessage(action));
-    console.warn(`[BLOCKED] ${action} too early by ${Math.abs(timeDiffMins).toFixed(1)} mins`);
-    return;
+    this.saveGame();
+  } else {
+    this.showAlert("Too Early!", "You've already gained early points for this action today.");
+    console.warn(`❌ 0.5 point for ${action} already given this cycle.`);
+  }
   }
 
   // Too late (missed care)
