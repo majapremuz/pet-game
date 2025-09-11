@@ -243,10 +243,18 @@ export class UserService {
           speed: dog.speed,
           strength: dog.strength,
         };
+
         localStorage.setItem('selectedDog', JSON.stringify(selectedDog));
+
+        const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+        user.petStats = {
+          name: selectedDog.name,
+          smart: selectedDog.smart,
+          speed: selectedDog.speed,
+          strength: selectedDog.strength
+        };
+        localStorage.setItem('authUser', JSON.stringify(user));
       }
-      
-      
 
   initializePetData(): Observable<any> {
     const user = JSON.parse(localStorage.getItem('username') || '{}');
@@ -459,9 +467,37 @@ getDefaultGameState(): GameState {
 resetGameState(): void {
   this.gameState = this.getDefaultGameState();
   localStorage.removeItem('gameState');  
+
+  // Dohvati starog psa
+  const selectedDog = JSON.parse(localStorage.getItem('selectedDog') || '{}');
+  if (selectedDog && selectedDog.name) {
+    // 🔁 Vrati default vrijednosti psa (npr. iz liste pasa)
+    const defaultDogs = [
+      { image: 'assets/dog 1.png', smart: 10, speed: 5, strength: 5 },
+      { image: 'assets/dog 2.png', smart: 5, speed: 10, strength: 5 },
+      { image: 'assets/dog 3.png', smart: 5, speed: 5, strength: 10 },
+    ];
+
+    const defaultDog = defaultDogs.find(d => d.image === selectedDog.image);
+
+    if (defaultDog) {
+      localStorage.setItem('selectedDog', JSON.stringify(defaultDog));
+
+      const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+      if (user) {
+        user.petStats = {
+          smart: defaultDog.smart,
+          speed: defaultDog.speed,
+          strength: defaultDog.strength
+        };
+        localStorage.setItem('authUser', JSON.stringify(user));
+        console.log('Pet stats resetirani na default vrijednosti psa:', user.petStats);
+      }
+    }
+  }
+
   console.log('Game state has been reset.');
 }
-
 
 clearGameState(): void {
   localStorage.removeItem('gameState');
@@ -488,31 +524,6 @@ getLevelUpState(): boolean {
 resetLevelUpState() {
   this.levelUpState = false;
 }
-
-/*performHungerAction(): void {
-  // Perform hunger-related action (decrease hunger value)
-  this.updateStatValue('hungerValue', this.gameState.hungerValue - 10);  // Decrease hunger
-  this.updateNextActionTime('hunger', 10000);  // Set the next hunger action in 10 seconds (example interval)
-}
-
-performFatigueAction(): void {
-  // Perform fatigue-related action (decrease fatigue value)
-  this.updateStatValue('fatigueValue', this.gameState.fatigueValue - 10);  // Decrease fatigue
-  this.updateNextActionTime('fatigue', 15000);  // Set the next fatigue action in 15 seconds (example interval)
-}
-
-performPurityAction(): void {
-  // Perform purity-related action (decrease purity value)
-  this.updateStatValue('purityValue', this.gameState.purityValue - 10);  // Decrease purity
-  this.updateNextActionTime('purity', 20000);  // Set the next purity action in 20 seconds (example interval)
-}
-
-performAttentionAction(): void {
-  // Perform attention-related action (decrease attention value)
-  this.updateStatValue('attentionValue', this.gameState.attentionValue - 10);  // Decrease attention
-  this.updateNextActionTime('attention', 5000);  // Set the next attention action in 5 seconds (example interval)
-}*/
-
 
 gethungerValue(): number {
   return this.gameState.hungerValue;

@@ -29,6 +29,10 @@
       <div class="dog">
         <img [src]="petImage" alt="selected dog" class="dog_img" [class.jump]="isJumping" (click)="makeDogJump()">
         <img src="assets/dog_heart.png" alt="heart icon" class="heart_img" *ngIf="showHeart">
+        <img src="assets/ham.png" alt="food" class="food_img" [class.feed]="isFeed" *ngIf="showFood">
+        <img src="assets/bath.png" alt="bath" class="bath_img" [class.wash]="isWash" *ngIf="showBath" >
+        <img src="assets/sleep.png" alt="sleep" class="sleep_img" [class.sleep]="isSleep"  *ngIf="showSleep">
+        <img src="assets/hand.png" alt="petting" class="hand_img" [class.petting]="isCare"  *ngIf="showCare">
       </div>
      </div>  
      

@@ -41,9 +41,13 @@
     --ion-default-mode: md;
 }
 
+.sc-ion-alert-md-h {
+    --backdrop-opacity: 0;
+}
+
 .alert-wrapper {
     --background: #d3ba77; 
-    --backdrop-opacity: 0.8;
+    --backdrop-opacity: 0;
     --backdrop-background: rgba(0, 0, 0, 0.884);
     --border-radius: 15px;
       border: 6px solid #bc9763;
@@ -51,6 +55,8 @@
      display: flex;
      justify-content: center;
      align-items: center;
+     position: absolute;
+     bottom: 0%;
 }
 
 .alert-message.sc-ion-alert-md {
@@ -85,8 +91,8 @@
 
   .playMode .alert-wrapper {
     --background: #d3ba77; 
-    --backdrop-opacity: 0.8;
-    --backdrop-background: rgba(0, 0, 0, 0.884);
+    --backdrop-opacity: 0;
+    //--backdrop-background: rgba(0, 0, 0, 0.884);
     --border-radius: 15px;
     border: 6px solid #bc9763;
     --max-width: 100%;

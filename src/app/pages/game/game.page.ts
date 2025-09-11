@@ -28,6 +28,10 @@ export class GamePage implements OnDestroy{
   maxPoints: number = 100; 
   currentColor: string = '#d3ba77';
   isJumping: boolean = false;
+  isFeed: boolean = false;
+  isWash: boolean = false;
+  isSleep: boolean = false;
+  isCare: boolean = false;
   audio: HTMLAudioElement;
   username: string = '';
   petName: string = '';
@@ -37,6 +41,10 @@ export class GamePage implements OnDestroy{
   petImage: string = '';
   dogStats: any = {};
   showHeart: boolean = false;
+  showFood: boolean = false;
+  showBath: boolean = false;
+  showSleep: boolean = false;
+  showCare: boolean = false;
   nextFeedTime: Date | undefined;
   gameState: GameState;
   currentStatValue!: number; 
@@ -159,10 +167,10 @@ export class GamePage implements OnDestroy{
 
   // handy map of your intervals
   const intervalsMs: Record<StatName, number> = {
-    hunger: 6  * 60 * 60 * 1000,
-    fatigue: 24 * 60 * 60 * 1000,
-    purity: 18 * 60 * 60 * 1000,
-    attention: 8  * 60 * 60 * 1000,
+    hunger: 6  * 60 * 60 * 1000,  // 6h
+    fatigue: 24 * 60 * 60 * 1000, // 24h
+    purity: 18 * 60 * 60 * 1000,  // 18h
+    attention: 8  * 60 * 60 * 1000, // 8h
   };
 
   if (stored) {
@@ -231,19 +239,24 @@ processMissedDecrements() {
 }
 
 
+private getRandomIntervalHours(minHours: number, maxHours: number): number {
+  return Math.floor(Math.random() * (maxHours - minHours + 1)) + minHours;
+}
 
    setInitialActionTimes() {
-    const now = new Date();
-    this.hungerNextAction = new Date(now.getTime() + this.getRandomInterval(6, 12)); // 6-12 hours
-    this.fatigueNextAction = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
-    this.purityNextAction = new Date(now.getTime() + 18 * 60 * 60 * 1000); // 18 hours
-    this.attentionNextAction = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hours
+  const now = new Date();
 
-    this.gameState.hungerNextAction = this.hungerNextAction;
-    this.gameState.fatigueNextAction = this.fatigueNextAction;
-    this.gameState.purityNextAction = this.purityNextAction;
-    this.gameState.attentionNextAction = this.attentionNextAction;
-  }
+  this.hungerNextAction = new Date(now.getTime() + this.getRandomIntervalHours(6, 12) * 60 * 60 * 1000);
+  this.fatigueNextAction = new Date(now.getTime() + 24 * 60 * 60 * 1000); // jednom dnevno
+  this.purityNextAction = new Date(now.getTime() + 18 * 60 * 60 * 1000);  // jednom dnevno
+  this.attentionNextAction = new Date(now.getTime() + this.getRandomIntervalHours(4, 12) * 60 * 60 * 1000);
+
+  this.gameState.hungerNextAction = this.hungerNextAction;
+  this.gameState.fatigueNextAction = this.fatigueNextAction;
+  this.gameState.purityNextAction = this.purityNextAction;
+  this.gameState.attentionNextAction = this.attentionNextAction;
+}
+
 
     /*setInitialActionTimes() {
       const now = new Date();
@@ -279,102 +292,113 @@ processMissedDecrements() {
       attention: 8 * 60 * 60 * 1000, // 8 hours
     }*/
 
-      decrementIntervals: Record<StatName, number> ={
-      hunger: 10 * 60 * 1000, // every 10 minutes
-      fatigue: 60 * 60 * 1000, // every 1 hour
-      purity: 30 * 60 * 1000, // every 30 min
-      attention: 20 * 60 * 1000, // every 20 min
-}
+      // koliko traje cijeli ciklus
+intervalsMs: Record<StatName, number> = {
+  hunger: 6  * 60 * 60 * 1000,  // 6h
+  fatigue: 24 * 60 * 60 * 1000, // 24h
+  purity: 18 * 60 * 60 * 1000,  // 18h
+  attention: 8  * 60 * 60 * 1000, // 8h
+};
 
-
+  // izračunaj koliko često treba padati 1%
+  decrementIntervals: Record<StatName, number> = {
+    hunger: this.intervalsMs.hunger / 10,
+    fatigue: this.intervalsMs.fatigue / 10,
+    purity: this.intervalsMs.purity / 10,
+    attention: this.intervalsMs.attention / 10,
+  };
 
 startStatusDecreasing() {
   console.log('✅ startStatusDecreasing() called');
   if (this.statusInterval) clearInterval(this.statusInterval);
 
   this.statusInterval = setInterval(() => {
-     console.log('⏰ Interval tick');
     const now = Date.now();
 
-    Object.entries(this.decrementIntervals).forEach(([stat, interval]) => {
-      const statKey = stat as StatName;
-      let last = this.userService.getLastDecrementTime(statKey);
+    (Object.keys(this.decrementIntervals) as StatName[]).forEach(statKey => {
+      const decrementInterval = this.decrementIntervals[statKey]; 
+      const fullActionInterval = this.getFullIntervalForStat(statKey);
 
-      // If no saved time, initialize
+      let last = this.userService.getLastDecrementTime(statKey); 
+
       if (!last) {
-        last = Date.now();
+        last = now - decrementInterval;
         this.userService.setLastDecrementTime(statKey, last);
       }
 
-      if (!last || now < last) {
-      last = now - interval;
-      this.userService.setLastDecrementTime(statKey, last);
-    }
+      if (last > now) {
+        last = now - decrementInterval;
+        this.userService.setLastDecrementTime(statKey, last);
+      }
 
-      console.log(`⏱ ${statKey}: now=${now}, last=${last}, interval=${interval}, diff=${now - last}`);
-
-      while (now - last >= interval) {
+      while (now - last >= decrementInterval) {
         console.log(`⏬ Decreasing ${statKey} (interval met)`);
+        const decreaseAmount = ({ hunger: 3, fatigue: 5, purity: 2, attention: 4 } as Record<StatName, number>)[statKey];
+        this.decreaseStat(statKey, decreaseAmount);
 
-        //this.decreaseStat(statKey, 1);
-
-        this.decreaseStat(statKey, {
-            hunger: 3,
-            fatigue: 5,
-            purity: 2,
-            attention: 4,
-          }[statKey]);
-
-
-        last += interval;
+        last += decrementInterval;
         this.userService.setLastDecrementTime(statKey, last);
-
-        // Update nextAction time
-        const nextAction = new Date(last + interval);
-        this[`${statKey}NextAction`] = nextAction;
-        this.gameState[`${statKey}NextAction`] = nextAction;
       }
+
+      const nextActionMs = last + fullActionInterval;
+      const nextAction = new Date(nextActionMs);
+      this[`${statKey}NextAction`] = nextAction;
+      this.gameState[`${statKey}NextAction`] = nextAction;
     });
+
     this.saveGame();
-  }, 60000); // every 1 minute
+  }, 60 * 1000); // svake 1 minute
 }
 
 
-private updateNextActionTime(stat: StatName, adjustByHours: number = 0) {
-  const now = Date.now();
+private getFullIntervalForStat(stat: StatName): number {
+  switch(stat) {
+    case 'hunger':
 
-  let baseHours: number;
+      return this.getRandomIntervalHours(6, 12) * 60 * 60 * 1000;
+    case 'attention':
+      return this.getRandomIntervalHours(4, 12) * 60 * 60 * 1000;
+    case 'fatigue': return 24 * 60 * 60 * 1000;
+    case 'purity': return 18 * 60 * 60 * 1000;
+    default: return 6 * 60 * 60 * 1000;
+  }
+}
+
+private updateNextActionTime(stat: StatName, adjust: number = 0) {
+  const now = Date.now();
+  let nextHours: number;
 
   switch (stat) {
     case 'hunger':
-      baseHours = 6;
+      nextHours = this.getRandomIntervalHours(6, 12);
       break;
     case 'fatigue':
-      baseHours = 24;
+      nextHours = 24;
       break;
     case 'purity':
-      baseHours = 18;
+      nextHours = 18;
       break;
     case 'attention':
-      baseHours = 8;
+      nextHours = this.getRandomIntervalHours(4, 12);
       break;
     default:
-      baseHours = this.getRandomInterval(6, 12) / (60 * 60 * 1000); // fallback
+      nextHours = 6;
   }
 
-  const totalHours = baseHours + adjustByHours;
-  let newActionTime = new Date(now + totalHours * 60 * 60 * 1000);
+  // Ako igrač prerano → produži interval
+  // Ako igrač prekasno → skrati interval
+  nextHours = Math.max(1, nextHours + adjust);
 
-  // Prevent past timestamps
-  if (newActionTime.getTime() <= now) {
-    newActionTime = new Date(now + 60 * 60 * 1000); // at least 1 hour ahead
-    console.warn(`Next action time for ${stat} was in the past. Reset to 1 hour ahead.`);
-  }
+  let newActionTime = new Date(now + nextHours * 60 * 60 * 1000);
 
   this[`${stat}NextAction`] = newActionTime;
   this.gameState[`${stat}NextAction`] = newActionTime;
 
-  console.log(`✅ Updated ${stat} next action time:`, newActionTime);
+  // Reset early flag za novi ciklus
+  const earlyKey = `${stat}EarlyGiven` as keyof GameState;
+  this.gameState[earlyKey] = false;
+
+  console.log(`✅ Next ${stat}:`, newActionTime);
   this.scheduleNotification(stat, newActionTime);
 }
 
@@ -513,7 +537,6 @@ handleAction(action: StatName) {
   const now = new Date();
   const valueKey = `${action}Value` as keyof GameState;
 
-  // Don't do anything if already full
   if (this.gameState[valueKey] === 100) {
     console.log(`${action} is already full.`);
     return;
@@ -523,31 +546,31 @@ handleAction(action: StatName) {
   const timeDiffMs = now.getTime() - nextActionTime.getTime();
   const timeDiffMins = timeDiffMs / (60 * 1000);
 
-  // Define bounds
   const EARLY_BOUND = -10; // 10 min before
   const LATE_BOUND = 10;   // 10 min after
-  const MISSED_BOUND = 720; // 12 hours late
+  const MISSED_BOUND = 720; // 12 hours late (mins)
 
-  // Too early
   const earlyKey = `${action}EarlyGiven` as keyof GameState;
 
-  if (timeDiffMins < EARLY_BOUND) {
-    if (!this.gameState[earlyKey]) {
-    this.addPoint(0.5);
-    this.gameState[earlyKey] = true;
-    this.showAlert("Too Early!", this.getEarlyMessage(action));
-    this.saveGame();
-  } else {
-    this.showAlert("Too Early!", "You've already gained early points for this action today.");
-    console.warn(`❌ 0.5 point for ${action} already given this cycle.`);
-  }
-  }
-
-  // Too late (missed care)
+  // Missed
   if (timeDiffMins > MISSED_BOUND) {
-    this.gameState[valueKey] = Math.max(this.gameState[valueKey] - 20, 0);
+    this.gameState[valueKey] = Math.max((this.gameState[valueKey] || 0) - 20, 0);
     this.saveGame();
     this.showAlert("Missed!", `${action} was missed by over 12 hours.`);
+    this.gameState[earlyKey] = false;
+    return;
+  }
+
+  // Too early
+  if (timeDiffMins < EARLY_BOUND) {
+    if (!this.gameState[earlyKey]) {
+      this.addPoint(0.5);
+      this.gameState[earlyKey] = true;
+      this.showAlert("Too Early!", this.getEarlyMessage(action));
+      this.saveGame();
+    } else {
+      this.showAlert("Too Early!", "You've already gained early points for this cycle.");
+    }
     return;
   }
 
@@ -555,31 +578,23 @@ handleAction(action: StatName) {
   if (timeDiffMins > LATE_BOUND) {
     this.addPoint(0);
     this.showAlert("Too Late!", this.getLateMessage(action));
-    this.updateNextActionTime(action, -1); // Shorten next interval
-  }
-  // Slightly early
-  else if (timeDiffMins < EARLY_BOUND) {
-    this.showAlert("Too Early!", this.getEarlyMessage(action));
-    console.warn(`[BLOCKED] ${action} too early by ${Math.abs(timeDiffMins).toFixed(1)} mins`);
-    return; // ❗ block everything, don’t add points or extend time
-}
-
-  // On time
-  else {
-    this.addPoint(1);
-    this.updateNextActionTime(action); // Regular update
+    this.updateNextActionTime(action, -1);
+    return;
   }
 
-  // ✅ ONLY increase stat if within acceptable bounds
-  if (timeDiffMins >= EARLY_BOUND && timeDiffMins <= MISSED_BOUND) {
-    this.ngZone.run(() => {
-      const increment = this.getIncrementForAction(action);
-      this.increaseStat(action, increment);
-      this.updateStatColorsAndHeight(action);
-      this.cdRef.detectChanges();
-    });
-  }
+  this.gameState[earlyKey] = false;
+  this.addPoint(1);
+  this.updateNextActionTime(action);
+
+  this.ngZone.run(() => {
+    const increment = this.getIncrementForAction(action);
+    this.increaseStat(action, increment);
+    this.updateStatColorsAndHeight(action);
+    this.cdRef.detectChanges();
+  });
+  this.saveGame();
 }
+
 
 private getIncrementForAction(action: StatName): number {
   switch (action) {
@@ -900,6 +915,7 @@ savePetStats() {
     this.handleAction('purity');
     this.updateCurrentStat('purity');
     this.openActionModal('purity');
+    this.washDog();
     this.cdRef.detectChanges();
   }
 
@@ -907,6 +923,7 @@ savePetStats() {
     this.handleAction('fatigue');
     this.updateCurrentStat('fatigue');
     this.openActionModal('fatigue');
+    this.sleepDog();
     this.cdRef.detectChanges();
   }
 
@@ -914,22 +931,24 @@ savePetStats() {
     this.handleAction('attention');
     this.updateCurrentStat('attention');
     this.openActionModal('attention');
+    this.petDog();
     this.cdRef.detectChanges();
   }
 
   feed() {
     this.handleAction('hunger');
     this.updateCurrentStat('hunger');
+    this.feedDog();
     this.openActionModal('hunger');
     this.cdRef.detectChanges();
     console.log('Updated hungerValue:', this.gameState.hungerValue);
   }
 
-  setNextFeedTime() {
+  /*setNextFeedTime() {
     const now = new Date();
     const randomHours = Math.floor(Math.random() * 6) + 6; // 6 do 12 sati
     this.nextFeedTime = new Date(now.getTime() + randomHours * 60 * 60 * 1000);
-  }
+  }*/
 
   checkLevelUp() {
     if (this.gameState.points >= this.pointsNeeded) {
@@ -1127,6 +1146,63 @@ closeActionModal() {
       console.error('Audio playback failed:', error);
     });
   }
+
+  feedDog() {
+    this.showFood = true;
+    this.isFeed = false;
+
+    setTimeout(() => {
+    this.isFeed = true;
+
+    setTimeout(() => {
+      this.isFeed = false;
+      this.showFood = false;  
+    }, 2000);
+  });
+  }
+
+  washDog() {
+  this.showBath = true;
+  this.isWash = false;
+
+  setTimeout(() => {
+    this.isWash = true;
+
+    setTimeout(() => {
+      this.isWash = false;
+      this.showBath = false;  
+    }, 2000);
+  });
+}
+
+  sleepDog() {
+    this.showSleep = true;
+    this.isSleep = false;
+
+    setTimeout(() => {
+    this.isSleep = true;
+
+    setTimeout(() => {
+      this.isSleep = false;
+      this.showSleep = false;  
+    }, 1000);
+  });
+  }
+
+  petDog() {
+    this.showCare = true;
+    this.isCare = false;
+
+    setTimeout(() => {
+    this.isCare = true;
+
+    setTimeout(() => {
+      this.isCare = false;
+      this.showCare = false;  
+    }, 1000);
+  });
+  }
+
 
   profile() {
     this.router.navigate(['/profile']);
