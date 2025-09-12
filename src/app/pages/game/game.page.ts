@@ -533,35 +533,33 @@ private updateNextActionTime(stat: StatName, adjust: number = 0) {
   }
 }*/
 
-handleAction(action: StatName) {
+handleAction(action: StatName): boolean {
   const now = new Date();
   const valueKey = `${action}Value` as keyof GameState;
 
   if (this.gameState[valueKey] === 100) {
     console.log(`${action} is already full.`);
-    return;
+    return false;
   }
 
   const nextActionTime = new Date(this[`${action}NextAction`] ?? Date.now());
   const timeDiffMs = now.getTime() - nextActionTime.getTime();
   const timeDiffMins = timeDiffMs / (60 * 1000);
 
-  const EARLY_BOUND = -10; // 10 min before
-  const LATE_BOUND = 10;   // 10 min after
-  const MISSED_BOUND = 720; // 12 hours late (mins)
+  const EARLY_BOUND = -10;
+  const LATE_BOUND = 10;
+  const MISSED_BOUND = 720;
 
   const earlyKey = `${action}EarlyGiven` as keyof GameState;
 
-  // Missed
   if (timeDiffMins > MISSED_BOUND) {
     this.gameState[valueKey] = Math.max((this.gameState[valueKey] || 0) - 20, 0);
     this.saveGame();
     this.showAlert("Missed!", `${action} was missed by over 12 hours.`);
     this.gameState[earlyKey] = false;
-    return;
+    return false;
   }
 
-  // Too early
   if (timeDiffMins < EARLY_BOUND) {
     if (!this.gameState[earlyKey]) {
       this.addPoint(0.5);
@@ -571,15 +569,14 @@ handleAction(action: StatName) {
     } else {
       this.showAlert("Too Early!", "You've already gained early points for this cycle.");
     }
-    return;
+    return false;
   }
 
-  // Slightly late
   if (timeDiffMins > LATE_BOUND) {
     this.addPoint(0);
     this.showAlert("Too Late!", this.getLateMessage(action));
     this.updateNextActionTime(action, -1);
-    return;
+    return false;
   }
 
   this.gameState[earlyKey] = false;
@@ -593,6 +590,8 @@ handleAction(action: StatName) {
     this.cdRef.detectChanges();
   });
   this.saveGame();
+
+  return true;
 }
 
 
@@ -912,7 +911,9 @@ savePetStats() {
 
   
   bath() {
-    this.handleAction('purity');
+    const allowed = this.handleAction('purity');
+    if (!allowed) return;
+
     this.updateCurrentStat('purity');
     this.openActionModal('purity');
     this.washDog();
@@ -920,7 +921,9 @@ savePetStats() {
   }
 
   sleep() {
-    this.handleAction('fatigue');
+    const allowed = this.handleAction('fatigue');
+    if (!allowed) return;
+
     this.updateCurrentStat('fatigue');
     this.openActionModal('fatigue');
     this.sleepDog();
@@ -928,7 +931,9 @@ savePetStats() {
   }
 
   care() {
-    this.handleAction('attention');
+    const allowed = this.handleAction('attention');
+    if (!allowed) return;
+
     this.updateCurrentStat('attention');
     this.openActionModal('attention');
     this.petDog();
@@ -936,7 +941,9 @@ savePetStats() {
   }
 
   feed() {
-    this.handleAction('hunger');
+    const allowed = this.handleAction('hunger');
+    if (!allowed) return;
+    
     this.updateCurrentStat('hunger');
     this.feedDog();
     this.openActionModal('hunger');
