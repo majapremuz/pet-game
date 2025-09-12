@@ -465,39 +465,48 @@ getDefaultGameState(): GameState {
 }
 
 resetGameState(): void {
+  // reset gameState
   this.gameState = this.getDefaultGameState();
-  localStorage.removeItem('gameState');  
+  localStorage.removeItem('gameState');
 
-  // Dohvati starog psa
+  // reset dog stats
   const selectedDog = JSON.parse(localStorage.getItem('selectedDog') || '{}');
-  if (selectedDog && selectedDog.name) {
-    // 🔁 Vrati default vrijednosti psa (npr. iz liste pasa)
-    const defaultDogs = [
-      { image: 'assets/dog 1.png', smart: 10, speed: 5, strength: 5 },
-      { image: 'assets/dog 2.png', smart: 5, speed: 10, strength: 5 },
-      { image: 'assets/dog 3.png', smart: 5, speed: 5, strength: 10 },
-    ];
+  const defaultDogs = [
+    { image: 'assets/dog 1.png', name: 'Dog 1', smart: 10, speed: 5, strength: 5 },
+    { image: 'assets/dog 2.png', name: 'Dog 2', smart: 5, speed: 10, strength: 5 },
+    { image: 'assets/dog 3.png', name: 'Dog 3', smart: 5, speed: 5, strength: 10 },
+  ];
 
-    const defaultDog = defaultDogs.find(d => d.image === selectedDog.image);
-
-    if (defaultDog) {
-      localStorage.setItem('selectedDog', JSON.stringify(defaultDog));
-
-      const user = JSON.parse(localStorage.getItem('authUser') || '{}');
-      if (user) {
-        user.petStats = {
-          smart: defaultDog.smart,
-          speed: defaultDog.speed,
-          strength: defaultDog.strength
-        };
-        localStorage.setItem('authUser', JSON.stringify(user));
-        console.log('Pet stats resetirani na default vrijednosti psa:', user.petStats);
-      }
-    }
+  let defaultDog = null;
+  if (selectedDog?.image) {
+    defaultDog = defaultDogs.find(d => d.image === selectedDog.image);
   }
 
-  console.log('Game state has been reset.');
+  if (defaultDog) {
+    localStorage.setItem('selectedDog', JSON.stringify(defaultDog));
+  } else {
+    localStorage.removeItem('selectedDog');
+  }
+
+  // reset authUser
+  const user = JSON.parse(localStorage.getItem('authUser') || '{}');
+  if (user && Object.keys(user).length > 0) {
+    user.petStats = defaultDog ? {
+      name: defaultDog.name,
+      smart: defaultDog.smart,
+      speed: defaultDog.speed,
+      strength: defaultDog.strength
+    } : null;
+
+    user.level = 0;
+    user.points = 0;
+
+    localStorage.setItem('authUser', JSON.stringify(user));
+  }
+
+  console.log('Game has been fully reset.');
 }
+
 
 clearGameState(): void {
   localStorage.removeItem('gameState');
